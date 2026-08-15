@@ -38,19 +38,20 @@ export default defineConfig([
       react: { version: 'detect' },
     },
     // NOTE: react-hooks' `recommended` ruleset is deliberately NOT enabled.
-    // Turning it on flags ~20 pre-existing patterns, including CampusView's
-    // imperative viewport refs, which are intentional. Adopting those rules is
-    // a separate, deliberate piece of work - not a side effect of the move.
+    // It is the React-Compiler-era ruleset and flags ~20 pre-existing patterns,
+    // including CampusView's imperative viewport refs, which are intentional.
+    // `exhaustive-deps` below is enabled on its own; the rest are not.
     rules: {
-      // These three are enabled because the source already carries
-      // `eslint-disable-next-line` comments for them - the code was written
-      // expecting them on. Left off, every one of those comments becomes an
-      // "unused disable directive" warning.
-      // exhaustive-deps stays off: switching it on adds 6 warnings on
-      // pre-existing hook code (CampusView, SpatialLayout, useChatPicker) that
-      // wants a deliberate fix, not a drive-by one during a repo move.
-      'no-console': 'warn',
+      // `no-console` and `react/no-danger` are on because the source already
+      // carries `eslint-disable-next-line` comments for them - it was written
+      // expecting them. Left off, each of those comments becomes an "unused
+      // disable directive" warning.
+      //
+      // warn/error are allowed: a library legitimately reports diagnostics that
+      // way (see runtime/in-memory-socket.ts). Only `console.log` is flagged.
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       'react/no-danger': 'warn',
+      'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -60,6 +61,26 @@ export default defineConfig([
           destructuredArrayIgnorePattern: '^_',
         },
       ],
+    },
+  },
+
+  {
+    // The playground is a demo app, not shipped code. Its console output is
+    // deliberate instrumentation (persisted-store counters, locale switching)
+    // that the panels document inline.
+    files: ['packages/playground/**/*.{ts,tsx}'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
+  {
+    // Stub auth providers. Their console.info only fires on the demo path,
+    // when the consumer has NOT supplied a real sendLink/sendCode - saying
+    // "nothing was actually sent" is the point of the stub.
+    files: ['packages/scena/src/porta/providers/examples/**/*.ts'],
+    rules: {
+      'no-console': 'off',
     },
   },
 ]);

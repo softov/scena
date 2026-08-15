@@ -110,8 +110,6 @@ export default function App() {
   const { t } = useI18n();
   const path = useUrlPath();
 
-  console.log('App rendering with path:', path);
-
   if (path === '/cadastre')
     return (
       <Suspense fallback={<ShellLoading />}>
