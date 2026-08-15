@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write # required for npm provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      # A tag that disagrees with package.json publishes the wrong version
+      # under the right tag, which cannot be undone once it is on npm.
+      - name: Verify tag matches package version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./packages/scena/package.json').version")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::Tag v$TAG does not match packages/scena version $PKG"
+            exit 1
+          fi
+          echo "Publishing @softov/scena@$PKG"
+
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+
+      # --provenance requires a public repository. Drop the flag if this repo
+      # is private, or the publish will fail at the attestation step.
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        working-directory: packages/scena
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
