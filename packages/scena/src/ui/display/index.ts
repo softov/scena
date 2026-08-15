@@ -1,0 +1,23 @@
+// Direct-React re-exports. Catalog registration lives in ../catalog.ts.
+export { Card } from './Card.js';
+export { Divider } from './Divider.js';
+export { Text } from './Text.js';
+export { Image } from './Image.js';
+export { Icon, NAMED_GLYPH } from './Icon.js';
+export type { IconName } from './Icon.js';
+export { Alert } from './Alert.js';
+export type { AlertProps, AlertTone } from './Alert.js';
+export { Badge } from './Badge.js';
+export type { BadgeProps, BadgeTone } from './Badge.js';
+export { DetailList } from './DetailList.js';
+export type { DetailListProps, DetailItem } from './DetailList.js';
+export { DetailHeader } from './DetailHeader.js';
+export type { DetailHeaderProps, DetailHeaderMeta } from './DetailHeader.js';
+export { DetailContainer } from './DetailContainer.js';
+export type { DetailContainerProps } from './DetailContainer.js';
+export { DetailNotFound } from './DetailNotFound.js';
+export type { DetailNotFoundProps, DetailNotFoundAction } from './DetailNotFound.js';
+export { AddPlaceholder } from './AddPlaceholder.js';
+export type { AddPlaceholderProps } from './AddPlaceholder.js';
+export { SectionTitle } from './SectionTitle.js';
+export type { SectionTitleProps } from './SectionTitle.js';

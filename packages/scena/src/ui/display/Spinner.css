@@ -1,0 +1,20 @@
+.oo-spinner-wrap {
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-muted);
+}
+.oo-spinner {
+  display: inline-block;
+  width: var(--oo-spinner-size, 16px);
+  height: var(--oo-spinner-size, 16px);
+  border: 2px solid var(--oo-color-border);
+  border-top-color: var(--oo-spinner-color, var(--oo-color-accent));
+  border-radius: 50%;
+  animation: oo-spin 0.8s linear infinite;
+  flex: 0 0 auto;
+}
+@keyframes oo-spin {
+  to { transform: rotate(360deg); }
+}
+.oo-spinner__label { line-height: 1; }

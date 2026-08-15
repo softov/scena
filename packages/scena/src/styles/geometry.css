@@ -1,0 +1,32 @@
+/*
+ * Geometry CSS variables. LayoutAPI writes these at runtime as the user
+ * resizes surfaces; the defaults here keep the values usable before
+ * the first write (and on environments without LayoutAPI mounted yet).
+ *
+ * Variable naming maps SurfaceName → kebab-case (sidebar:left → sidebar-left).
+ */
+:root {
+  --oo-activitybar-size:   48px;
+  --oo-sidebar-left-size:  240px;
+  --oo-sidebar-right-size: 280px;
+  --oo-main-size:          0px;          /* flex-filled; not typically read */
+  --oo-panel-bottom-size:  200px;
+  --oo-statusbar-size:     22px;
+  --oo-overlay-size:       0px;
+
+  --oo-sidebar-left-visible:  1;
+  --oo-sidebar-right-visible: 0;
+  --oo-panel-bottom-visible:  0;
+  --oo-activitybar-visible:   1;
+  --oo-statusbar-visible:     1;
+}
+
+/* Utility: width of main viewport after subtracting visible chrome widths. */
+.oo-main-fluid-width {
+  width: calc(
+    100vw
+    - var(--oo-activitybar-size, 0px)
+    - var(--oo-sidebar-left-size, 0px) * var(--oo-sidebar-left-visible, 0)
+    - var(--oo-sidebar-right-size, 0px) * var(--oo-sidebar-right-visible, 0)
+  );
+}

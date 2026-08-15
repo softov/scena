@@ -1,0 +1,19 @@
+.oo-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+}
+.oo-form-section__header {
+  font-size: var(--oo-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--oo-color-muted);
+  border-bottom: 1px solid var(--oo-color-border);
+  padding-bottom: var(--oo-spacing-xs);
+}
+.oo-form-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+}

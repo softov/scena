@@ -1,0 +1,35 @@
+.oo-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--oo-z-overlay);
+}
+.oo-modal__card {
+  background: var(--oo-color-canvas);
+  color: var(--oo-color-fg);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  padding: var(--oo-spacing-md);
+  min-width: 320px;
+  max-width: 80vw;
+  max-height: 80vh;
+  overflow: auto;
+}
+.oo-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: var(--oo-spacing-sm);
+}
+.oo-modal__close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  padding: 0 var(--oo-spacing-xs);
+}

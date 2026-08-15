@@ -1,0 +1,10 @@
+.oo-icon {
+  display: inline-block;
+  line-height: 1;
+  /* display: inline-flex; */
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  flex-shrink: 0;
+  color: rgb(var(--oo-color, var(--oo-color-muted)));
+}

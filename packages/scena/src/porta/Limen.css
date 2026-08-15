@@ -1,0 +1,50 @@
+.porta-limen {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'top    top    top'
+    'left   center right'
+    'bottom bottom bottom';
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  background: var(--oo-color-canvas);
+  color: var(--oo-color-fg);
+}
+.porta-limen__top    { grid-area: top; }
+.porta-limen__bottom { grid-area: bottom; }
+.porta-limen__left   { grid-area: left; }
+.porta-limen__right  { grid-area: right; }
+
+.porta-limen__center {
+  grid-area: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--oo-spacing-lg);
+  min-height: 0;
+  overflow: auto;
+}
+
+.porta-limen__panel {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  padding: var(--oo-spacing-lg);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-md);
+  background: var(--oo-color-surface);
+  box-shadow: var(--oo-shadow-md);
+}
+
+.porta-limen__title {
+  font-size: var(--oo-font-size-lg);
+  font-weight: 600;
+}
+.porta-limen__subtitle {
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+}

@@ -1,0 +1,25 @@
+/* Generic chrome strip: layout toolbars, panel headers, titlebar slots.
+ * Direction / alignment / gap come from data-attrs and inline props so the
+ * same class works for horizontal control rows AND vertical side rails. */
+.oo-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  border-bottom: 1px solid var(--oo-color-border);
+  background: var(--oo-color-surface);
+  color: var(--oo-color-fg);
+  font-size: var(--oo-font-size-sm);
+  flex: 0 0 auto;
+  min-height: var(--oo-toolbar-height, 32px);
+  user-select: none;
+}
+
+.oo-toolbar[data-direction='column'] {
+  flex-direction: column;
+  align-items: stretch;
+  border-bottom: none;
+  border-right: 1px solid var(--oo-color-border);
+  min-height: 0;
+  min-width: var(--oo-toolbar-height, 32px);
+}

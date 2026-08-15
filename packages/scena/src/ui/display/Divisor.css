@@ -1,0 +1,30 @@
+.oo-divisor {
+  flex: 0 0 auto;
+  background: var(--oo-color-border);
+  user-select: none;
+  touch-action: none;
+
+  height: 100%;
+  transition: background 0.15s;
+  position: relative;
+
+  flex-basis: auto;
+  flex-grow: 0;
+  flex-shrink: 0;
+  touch-action: none;
+
+}
+
+.oo-divisor:hover {
+  background: var(--oo-color-accent);
+}
+
+.oo-divisor__row {
+  width: 1px;
+  cursor: ew-resize;
+}
+
+.oo-divisor__col {
+  height: 1px;
+  cursor: ns-resize;
+}

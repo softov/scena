@@ -1,0 +1,102 @@
+.oo-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+}
+
+/* Field chrome shared by controls. The base .oo-field / .oo-field__label live
+   in the control CSS; these are the additions for required / type / hint /
+   error so every control renders the same field metadata. */
+
+.oo-field__label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--oo-spacing-xs);
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-text);
+  font-weight: 600;
+}
+.oo-field__required {
+  color: var(--oo-color-danger);
+  font-size: var(--oo-font-size-xs);
+  font-weight: 700;
+}
+.oo-field__type {
+  color: var(--oo-color-muted);
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+}
+.oo-field__hint {
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  line-height: 1.5;
+}
+.oo-field__error {
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-danger);
+  line-height: 1.4;
+}
+
+
+.oo-input,
+.oo-textarea {
+  width: 100%;
+}
+
+
+.oo-textarea {
+  resize: vertical;
+}
+
+.oo-control {
+  position: relative;
+  border-radius: var(--input-border-radius);
+  padding: 1px;
+}
+
+/* Loading state */
+.oo-form[data-loading='true'] {
+  pointer-events: none;
+}
+
+/* Moving light around input/select borders */
+.oo-form[data-loading='true'] .oo-control {
+  background:
+    conic-gradient(from var(--oo-angle),
+      rgb(var(--load-border)) 0deg,
+      rgb(var(--load-border)) 70deg,
+      rgb(var(--load-accent) / 0.25) 95deg,
+      rgb(var(--load-accent-2)) 120deg,
+      rgb(var(--load-accent) / 0.25) 145deg,
+      rgb(var(--load-border)) 180deg,
+      rgb(var(--load-border)) 360deg);
+  animation: oo-border-orbit 1.4s linear infinite;
+}
+
+.oo-form[data-loading='true'] .oo-control::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  border-radius: 14px;
+  background:
+    conic-gradient(from var(--oo-angle),
+      transparent,
+      rgb(var(--load-accent) / 0.32),
+      transparent 35%);
+  filter: blur(8px);
+  opacity: 0.65;
+  animation: oo-border-orbit 1.4s linear infinite;
+}
+
+@property --oo-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes oo-border-orbit {
+  to {
+    --oo-angle: 360deg;
+  }
+}

@@ -1,0 +1,16 @@
+.oo-list {
+  display: flex;
+  gap: var(--oo-list-gap, var(--oo-spacing-sm));
+  padding: var(--oo-list-padding, 0);
+  box-sizing: border-box;
+}
+.oo-list[data-direction='vertical'] {
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.oo-list[data-direction='horizontal'] {
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

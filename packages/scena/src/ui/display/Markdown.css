@@ -1,0 +1,38 @@
+.oo-markdown {
+  color: var(--oo-color-fg);
+  font-size: var(--oo-font-size-md);
+  line-height: 1.6;
+}
+.oo-markdown h1 { font-size: 22px; margin: 12px 0 6px; font-weight: 700; }
+.oo-markdown h2 { font-size: 18px; margin: 16px 0 6px; font-weight: 600; }
+.oo-markdown h3 { font-size: 15px; margin: 12px 0 4px; font-weight: 600; }
+.oo-markdown p { margin: 6px 0 10px; }
+.oo-markdown ul {
+  margin: 6px 0 10px;
+  padding-left: 22px;
+}
+.oo-markdown li { margin-bottom: 3px; }
+.oo-markdown a { color: var(--oo-color-accent); text-decoration: none; }
+.oo-markdown a:hover { text-decoration: underline; }
+.oo-markdown code {
+  font-family: var(--oo-font-mono);
+  font-size: 0.92em;
+  padding: 1px 5px;
+  background: var(--oo-color-active);
+  border-radius: 3px;
+}
+.oo-markdown pre {
+  background: var(--oo-color-active);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-md, 8px);
+  padding: var(--oo-spacing-md);
+  font-size: 12px;
+  font-family: var(--oo-font-mono);
+  overflow-x: auto;
+  margin: 6px 0 10px;
+}
+.oo-markdown pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}

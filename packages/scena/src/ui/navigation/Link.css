@@ -1,0 +1,13 @@
+.oo-link {
+  color: var(--oo-color-accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.oo-link:hover {
+  text-decoration: underline;
+}
+.oo-link[data-disabled='true'] {
+  color: var(--oo-color-muted);
+  cursor: not-allowed;
+  text-decoration: none;
+}

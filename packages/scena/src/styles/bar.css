@@ -1,0 +1,155 @@
+/* Bar layout: three slots (left | center | right) used by titlebar +
+ * statusbar. Per-surface chrome (height, border-bottom vs border-top, bg)
+ * lives on `.oo-surface--titlebar` / `.oo-surface--statusbar` so the
+ * same bar layout can render in either bar. */
+.oo-layout--bar {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  user-select: none;
+  background: var(--oo-color-surface);
+}
+
+.oo-bar__slot {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: var(--oo-spacing-xs);
+  padding: 0 var(--oo-spacing-sm);
+}
+
+.oo-bar__slot button {
+  border: 0;
+  border-radius: 0;
+}
+
+.oo-bar__slot button[data-active="true"]:not(:hover) {
+  color: var(--oo-color-active);
+}
+
+.oo-bar__slot--left {
+  justify-content: flex-start;
+  flex: 0 0 auto;
+}
+
+.oo-bar__slot--center {
+  justify-content: center;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.oo-bar__slot--right {
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+.oo-bar__item {
+  display: flex;
+  align-items: center;
+}
+
+.tab-bar {
+  display: flex;
+  background: var(--oo-color-surface);
+  border-bottom: 1px solid var(--oo-color-border);
+  font-size: var(--oo-font-size-xs);
+  min-width: 0;
+  min-height: 32px;
+}
+
+.tab-bar__strip {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.tab-bar__strip::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tab-bar__strip::-webkit-scrollbar-thumb {
+  background: var(--oo-color-border);
+  border-radius: 3px;
+}
+
+.tab-bar__tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-right: 1px solid var(--oo-color-border);
+  color: var(--oo-color-muted);
+  cursor: pointer;
+  user-select: none;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.tab-bar__tab[data-active="true"] {
+  color: var(--oo-color-text);
+  background: var(--oo-color-bg);
+  border-bottom: 2px solid var(--oo-color-accent);
+  margin-bottom: -1px;
+}
+
+.tab-bar__tab[data-drag-over="true"] {
+  box-shadow: inset 0 2px 0 var(--oo-color-accent);
+}
+
+.tab-bar__tab .close {
+  opacity: 0.5;
+}
+
+.tab-bar__tab:hover .close {
+  opacity: 1;
+}
+.tab-bar__tab .tab__label {
+  max-width: 173px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.tab-bar__tab .tab__icon {
+  color: var(--tab-color, inherit);
+}
+
+.tab-bar__extras {
+  display: flex;
+  flex: 0 0 auto;
+  padding: 0 8px;
+  gap: 6px;
+  align-items: center;
+}
+
+.tab-bar__extras button {
+  font-size: 11px;
+  padding: 2px 8px;
+  border: 0;
+  /* border: 1px solid var(--oo-color-border); */
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+
+/* Testing ui boxed */
+/* .tab-bar__extras {
+  gap: 0;
+  align-items: stretch;
+  padding: 0;
+}
+
+.tab-bar__extras button {
+  border: 0;
+  border-radius: 0px;
+  min-width: 32px;
+  border-left: 1px solid var(--oo-color-border);
+} */
+
+.tab-bar__extras button:hover {
+  background: var(--oo-color-active);
+}

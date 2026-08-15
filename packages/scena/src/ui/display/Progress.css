@@ -1,0 +1,39 @@
+.oo-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.oo-progress__head {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+}
+.oo-progress__label {
+  font-weight: 500;
+}
+.oo-progress__value {
+  font-family: var(--oo-font-mono);
+}
+.oo-progress__track {
+  width: 100%;
+  height: var(--oo-progress-height, 6px);
+  background: var(--oo-color-border);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.oo-progress__bar {
+  height: 100%;
+  background: rgb(var(--oo-progress-color));
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+.oo-progress__bar--indet {
+  width: 30%;
+  animation: oo-progress-indet 1.4s linear infinite;
+}
+@keyframes oo-progress-indet {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}

@@ -1,0 +1,81 @@
+.oo-schema-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+}
+.oo-schema-form__modebar {
+  display: flex;
+  gap: var(--oo-spacing-xs);
+  align-self: flex-end;
+}
+.oo-schema-form__modebar button {
+  font: inherit;
+  font-size: var(--oo-font-size-xs);
+  padding: 2px var(--oo-spacing-sm);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.oo-schema-form__modebar button[data-active='true'] {
+  background: var(--oo-color-active);
+  border-color: var(--oo-color-accent);
+}
+.oo-schema-form__modebar .oo-schema-form__reset {
+  color: var(--oo-color-warning);
+  border-color: var(--oo-color-warning);
+}
+.oo-schema-form__json {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+  resize: vertical;
+  padding: var(--oo-spacing-sm);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-color-canvas);
+  color: inherit;
+}
+.oo-schema-form__empty {
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  font-style: italic;
+}
+.oo-schema-form__union {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+}
+.oo-schema-form__array {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+}
+.oo-schema-form__array-item {
+  display: flex;
+  gap: var(--oo-spacing-xs);
+  align-items: flex-start;
+}
+.oo-schema-form__array-control {
+  flex: 1;
+}
+.oo-schema-form__array-remove {
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: var(--oo-color-danger);
+  font-weight: 700;
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  cursor: pointer;
+}
+.oo-schema-form__array-add {
+  align-self: flex-start;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: inherit;
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  cursor: pointer;
+}
