@@ -17,7 +17,6 @@ export function createEventBus(): EventBus {
       try {
         fn(payload);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(`[scena.events] listener for "${event}" threw:`, err);
       }
     }

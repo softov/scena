@@ -110,7 +110,6 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
       try {
         fn(state);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error('[scena.layout] subscriber threw:', err);
       }
     }

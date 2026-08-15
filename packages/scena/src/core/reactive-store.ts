@@ -204,7 +204,6 @@ export function createReactiveStore(deps: Deps): ReactiveStore {
     try {
       fn(value);
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error(`[scena.store] subscriber for "${path}" threw:`, err);
     }
   }
@@ -217,7 +216,6 @@ export function createReactiveStore(deps: Deps): ReactiveStore {
     try {
       fn(value, path);
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error(`[scena.store] wildcard subscriber threw:`, err);
     }
   }
