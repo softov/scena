@@ -10,7 +10,12 @@
     "test": "pnpm --filter @softov/scena test",
     "test:watch": "pnpm --filter @softov/scena test:watch",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "release": "node scripts/publish.mjs",
+    "release:check": "node scripts/publish.mjs --dry-run"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "packageManager": "pnpm@10.28.0",
   "engines": {
