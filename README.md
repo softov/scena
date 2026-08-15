@@ -7,6 +7,15 @@ A page is a graph of component nodes held in a layered reactive store; component
 
 > Status: pre-1.0. The public surface is still moving.
 
+## Documentation
+
+| Document | What it answers |
+| --- | --- |
+| [`docs/README.md`](docs/README.md) | The vocabulary everything else assumes |
+| [`docs/architecture.md`](docs/architecture.md) | The model: store, graph, registries, surfaces, shells |
+| [`docs/consuming.md`](docs/consuming.md) | Building an application on it, and the mistakes that cost days |
+| [`docs/ui.md`](docs/ui.md) | The component catalog and the theme tokens |
+
 ## Packages
 
 | Package | Description |
