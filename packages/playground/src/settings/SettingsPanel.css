@@ -1,0 +1,57 @@
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  padding: var(--oo-spacing-md);
+  height: 100%;
+  overflow: auto;
+}
+.settings-panel__head h2 {
+  margin: 0;
+  font-size: var(--oo-font-size-md);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--oo-color-muted);
+}
+.settings-panel__sub {
+  margin: 4px 0 0;
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+}
+
+.settings-section {
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  padding: var(--oo-spacing-sm);
+}
+.settings-section h3 {
+  margin: 0 0 var(--oo-spacing-xs);
+  font-size: var(--oo-font-size-sm);
+  font-weight: 600;
+}
+.settings-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-xs);
+}
+.settings-row--check { justify-content: flex-start; }
+.settings-row select,
+.settings-row input[type="number"] {
+  padding: 2px 6px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.settings-row code {
+  font-size: 11px;
+}

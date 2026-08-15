@@ -1,0 +1,37 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@softov/scena": ["../scena/src/core/index.ts"],
+      "@softov/scena/types": ["../scena/src/types/index.ts"],
+      "@softov/scena/react/core": ["../scena/src/react/core.ts"],
+      "@softov/scena/react": ["../scena/src/react/index.ts"],
+      "@softov/scena/ui/builtins": ["../scena/src/ui/register.ts"],
+      "@softov/scena/ui/forms": ["../scena/src/ui/forms/index.ts"],
+      "@softov/scena/ui/layout": ["../scena/src/ui/layout/index.ts"],
+      "@softov/scena/ui/display": ["../scena/src/ui/display/index.ts"],
+      "@softov/scena/ui/control": ["../scena/src/ui/control/index.ts"],
+      "@softov/scena/ui/data": ["../scena/src/ui/data/index.ts"],
+      "@softov/scena/ui/navigation": ["../scena/src/ui/navigation/index.ts"],
+      "@softov/scena/ui/media": ["../scena/src/ui/media/index.ts"],
+      "@softov/scena/ui/overlay": ["../scena/src/ui/overlay/index.ts"],
+      "@softov/scena/ui/chart": ["../scena/src/ui/chart/index.ts"],
+      "@softov/scena/ui/menu": ["../scena/src/ui/menu/index.ts"],
+      "@softov/scena/ui/campus": ["../scena/src/ui/campus/index.ts"],
+      "@softov/scena/ui": ["../scena/src/ui/index.ts"],
+      "@softov/scena/styles": ["../scena/src/styles/index.ts"],
+      "@softov/scena/styles/*": ["../scena/src/styles/*"],
+      "@softov/scena/porta": ["../scena/src/porta/index.ts"],
+      "@softov/scena/porta/examples": ["../scena/src/porta/providers/examples/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "vite.config.ts"]
+}

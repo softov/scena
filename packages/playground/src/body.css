@@ -1,0 +1,117 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Light mode */
+:root {
+  --auth-text-color: #ff0000;
+  --sky-color-01: #0077e6;
+  --sky-color-02: #1398f2;
+  --sky-color-03: #58c5ff;
+  --sky-color-04: #c6f3ff;
+
+  --sky-grad-01: rgba(198, 243, 255, 0.9);
+  --sky-grad-02: rgba(88, 197, 255, 0.45);
+}
+
+.dark {
+  --auth-text-color: #2dd2d2;
+  --sky-color-01: #02030a;
+  --sky-color-02: #050814;
+  --sky-color-03: #090d20;
+  --sky-color-04: #11142f;
+
+  --sky-grad-01: rgba(54, 75, 180, 0.22);
+  --sky-grad-02: rgba(96, 40, 150, 0.2);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle, #101827 0%, #05070b 70%);
+  color: white;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+
+  background:
+    radial-gradient(circle at 18% 16%, var(--sky-grad-01), transparent 30%),
+    radial-gradient(circle at 82% 72%, var(--sky-grad-02), transparent 36%),
+    linear-gradient(135deg,
+      var(--sky-color-01) 0%,
+      var(--sky-color-02) 32%,
+      var(--sky-color-03) 68%,
+      var(--sky-color-04) 100%);
+
+  background-size:
+    120% 120%,
+    150% 150%,
+    320% 320%;
+
+  background-position:
+    0% 0%,
+    100% 100%,
+    0% 50%;
+
+  animation: dayDiagonal 18s ease-in-out infinite alternate;
+}
+
+@keyframes dayDiagonal {
+  0% {
+    background-position:
+      0% 0%,
+      100% 100%,
+      0% 50%;
+  }
+
+  50% {
+    background-position:
+      28% 16%,
+      72% 84%,
+      65% 50%;
+  }
+
+  100% {
+    background-position:
+      48% 32%,
+      52% 68%,
+      100% 50%;
+  }
+}
+
+@keyframes diagonalMove {
+  0% {
+    background-position:
+      0% 0%,
+      18% 0%,
+      0% 0%,
+      0% 0%;
+  }
+
+  50% {
+    background-position:
+      100% 100%,
+      82% 100%,
+      40px 40px,
+      100% 100%;
+  }
+
+  100% {
+    background-position:
+      0% 0%,
+      18% 0%,
+      0% 0%,
+      0% 0%;
+  }
+}

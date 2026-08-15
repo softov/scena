@@ -1,0 +1,68 @@
+/* Both panes assume StackLayout (the surface layout) supplies the section
+ * header strip + collapse/resize. They render only their toolbar + body. */
+
+.explorer-files,
+.explorer-events {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.explorer-files__toolbar,
+.explorer-events__toolbar {
+  display: flex;
+  gap: 4px;
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  border-bottom: 1px solid var(--oo-color-border);
+  background: var(--oo-color-surface);
+  flex: 0 0 auto;
+}
+
+.explorer-files__toolbar button,
+.explorer-events__toolbar button {
+  font-size: var(--oo-font-size-xs);
+  padding: 1px 6px;
+  background: transparent;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm, 3px);
+  color: var(--oo-color-muted);
+  cursor: pointer;
+}
+
+.explorer-files__toolbar button:hover,
+.explorer-events__toolbar button:hover {
+  background: var(--oo-color-active);
+  color: var(--oo-color-fg);
+}
+
+.explorer-files__body,
+.explorer-events__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.explorer-events__log {
+  margin: 0;
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  list-style: none;
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+}
+
+.explorer-events__log li {
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.explorer-events__empty {
+  margin: 0;
+  padding: var(--oo-spacing-sm);
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+  font-style: italic;
+}

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scena · dev playground</title>
+
+  <style>
+    :root {
+      color-scheme: light dark;
+      --boot-bg: #f8fafc;
+      --boot-text: #0f172a;
+      --boot-muted: #64748b;
+      /* --boot-accent: #3bf689; */
+      --boot-accent: #46c9b0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --boot-bg: #020617;
+        --boot-text: #e5e7eb;
+        --boot-muted: #94a3b8;
+        /* --boot-accent: #3bf689; */
+        --boot-accent: #46c9b0;
+      }
+    }
+
+    html,
+    body,
+    #root {
+      margin: 0;
+    }
+
+    .boot-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+
+      display: grid;
+      place-items: center;
+
+      background: var(--boot-bg);
+      color: var(--boot-text);
+
+      font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+
+      opacity: 1;
+      transition:
+        opacity 420ms ease,
+        transform 420ms ease,
+        filter 420ms ease;
+
+      pointer-events: none;
+    }
+
+    .boot-screen.boot-exit {
+      opacity: 0;
+      transform: scale(1.015);
+      filter: blur(6px);
+      transition:
+        opacity 420ms ease,
+        transform 420ms ease,
+        filter 420ms ease;
+    }
+
+    .boot-logo {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      color: var(--boot-muted);
+      opacity: 0.8;
+      animation: growText 1.5s ease-in-out infinite;
+    }
+
+    .app-enter {
+      min-height: 100vh;
+      height: 100%;
+      animation: appEnter 360ms ease-out both;
+    }
+
+    .app-fallback {
+      min-height: 100vh;
+      animation: appEnter 360ms ease-out both;
+    }
+
+    @keyframes appEnter {
+      from {
+        opacity: 0;
+        transform: scale(0.995);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .app-fallback .boot-logo {
+      color: var(--boot-accent);
+      transition: color 1.3s ease;
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.985);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes growText {
+      0% {
+        letter-spacing: 0.18em;
+        opacity: 0.8;
+      }
+
+      50% {
+        letter-spacing: 0.36em;
+        opacity: 1;
+      }
+
+      100% {
+        letter-spacing: 0.18em;
+        opacity: 0.8;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="boot-screen" class="boot-screen">
+    <div class="boot-logo">scena</div>
+  </div>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>
