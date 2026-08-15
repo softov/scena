@@ -30,11 +30,13 @@ const dryRun = args.includes('--dry-run');
 const push = args.includes('--push');
 const request = args.find((arg) => !arg.startsWith('--'));
 
-// `shell` on Windows because pnpm and npm are .cmd shims there, which
-// execFileSync cannot exec directly.
-const shell = process.platform === 'win32';
-
 function run(command, commandArgs, options = {}) {
+  // A shell is needed for pnpm and npm on Windows - they are `.cmd` shims,
+  // which execFileSync cannot exec directly - and must NOT be used for
+  // anything else, because a shell re-splits every argument on whitespace.
+  // `git commit -m "release: @softov/scena v0.1.1"` then arrives as four words,
+  // and git reads the last two as pathspecs.
+  const shell = process.platform === 'win32' && (command === 'pnpm' || command === 'npm');
   return execFileSync(command, commandArgs, {
     cwd: options.cwd ?? repoRoot,
     stdio: options.capture === true ? ['ignore', 'pipe', 'pipe'] : 'inherit',
@@ -162,13 +164,24 @@ if (dryRun) {
 }
 
 // ── Bump, commit, tag ─────────────────────────────────────────────────────
-// The version is written with the file's own trailing newline preserved, so the
-// release commit is a one-line diff.
-manifest.version = version;
-writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-run('git', ['add', 'packages/scena/package.json']);
-run('git', ['commit', '-m', `release: ${manifest.name} ${tag}`]);
-run('git', ['tag', '-a', tag, '-m', `${manifest.name} ${tag}`]);
+// Everything above this line is read-only, so a failure there leaves nothing
+// behind. From here it does not, and a run that dies between the write and the
+// commit leaves a bumped-and-staged version that the next run then refuses as a
+// dirty tree - so the three steps undo themselves as one.
+const original = readFileSync(manifestPath, 'utf8');
+const packageName = manifest.name;
+try {
+  manifest.version = version;
+  // The trailing newline is preserved, so the release commit is a one-line diff.
+  writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  run('git', ['add', 'packages/scena/package.json']);
+  run('git', ['commit', '-m', `release: ${packageName} ${tag}`]);
+  run('git', ['tag', '-a', tag, '-m', `${packageName} ${tag}`]);
+} catch (error) {
+  writeFileSync(manifestPath, original);
+  run('git', ['reset', '--quiet', 'HEAD', '--', 'packages/scena/package.json']);
+  fail(`could not commit and tag, version left at ${JSON.parse(original).version}:\n${error.message}`);
+}
 
 if (!push) {
   // Not pushed by default. Pushing the tag is what starts the publish, and that
