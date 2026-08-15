@@ -1,0 +1,11 @@
+.porta-showcase {
+  padding: var(--oo-spacing-lg);
+  overflow: auto;
+}
+.porta-showcase__col {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+}

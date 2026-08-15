@@ -1,0 +1,42 @@
+.link-demo {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.link-demo header h2 {
+  margin: 0 0 4px;
+}
+.link-demo header p {
+  margin: 0;
+  max-width: 80ch;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+  line-height: 1.5;
+}
+.link-demo__table {
+  border-collapse: collapse;
+  font-size: var(--oo-font-size-sm);
+}
+.link-demo__table th,
+.link-demo__table td {
+  text-align: left;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--oo-color-border);
+  vertical-align: middle;
+}
+.link-demo__table th {
+  font-size: var(--oo-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--oo-color-muted);
+}
+.link-demo__kind {
+  font-size: var(--oo-font-size-xs);
+  padding: 1px 8px;
+  border-radius: 9999px;
+  border: 1px solid var(--oo-color-border);
+}
+.link-demo__kind--tel { color: var(--oo-color-green); border-color: var(--oo-color-green); }
+.link-demo__kind--email { color: var(--oo-color-blue); border-color: var(--oo-color-blue); }
+.link-demo__kind--web { color: var(--oo-color-purple); border-color: var(--oo-color-purple); }

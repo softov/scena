@@ -1,0 +1,114 @@
+.picker-demo {
+  padding: var(--oo-spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  height: 100%;
+  overflow: auto;
+}
+.picker-demo header h2 { margin: 0 0 4px; }
+.picker-demo header p {
+  margin: 0;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+}
+
+.picker-demo__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--oo-spacing-md);
+}
+
+.picker-demo__chat {
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-md, 8px);
+  padding: var(--oo-spacing-sm);
+  background: var(--oo-color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+  position: relative;
+}
+.picker-demo__chat h3 {
+  margin: 0;
+  font-size: var(--oo-font-size-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.picker-demo__chat h3 small {
+  font-weight: 400;
+  color: var(--oo-color-muted);
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+}
+
+.picker-demo__buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.picker-demo__chat textarea {
+  width: 100%;
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 4px;
+  background: var(--oo-color-canvas);
+  color: var(--oo-color-fg);
+  resize: vertical;
+}
+
+.picker-demo__picker {
+  position: absolute;
+  left: var(--oo-spacing-sm);
+  right: var(--oo-spacing-sm);
+  bottom: 100%;
+  margin-bottom: 4px;
+  z-index: 10;
+}
+/* When picker would render above the chat (overlapping page top), allow it to
+ * fall below the textarea instead. The two-panel demo doesn't have anchored
+ * positioning so we just inline the dropdown beneath. */
+.picker-demo__chat .picker-demo__picker {
+  position: static;
+  margin-top: 4px;
+}
+
+.picker-demo__state {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 12px;
+  font-size: var(--oo-font-size-xs);
+  font-family: var(--oo-font-mono);
+  margin: 0;
+  color: var(--oo-color-muted);
+}
+.picker-demo__state dt { font-weight: 700; }
+.picker-demo__state dd { margin: 0; color: var(--oo-color-fg); }
+
+.picker-demo__tabs,
+.picker-demo__files {
+  display: flex;
+  gap: 4px;
+  margin: 6px 0;
+}
+.picker-demo__tab,
+.picker-demo__file {
+  padding: 4px 10px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: 4px;
+  background: var(--oo-color-canvas);
+  user-select: none;
+  cursor: context-menu;
+}
+.picker-demo__file {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+}
+.picker-demo__file small {
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}

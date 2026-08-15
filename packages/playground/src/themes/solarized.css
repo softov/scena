@@ -1,0 +1,76 @@
+/*
+ * Solarized theme — registered as a CSS-sourced theme in dev/themes/index.ts.
+ * Demonstrates the `{ kind: 'css', href }` registration path: the file is
+ * imported with `?url`, then injected lazily on first applyTheme() call.
+ */
+[data-theme='solarized'][data-theme-mode='light'] {
+  --oo-color-canvas:    #fdf6e3;
+  --oo-color-text:      #586e75;
+  --oo-color-muted:     #93a1a1;
+  --oo-color-accent:    #586e75;
+  --oo-color-line  :    #eee8d5;
+  --oo-color-border:    #dbd5c1;
+  --oo-color-surface:        #eee8d5;
+  --oo-color-surface-hover:  #e3dcc4;
+  --oo-color-surface-active: #e3dcc4;
+
+  --load-border:          220 220 228;
+  --load-accent:          56 110 117;
+  --load-accent-2:        88 143 143;
+
+  --oo-color-active:    #586e75;
+  --oo-color-primary:   #586e75;
+  --oo-color-danger:    #dc322f;
+  --oo-color-success:   #859900;
+  --oo-color-warning:   #b58900;
+
+  --oo-sidebar-left-bg:  #eee8d5;
+  --oo-sidebar-left-fg:  #586e75;
+  --oo-sidebar-right-bg: #eee8d5;
+  --oo-sidebar-right-fg: #586e75;
+  
+  /* Scrollbar */
+  --scrollbar-width:    15px;
+  --scrollbar-track-color: transparent;
+  --scrollbar-thumb-color: #dbd5c1;
+  --scrollbar-thumb-border: #dbd5c1;
+  --scrollbar-thumb-hover: #586e75;
+}
+
+[data-theme='solarized'][data-theme-mode='dark'] {
+  --oo-color-canvas:        #002b36;
+  --oo-color-text:        #93a1a1;
+  --oo-color-muted:     #657b83;
+  --oo-color-accent:    #93a1a1;
+  --oo-color-border:    #084352;
+  --oo-color-surface:   #073642;
+  --oo-color-surface-hover: #094352;
+  --oo-color-surface-active: #094352;
+
+  --load-border:         8 67 82; 
+  --load-accent:         147 161 161;
+  --load-accent-2:       147 161 161;
+
+  --oo-color-primary:   #93a1a1;
+  --oo-color-active:    rgba(9, 67, 82, 0.8);
+  --oo-color-danger:    #dc322f;
+  --oo-color-success:   #859900;
+  --oo-color-warning:   #b58900;
+
+  --oo-sidebar-left-bg:  #073642;
+  --oo-sidebar-left-fg:  #93a1a1;
+  --oo-sidebar-right-bg: #073642;
+  --oo-sidebar-right-fg: #93a1a1;
+
+  --scrollbar-track-color: transparent;
+  --scrollbar-thumb-color: var(--oo-color-border);
+  --scrollbar-thumb-border: var(--oo-color-border);
+  --scrollbar-thumb-hover: var(--oo-color-active);
+  
+  /* Scrollbar */
+  --scrollbar-width:    15px;
+  --scrollbar-track-color: transparent;
+  --scrollbar-thumb-color: #073642;
+  --scrollbar-thumb-border: #073642;
+  --scrollbar-thumb-hover: #586e75;
+} 
