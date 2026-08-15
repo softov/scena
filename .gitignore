@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+.pnpm-debug.log*
+
+# Build output
+dist/
+dev-dist/
+build/
+*.tsbuildinfo
+
+# Cache
+.cache/
+.vite/
+.eslintcache
+
+# Environment
+.env
+.env.local
+
+# Editor / OS
+.DS_Store
+Thumbs.db

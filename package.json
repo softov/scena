@@ -1,0 +1,28 @@
+{
+  "name": "scena-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Workspace root for @softov/scena - graph-mounted reactive UI runtime",
+  "scripts": {
+    "dev": "pnpm --filter @softov/scena-playground dev",
+    "build": "pnpm --filter @softov/scena build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @softov/scena test",
+    "test:watch": "pnpm --filter @softov/scena test:watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "eslint": "^10.4.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.6.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.59.4"
+  }
+}
