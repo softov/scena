@@ -6,7 +6,10 @@ on:
 
 permissions:
   contents: read
-  id-token: write # required for npm provenance
+  # Publishing to GitHub Packages. The built-in GITHUB_TOKEN is enough — no PAT
+  # secret to create or rotate, as long as the package scope (@softov) matches
+  # the repository owner, which GitHub Packages requires.
+  packages: write
 
 jobs:
   publish:
@@ -22,7 +25,8 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          registry-url: https://registry.npmjs.org
+          registry-url: https://npm.pkg.github.com
+          scope: '@softov'
 
       - run: pnpm install --frozen-lockfile
 
@@ -43,10 +47,11 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
-      # --provenance requires a public repository. Drop the flag if this repo
-      # is private, or the publish will fail at the attestation step.
-      - name: Publish to npm
-        run: npm publish --provenance --access public
+      # No --provenance: that is an npmjs.org attestation and GitHub Packages
+      # does not accept it. Access follows the repository's visibility, so a
+      # private repo yields a private package — which is the point here.
+      - name: Publish to GitHub Packages
+        run: npm publish
         working-directory: packages/scena
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
