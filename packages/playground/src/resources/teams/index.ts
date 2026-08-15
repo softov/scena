@@ -44,7 +44,7 @@ export function registerTeams(scena: Scena) {
     scena.surfaces.mount({
       surface: 'sidebar:left',
       key: 'teams:explorer',
-      when: '$/ui/sidebar/left/section == "teams"',
+      when: '$/layout/surfaces/sidebar:left/section == "teams"',
       resource: { component: 'TeamExplorer' },
     }),
 

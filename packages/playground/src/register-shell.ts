@@ -178,9 +178,10 @@ export function registerShell(scena: Scena): Disposable {
 
   // Snap back to `showcase` instead of leaving the sidebar empty.
   const KNOWN_SECTIONS = new Set(['showcase', 'users', 'teams', 'explorer']);
-  const currentSection = scena.store.get<string>('$/ui/sidebar/left/section' as BindingPath);
+  const currentSection = scena.layout.get().surfaces['sidebar:left']?.section;
   if (currentSection === undefined || !KNOWN_SECTIONS.has(currentSection)) {
-    scena.store.set('$/ui/sidebar/left/section' as BindingPath, 'showcase');
+    const cur = scena.layout.get().surfaces['sidebar:left'];
+    scena.layout.setSurface('sidebar:left', { ...cur, section: 'showcase' });
   }
 
   // Per-section layout + container header for sidebar:left. Single-mount
@@ -198,7 +199,7 @@ export function registerShell(scena: Scena): Disposable {
     },
   };
   function applySidebarShell() {
-    const section = scena.store.get<string>('$/ui/sidebar/left/section' as BindingPath) ?? '';
+    const section = scena.layout.get().surfaces['sidebar:left']?.section ?? '';
     const shell: SectionShell = SECTION_SHELL[section] ?? { layout: 'single' };
     const cur = scena.layout.get().surfaces['sidebar:left'];
     const nextStack = shell.container ? { ...cur?.stack, container: shell.container } : undefined;
@@ -207,7 +208,10 @@ export function registerShell(scena: Scena): Disposable {
   }
   applySidebarShell();
   subs.push(
-    scena.store.subscribe('$/ui/sidebar/left/section' as BindingPath, applySidebarShell),
+    scena.store.subscribe(
+      '$/layout/surfaces/sidebar:left/section' as BindingPath,
+      applySidebarShell,
+    ),
   );
 
   if (import.meta.env.DEV) {
