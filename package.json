@@ -1,7 +1,6 @@
 {
   "name": "scena-workspace",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "description": "Workspace root for @softov/scena - graph-mounted reactive UI runtime",
   "scripts": {
