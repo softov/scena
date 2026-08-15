@@ -1,6 +1,6 @@
 {
   "name": "@softov/scena",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Graph-mounted reactive UI runtime (contracts + runtime)",
   "license": "MIT",
   "author": "Luiz Fernando Softov <lfs@softov.dev>",
