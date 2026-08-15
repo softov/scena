@@ -20,7 +20,6 @@ export function smsOtpProvider(opts: SmsOtpOpts = {}): PortaProvider {
     async request(phone) {
       if (opts.sendCode) return { challengeId: await opts.sendCode(phone) };
       const id = `sms_${Date.now().toString(36)}`;
-      // eslint-disable-next-line no-console
       console.info(
         `[smsOtpProvider] (stub) would SMS ${phone} a ${digits}-digit code — challengeId=${id}`,
       );

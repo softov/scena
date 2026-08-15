@@ -42,7 +42,6 @@ export function createInMemorySocket(): InMemorySocket {
       try {
         fn(payload);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error(`[in-memory-socket] listener for "${event}" threw:`, err);
       }
     }

@@ -23,7 +23,6 @@ export function magicLinkProvider(opts: MagicLinkOpts = {}): PortaProvider {
       if (opts.sendLink) return { challengeId: await opts.sendLink(email) };
       // Demo stub — just echoes a synthetic id
       const id = `magic_${Date.now().toString(36)}`;
-      // eslint-disable-next-line no-console
       console.info(`[magicLinkProvider] (stub) would email ${email} — challengeId=${id}`);
       return { challengeId: id };
     },
