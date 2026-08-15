@@ -50,6 +50,8 @@ export { Listable } from './data/index.js';
 export type {
   ListableProps,
   ListableColumn,
+  ListableCellProps,
+  ListableTitleProps,
   ListableSort,
   ListableRenderContext,
 } from './data/index.js';
