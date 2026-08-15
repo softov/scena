@@ -7,6 +7,27 @@
   user-select: none;
   font-size: var(--oo-font-size-sm);
   color: var(--oo-color-fg);
+
+  /*
+   * A size container, so a column can reposition its cells from a stylesheet
+   * instead of from JS.
+   *
+   * The same list renders in a 300px sidebar and in `main` at 1200px, so a
+   * viewport media query would be wrong in both places at once. `@container`
+   * asks the only question that matters — how wide is this list — and answers
+   * it during a resize drag without a render:
+   *
+   *   .ticket-title { grid-column: 2; }
+   *   @container (max-width: 520px) {
+   *     .ticket-title { grid-column: 1 / -1; grid-row: 2; }
+   *   }
+   *
+   * `inline-size` rather than `size`: containing block size in both axes
+   * would require the list to have a height independent of its rows, which is
+   * exactly what a list of unknown length does not have.
+   */
+  container-type: inline-size;
+  container-name: oo-listable;
 }
 .oo-listable:focus-visible {
   outline: 1px solid var(--oo-color-accent);
@@ -187,4 +208,38 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Track widths interpolate, so the columns either side of a moved cell close
+ * and open smoothly even though the cell itself teleports. Two conditions, and
+ * both are on the caller: the track COUNT has to hold across the change, and
+ * each track has to keep its type - px to px, fr to fr. `0` to `minmax(0,1fr)`
+ * is a type change and snaps. */
+.oo-listable[data-mode='table'] .oo-listable__rows {
+  transition: grid-template-columns 160ms ease;
+}
+
+/* The cell's own paint. Not position - that is discrete - but a cell arriving
+ * in a new slot reads as placed rather than teleported if its colour settles
+ * rather than cuts. */
+.oo-listable__cell,
+.oo-listable__head-cell {
+  transition: color 140ms ease, background-color 140ms ease, opacity 140ms ease;
+}
+
+/* Not during a splitter drag. `containerWidth` changes every frame there, so
+ * each frame restarts the transition and the grid trails the pointer by the
+ * full duration - the exact lag the transition exists to hide. `oo-resizing`
+ * is on <html> for the length of a drag (ShellSplitter.tsx:67, and
+ * useSurfaceResize.ts:143). */
+html.oo-resizing .oo-listable[data-mode='table'] .oo-listable__rows {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oo-listable[data-mode='table'] .oo-listable__rows,
+  .oo-listable__cell,
+  .oo-listable__head-cell {
+    transition: none;
+  }
 }

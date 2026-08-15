@@ -25,6 +25,42 @@ export interface ListableRenderContext {
   containerWidth: number;
 }
 
+// What a column may say about one of its cells, per row. Deliberately the DOM
+// props that carry layout rather than a free-form spread: a cell that could
+// take arbitrary props could take `key`, `role` or `onClick`, and silently
+// break the grid, the a11y tree, or selection.
+//
+// No `title` here. The tooltip is per-row text, not styling, and folding it in
+// meant one function returned both the thing a `className` styles and a string
+// that class can never reach. `titleProps` owns it instead.
+export interface ListableCellProps {
+  style?: CSSProperties;
+  className?: string;
+}
+
+// Everything about a column's title: the header label and the cell tooltip.
+//
+// One function rather than a field plus a function, because they answer the
+// same question — what this column is called and whether it is worth saying
+// here. A column that moves its cells to a second row usually wants the header
+// gone and the tooltip kept, and that is one decision, made once.
+export interface ListableTitleProps {
+  // The cell's tooltip. Worth setting on any column whose text is routinely
+  // wider than its track: cells are `text-overflow: ellipsis`, so without it
+  // the full value is unreachable at narrow widths.
+  title?: string;
+  // Drop the header label while keeping the header cell.
+  //
+  // The cell has to stay: it is a grid slot, and removing it would shift every
+  // header after it one track left of the data it names. Hiding is what a
+  // column wants once its cells have moved to a second row — that track
+  // collapses to nothing, and a heading floating over nothing is worse than no
+  // heading at all.
+  hidden?: boolean;
+  style?: CSSProperties;
+  className?: string;
+}
+
 export interface ListableColumn<T> {
   // Stable id; doubles as the default sort key.
   key: string;
@@ -52,14 +88,53 @@ export interface ListableColumn<T> {
   //   falsy            → not sortable; header has no click affordance.
   sortable?: boolean | ((a: T, b: T) => number);
 
+  // Per-row cell props, computed from the item and the measured container.
+  //
+  // Pure and called during render, so it must not write state — that is the
+  // whole reason it returns props instead of taking a setter.
+  //
+  // What it is for is a row that is more than one line. Say where each cell
+  // goes and the row becomes a grid rather than a sequence:
+  //
+  //   { style: { gridRow: 2, gridColumn: '1 / span 4' } }
+  //
+  // Two rules come with that. Place every cell, not some: an explicitly placed
+  // item and an auto-placed one share a cursor, and the auto ones land wherever
+  // the explicit ones left it. And zero the `width` of every column whose cells
+  // now sit on another column's track — the track is still emitted, one per
+  // visible column, and an unclaimed `1fr` would take a share of the row.
+  //
+  // For anything expressible in a stylesheet, prefer returning a `className`
+  // and writing an `@container` query: `.oo-listable` is a size container, so
+  // the CSS reacts during a resize drag without a render.
+  cellProps?: (item: T, ctx: ListableRenderContext) => ListableCellProps;
+
+  // The column's title: its header label and its cells' tooltip.
+  //
+  // `item` is the row for a cell's tooltip, and undefined when the header asks
+  // — the header is one cell for the whole column and has no row to speak of.
+  titleProps?: (item: T | undefined, ctx: ListableRenderContext) => ListableTitleProps;
+
   align?: 'left' | 'right';
   // CSS Grid track for table mode (e.g. `'90px'`, `'minmax(120px,1fr)'`).
   // Default `'minmax(0, 1fr)'` — column shares the row's width evenly with
   // its siblings. Use explicit widths to anchor a narrow lead column.
-  width?: string;
+  //
+  // As a function, the track follows the measured container, so a column can
+  // trade width for room instead of disappearing:
+  //
+  //   width: (ctx) => (ctx.containerWidth < 520 ? '90px' : 'minmax(0, 1fr)'),
+  //
+  // `'0'` for a column whose cells are placed by hand onto another column's
+  // track: the track is still emitted — it is one per visible column — and an
+  // unclaimed `1fr` would otherwise take a share of the row and leave a gap.
+  width?: string | ((ctx: ListableRenderContext) => string);
   // Hide this column until the container is at least `showAt` px wide —
   // finer-grained than `mode: 'table'`. e.g. Provider from 400, Agents from 500.
   showAt?: number;
+
+  // Static cell style, merged under whatever `cellProps` returns for the row.
+  // Applies in both modes.
   style?: CSSProperties;
 }
 
@@ -200,19 +275,27 @@ export function Listable<T>({
     [columns, tableMode, containerWidth],
   );
 
+  // Declared before the track template, which now depends on it: a column's
+  // width may be a function of the measured container.
+  const renderCtx: ListableRenderContext = useMemo(
+    () => ({ tableMode, containerWidth }),
+    [tableMode, containerWidth],
+  );
+
+  // One track per visible column, in order — so a cell's position in the row
+  // is exactly its position in `columns` and nothing has to be placed by hand.
   const gridTemplate = useMemo(
-    () => visibleColumns.map((c) => c.width ?? 'minmax(0, 1fr)').join(' '),
-    [visibleColumns],
+    () =>
+      visibleColumns
+        .map((c) => (typeof c.width === 'function' ? c.width(renderCtx) : c.width))
+        .map((track) => track ?? 'minmax(0, 1fr)')
+        .join(' '),
+    [visibleColumns, renderCtx],
   );
 
   const sortedItems = useMemo(
     () => sortItems(items, columns, activeSort ?? null),
     [items, columns, activeSort],
-  );
-
-  const renderCtx: ListableRenderContext = useMemo(
-    () => ({ tableMode, containerWidth }),
-    [tableMode, containerWidth],
   );
 
   function handleHeaderClick(col: ListableColumn<T>): void {
@@ -279,6 +362,77 @@ export function Listable<T>({
     setMenu({ x: e.clientX, y: e.clientY, item });
   }
 
+  // One table cell. Placement is the cell's own business via `cellProps`; a
+  // wrapped cell needs none, because the strip it sits in is what the grid
+  // places.
+  function renderTableCell(col: ListableColumn<T>, item: T): ReactNode {
+    const extra = col.cellProps?.(item, renderCtx);
+    // `col.style` was declared and then only ever applied in the stacked row,
+    // so a column that set one was silently ignored in table mode. The per-row
+    // props win over it, being the more specific of the two.
+    const style =
+      col.style === undefined && extra?.style === undefined
+        ? undefined
+        : { ...col.style, ...extra?.style };
+    return (
+      <div
+        key={col.key}
+        role="cell"
+        className={
+          extra?.className === undefined
+            ? 'oo-listable__cell'
+            : `oo-listable__cell ${extra.className}`
+        }
+        data-align={col.align ?? 'left'}
+        title={col.titleProps?.(item, renderCtx).title}
+        // `undefined` rather than `{}` when there is nothing to say: an empty
+        // object literal is a new reference on every render, which is a prop
+        // change on every cell of every row.
+        style={style}
+      >
+        {renderCellContent(col, item)}
+      </div>
+    );
+  }
+
+  // One header cell.
+  function renderHeadCell(col: ListableColumn<T>): ReactNode {
+    const isSorted = activeSort?.key === col.key;
+    // No row to speak of: the header is one cell for the whole column.
+    const head = col.titleProps?.(undefined, renderCtx);
+    return (
+      <div
+        key={col.key}
+        role="columnheader"
+        className={
+          head?.className === undefined
+            ? 'oo-listable__head-cell'
+            : `oo-listable__head-cell ${head.className}`
+        }
+        data-align={col.align ?? 'left'}
+        data-sortable={col.sortable ? 'true' : undefined}
+        data-sorted={isSorted ? activeSort!.direction : undefined}
+        title={col.sortable && typeof col.label === 'string' ? `Sort by ${col.label}` : undefined}
+        onClick={col.sortable ? () => handleHeaderClick(col) : undefined}
+        style={head?.style}
+      >
+        {/* The cell stays even when the label goes — it is a grid slot, and
+            dropping it would shift every header after it one track left of the
+            data it names. */}
+        {head?.hidden === true ? null : (
+          <>
+            <span className="oo-listable__head-label">{col.label}</span>
+            {isSorted ? (
+              <span className="oo-listable__sort-arrow" aria-hidden="true">
+                {activeSort!.direction === 'asc' ? '▲' : '▼'}
+              </span>
+            ) : null}
+          </>
+        )}
+      </div>
+    );
+  }
+
   // ── Render helpers ─────────────────────────────────────────────────────
   function renderCellContent(col: ListableColumn<T>, item: T): ReactNode {
     if (col.visible && !col.visible(item)) return null;
@@ -306,16 +460,7 @@ export function Listable<T>({
           cursor: onSelect ? 'pointer' : undefined
         }}
       >
-        {visibleColumns.map((col) => (
-          <div
-            key={col.key}
-            role="cell"
-            className="oo-listable__cell"
-            data-align={col.align ?? 'left'}
-          >
-            {renderCellContent(col, item)}
-          </div>
-        ))}
+        {visibleColumns.map((col) => renderTableCell(col, item))}
       </div>
     );
   }
@@ -344,8 +489,25 @@ export function Listable<T>({
           : visibleColumns.map((col) => {
               const content = renderCellContent(col, item);
               if (content == null) return null;
+              // Same contract in both modes. `ctx.tableMode` is false here, so
+              // a column that only wants to reposition in the table can say so
+              // without this branch having to know about it.
+              const extra = col.cellProps?.(item, renderCtx);
               return (
-                <div key={col.key} className="oo-listable__list-cell" style={col.style}>
+                <div
+                  key={col.key}
+                  className={
+                    extra?.className === undefined
+                      ? 'oo-listable__list-cell'
+                      : `oo-listable__list-cell ${extra.className}`
+                  }
+                  title={col.titleProps?.(item, renderCtx).title}
+                  style={
+                    col.style === undefined && extra?.style === undefined
+                      ? undefined
+                      : { ...col.style, ...extra?.style }
+                  }
+                >
                   {/* <span className="oo-listable__list-label">{col.label}</span> */}
                   <span className="oo-listable__list-value">{content}</span>
                 </div>
@@ -389,28 +551,7 @@ export function Listable<T>({
         >
           {tableMode ? (
             <div role="row" className="oo-listable__head-row">
-              {visibleColumns.map((col) => {
-                const isSorted = activeSort?.key === col.key;
-                return (
-                  <div
-                    key={col.key}
-                    role="columnheader"
-                    className="oo-listable__head-cell"
-                    data-align={col.align ?? 'left'}
-                    data-sortable={col.sortable ? 'true' : undefined}
-                    data-sorted={isSorted ? activeSort!.direction : undefined}
-                    title={col.sortable && typeof col.label === 'string' ? `Sort by ${col.label}` : undefined}
-                    onClick={col.sortable ? () => handleHeaderClick(col) : undefined}
-                  >
-                    <span className="oo-listable__head-label">{col.label}</span>
-                    {isSorted ? (
-                      <span className="oo-listable__sort-arrow" aria-hidden="true">
-                        {activeSort!.direction === 'asc' ? '▲' : '▼'}
-                      </span>
-                    ) : null}
-                  </div>
-                );
-              })}
+              {visibleColumns.map((col) => renderHeadCell(col))}
             </div>
           ) : null}
 

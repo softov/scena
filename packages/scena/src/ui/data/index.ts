@@ -8,6 +8,8 @@ export { Listable } from './Listable.js';
 export type {
   ListableProps,
   ListableColumn,
+  ListableCellProps,
+  ListableTitleProps,
   ListableSort,
   ListableRenderContext,
 } from './Listable.js';
