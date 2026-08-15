@@ -36,6 +36,10 @@ function defaultLayout(): ScenaLayout {
   return { surfaces: { ...DEFAULT_SURFACE_LAYOUTS } };
 }
 
+// Long enough to swallow a gesture, short enough that letting go of a splitter
+// and closing the tab keeps the size.
+const SAVE_DEBOUNCE_MS = 150;
+
 function applyDeep<T>(base: T, patch: DeepPartial<T>): T {
   if (patch === null || typeof patch !== 'object') return patch as unknown as T;
   if (Array.isArray(patch)) return patch as unknown as T;
@@ -61,38 +65,55 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
     ? applyDeep(defaultLayout(), deps.initial as DeepPartial<ScenaLayout>)
     : defaultLayout();
   const subscribers = new Set<(layout: ScenaLayout) => void>();
+  let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
-  function mirrorToStore(): void {
-    for (const [surface, surfaceState] of Object.entries(state.surfaces)) {
-      if (!surfaceState) continue;
+  // Only the surfaces that could have changed. `set` and `patch` can touch any
+  // of them and pass nothing; `setSurface` names the one it wrote, which keeps a
+  // splitter drag from re-announcing all nine every frame.
+  function changedSurfaces(only?: SurfaceName): [string, SurfaceLayoutState][] {
+    if (only !== undefined) {
+      const one = state.surfaces[only];
+      return one ? [[only, one]] : [];
+    }
+    return Object.entries(state.surfaces).filter(
+      (entry): entry is [string, SurfaceLayoutState] => entry[1] !== undefined,
+    );
+  }
+
+  // `store.set` queues a change notification unconditionally, so mirroring a
+  // value back over itself still wakes every subscriber on that path. Most of
+  // what this writes is unchanged on any given call.
+  function setIfChanged(path: string, value: unknown): void {
+    if (Object.is(store.get(path as BindingPath), value)) return;
+    store.set(path as BindingPath, value);
+  }
+
+  function mirrorToStore(only?: SurfaceName): void {
+    for (const [surface, surfaceState] of changedSurfaces(only)) {
       const base = surfaceBase(surface);
-      store.set(`${base}/visible` as BindingPath, surfaceState.visible);
+      setIfChanged(`${base}/visible`, surfaceState.visible);
       if (surfaceState.size !== undefined) {
-        store.set(`${base}/size` as BindingPath, surfaceState.size);
+        setIfChanged(`${base}/size`, surfaceState.size);
       }
       if (surfaceState.layout !== undefined) {
-        store.set(`${base}/layout` as BindingPath, surfaceState.layout);
+        setIfChanged(`${base}/layout`, surfaceState.layout);
       }
       if (surfaceState.activeContainerKey !== undefined) {
-        store.set(
-          `${base}/activeContainerKey` as BindingPath,
-          surfaceState.activeContainerKey,
-        );
+        setIfChanged(`${base}/activeContainerKey`, surfaceState.activeContainerKey);
       }
       if (surfaceState.section !== undefined) {
-        store.set(`${base}/section` as BindingPath, surfaceState.section);
+        setIfChanged(`${base}/section`, surfaceState.section);
       }
       if (surfaceState.split) {
-        store.set(`${base}/split` as BindingPath, surfaceState.split);
+        setIfChanged(`${base}/split`, surfaceState.split);
       }
     }
   }
 
-  function mirrorToCss(): void {
+  function mirrorToCss(only?: SurfaceName): void {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    for (const [surface, surfaceState] of Object.entries(state.surfaces)) {
-      if (!surfaceState) continue;
+    for (const [surface, surfaceState] of changedSurfaces(only)) {
       const slug = surface.replace(':', '-');
       if (surfaceState.size !== undefined) {
         root.style.setProperty(`--oo-${slug}-size`, `${surfaceState.size}px`);
@@ -104,7 +125,21 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
     }
   }
 
-  function notify(): void {
+  // Writing the layout means serialising all of it, so a caller that changes
+  // something per animation frame would otherwise run a synchronous
+  // JSON.stringify + localStorage write on the main thread at 60Hz. Coalesced,
+  // the last value of a burst is the one that lands, which is the only one
+  // anybody wanted saved.
+  function scheduleSave(): void {
+    if (!storage) return;
+    if (saveTimer !== null) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      saveTimer = null;
+      if (storage) void storage.save(state);
+    }, SAVE_DEBOUNCE_MS);
+  }
+
+  function notify(opts?: { surface?: SurfaceName; transient?: boolean }): void {
     events.emit('scena:layout:changed', state);
     for (const fn of [...subscribers]) {
       try {
@@ -113,11 +148,15 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
         console.error('[scena.layout] subscriber threw:', err);
       }
     }
-    mirrorToStore();
-    mirrorToCss();
-    if (storage) {
-      void storage.save(state);
-    }
+    // The CSS variables move with the gesture: they are one write per changed
+    // property on one element, and a shell that sizes from them rather than
+    // from React state gets the frame for free.
+    mirrorToCss(opts?.surface);
+    // A frame of a drag is not a value anybody should be reading or storing.
+    // The next settled call mirrors and persists whatever it ended on.
+    if (opts?.transient === true) return;
+    mirrorToStore(opts?.surface);
+    scheduleSave();
   }
 
   mirrorToStore();
@@ -144,7 +183,7 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
       state = applyDeep(state, patch);
       notify();
     },
-    setSurface(surface, surfaceState) {
+    setSurface(surface, surfaceState, opts) {
       const current = state.surfaces[surface] ?? { visible: false };
       state = {
         ...state,
@@ -153,7 +192,7 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
           [surface]: { ...current, ...surfaceState },
         },
       };
-      notify();
+      notify({ surface, ...(opts?.transient === true ? { transient: true } : {}) });
     },
     subscribe(fn) {
       subscribers.add(fn);

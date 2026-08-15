@@ -131,11 +131,27 @@ export type DeepPartial<T> = T extends object
   ? { [K in keyof T]?: DeepPartial<T[K]> }
   : T;
 
+export interface SetSurfaceOptions {
+  // A frame of a continuous gesture (a splitter drag, a spatial pan) rather
+  // than a settled value.
+  //
+  // Subscribers and `scena:layout:changed` still fire, because they are what
+  // moves the pixels. What is skipped is everything only a settled value needs:
+  // mirroring into the reactive store, which wakes every `useStore` in the app,
+  // and persisting, which serialises the whole layout. Both happen on the next
+  // non-transient call, so the gesture ends by committing once.
+  transient?: boolean;
+}
+
 export interface LayoutAPI {
   get(): ScenaLayout;
   set(layout: ScenaLayout): void;
   patch(patch: DeepPartial<ScenaLayout>): void;
-  setSurface(surface: SurfaceName, state: Partial<SurfaceLayoutState>): void;
+  setSurface(
+    surface: SurfaceName,
+    state: Partial<SurfaceLayoutState>,
+    opts?: SetSurfaceOptions,
+  ): void;
   subscribe(fn: (layout: ScenaLayout) => void): Disposable;
 }
 
