@@ -43,7 +43,7 @@ export function registerUsers(scena: Scena) {
     scena.surfaces.mount({
       surface: 'sidebar:left',
       key: 'users:explorer',
-      when: '$/ui/sidebar/left/section == "users"',
+      when: '$/layout/surfaces/sidebar:left/section == "users"',
       resource: { component: 'UserExplorer' },
     }),
 

@@ -267,7 +267,7 @@ export function registerShowcase(scena: Scena, _subs: Disposable[]): void {
   scena.surfaces.mount({
     surface: 'sidebar:left',
     key: 'showcase:explorer',
-    when: '$/ui/sidebar/left/section == "showcase"',
+    when: '$/layout/surfaces/sidebar:left/section == "showcase"',
     resource: { component: 'ShowcaseExplorer' },
   });
 }

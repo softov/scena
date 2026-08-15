@@ -27,7 +27,7 @@ function ActivityBarItem({
   icon, 
   color,
   label, badge, section, pos, onClick }: ActivityBarItemProps) {
-  const activeSection = useStore<string | undefined>('$/ui/sidebar/left/section');
+  const activeSection = useStore<string | undefined>('$/layout/surfaces/sidebar:left/section');
   const isActive = section !== undefined && activeSection === section;
   return (
     <div

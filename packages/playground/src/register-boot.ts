@@ -32,7 +32,14 @@ export function registerBoot(scena: Scena): void {
     run: (ctx, args) => {
       const section = (args as { section?: string } | undefined)?.section;
       if (!section) return;
-      ctx.store.set('$/ui/sidebar/left/section', section);
+      // Section and visibility are both sidebar:left layout state, written
+      // together. `visible: true` is the point: activating a section from the
+      // activity bar has to OPEN the sidebar, otherwise clicking an icon while
+      // it is closed just swaps the section behind a hidden panel and looks
+      // like nothing happened. Keeping section in layout state (rather than a
+      // parallel `$/ui/...` path) means one store and one persistence path.
+      const cur = ctx.scena.layout.get().surfaces['sidebar:left'];
+      ctx.scena.layout.setSurface('sidebar:left', { ...cur, section, visible: true });
     },
   });
   scena.commands.register({

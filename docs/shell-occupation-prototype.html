@@ -1,0 +1,408 @@
+<title>Shell Occupation Prototype</title>
+
+<style>
+  :root {
+    --ground:      #eef3f1;
+    --paper:       #ffffff;
+    --ink:         #15302b;
+    --ink-soft:    #47645f;
+    --muted:       #7d9591;
+    --rule:        #d1dedb;
+    --rule-strong: #b2c6c1;
+    --accent:      #1f9d86;
+    --accent-wash: #ddf1ec;
+    --amber:       #a9690f;
+    --amber-wash:  #f7ead4;
+    --shade:       #e4ecea;
+    --scrim:       rgb(8 24 21 / 0.34);
+
+    --sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0a1816;
+      --paper:       #0f2320;
+      --ink:         #dbeae6;
+      --ink-soft:    #9db6b1;
+      --muted:       #6d8984;
+      --rule:        #1d3833;
+      --rule-strong: #2b514a;
+      --accent:      #46c9b0;
+      --accent-wash: #102e28;
+      --amber:       #e0a24e;
+      --amber-wash:  #2c2211;
+      --shade:       #142e29;
+      --scrim:       rgb(0 0 0 / 0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0a1816;
+    --paper:       #0f2320;
+    --ink:         #dbeae6;
+    --ink-soft:    #9db6b1;
+    --muted:       #6d8984;
+    --rule:        #1d3833;
+    --rule-strong: #2b514a;
+    --accent:      #46c9b0;
+    --accent-wash: #102e28;
+    --amber:       #e0a24e;
+    --amber-wash:  #2c2211;
+    --shade:       #142e29;
+    --scrim:       rgb(0 0 0 / 0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 72rem; margin: 0 auto; padding: clamp(1.2rem,3vw,2.6rem) clamp(1rem,3vw,2rem) 4rem; }
+
+  h1 {
+    font-family: var(--mono); font-size: clamp(1.5rem,1.2rem+1.4vw,2.3rem);
+    font-weight: 600; letter-spacing: -0.02em; margin: 0 0 0.4rem;
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 0.7rem;
+  }
+  .sub { color: var(--ink-soft); max-width: 56ch; margin: 0 0 1.8rem; }
+
+  h2 {
+    font-family: var(--mono); font-size: 1.15rem; font-weight: 600;
+    margin: 2.4rem 0 0.6rem;
+  }
+  p { max-width: 66ch; }
+
+  code {
+    font-family: var(--mono); font-size: 0.88em; background: var(--shade);
+    border: 1px solid var(--rule); border-radius: 3px; padding: 0.05em 0.32em;
+  }
+
+  /* ── Control deck ─────────────────────────────────────────────────── */
+  .deck {
+    background: var(--paper); border: 1px solid var(--rule);
+    padding: 1rem 1.1rem; margin-bottom: 1.2rem;
+  }
+
+  .deck-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem 1.2rem; }
+  .deck-row + .deck-row { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid var(--rule); }
+
+  .lbl {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.11em;
+    text-transform: uppercase; color: var(--muted); flex: 0 0 auto;
+  }
+
+  input[type="range"] { flex: 1 1 12rem; min-width: 9rem; accent-color: var(--accent); }
+  input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .readout {
+    font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: 0.92rem; color: var(--ink); flex: 0 0 auto;
+  }
+  .readout b { color: var(--accent); font-weight: 600; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+  .chip {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.03em;
+    padding: 0.26rem 0.6rem; border: 1px solid var(--rule-strong);
+    background: var(--ground); color: var(--muted); cursor: pointer;
+    border-radius: 2px;
+  }
+  .chip[aria-pressed="true"] { background: var(--accent-wash); border-color: var(--accent); color: var(--accent); }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ── The shell frame ──────────────────────────────────────────────── */
+  .stage {
+    background: var(--shade); border: 1px solid var(--rule);
+    padding: 1rem; overflow-x: auto;
+  }
+
+  .frame { margin: 0 auto; transition: width 90ms linear; max-width: 100%; }
+
+  .shell {
+    position: relative;
+    display: flex; flex-direction: column;
+    height: 23rem;
+    background: var(--paper);
+    border: 1px solid var(--rule-strong);
+    overflow: hidden;
+    font-family: var(--mono); font-size: 0.66rem;
+  }
+
+  .body { display: flex; flex: 1; min-height: 0; position: relative; }
+  .center { flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative; }
+
+  .s {
+    display: grid; place-items: center; text-align: center;
+    background: var(--shade); color: var(--ink-soft);
+    border: 1px solid var(--rule); padding: 0.2rem;
+    overflow: hidden; white-space: nowrap;
+  }
+  .s[data-visible="false"] { display: none; }
+
+  .s--main { background: var(--accent-wash); color: var(--accent); font-weight: 600; flex: 1; min-height: 0; }
+  .s--titlebar, .s--statusbar { flex: 0 0 auto; height: 1.5rem; }
+  .s--activitybar { flex: 0 0 2.1rem; writing-mode: vertical-rl; }
+  .s--sidebar-left  { flex: 0 0 auto; width: 9rem; }
+  .s--sidebar-right { flex: 0 0 auto; width: 10rem; }
+  .s--panel { flex: 0 0 auto; height: 5.5rem; }
+
+  .grip { flex: 0 0 4px; background: var(--rule-strong); cursor: col-resize; }
+  .grip--h { flex-basis: 4px; cursor: row-resize; }
+  .shell[data-hide-grips="true"] .grip { display: none; }
+
+  /* floating occupation — surface lifts out of flow */
+  .s.is-floating {
+    position: absolute; top: 0; bottom: 0; z-index: 3;
+    box-shadow: 0 0 22px rgb(0 0 0 / 0.3);
+    border-color: var(--amber);
+    background: var(--amber-wash); color: var(--amber); font-weight: 600;
+  }
+  .s--sidebar-left.is-floating  { left: 0;  width: 11rem; }
+  .s--sidebar-right.is-floating { right: 0; width: 11rem; }
+
+  /* sheet occupation — from the bottom edge, over main */
+  .s.is-sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+    height: 52%;
+    box-shadow: 0 -8px 22px rgb(0 0 0 / 0.3);
+    border-color: var(--amber);
+    background: var(--amber-wash); color: var(--amber); font-weight: 600;
+  }
+
+  /* bar occupation — activitybar rotates to the bottom edge */
+  .s--activitybar.is-bar {
+    position: absolute; left: 0; right: 0; bottom: 0; top: auto;
+    width: auto; height: 2.1rem; flex: none; z-index: 4;
+    writing-mode: horizontal-tb;
+    background: var(--amber-wash); color: var(--amber); font-weight: 600;
+    border-color: var(--amber);
+  }
+  .shell[data-nav="bar"] .center { padding-bottom: 2.1rem; }
+
+  .scrim {
+    position: absolute; inset: 0; z-index: 2;
+    background: var(--scrim); display: none;
+  }
+  .shell[data-scrim="true"] .scrim { display: block; }
+
+  /* ── Occupation table ─────────────────────────────────────────────── */
+  .scroll { overflow-x: auto; margin: 1.2rem 0 0; border: 1px solid var(--rule); background: var(--paper); }
+  table { border-collapse: collapse; width: 100%; min-width: 30rem; font-size: 0.82rem; }
+  th, td { text-align: left; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--rule); }
+  th {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--shade);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td { font-family: var(--mono); }
+  td.occ b { font-weight: 600; }
+  .occ-docked   { color: var(--ink-soft); }
+  .occ-floating,
+  .occ-sheet,
+  .occ-bar      { color: var(--amber); }
+  .occ-off      { color: var(--muted); opacity: 0.65; }
+
+  .note {
+    border-left: 3px solid var(--amber); background: var(--amber-wash);
+    padding: 0.85rem 1.05rem; margin: 1.4rem 0;
+  }
+  .note p { margin: 0; max-width: none; }
+
+  footer {
+    margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--ink);
+    font-family: var(--mono); font-size: 0.76rem; color: var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) { .frame { transition: none; } }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Prototype · @softov/scena</p>
+  <h1>Shell Occupation</h1>
+  <p class="sub">Drag the width. Surfaces change <em>how they occupy space</em> — they do not disappear. Toggle any surface off and back on at any width: your choice is never overwritten.</p>
+
+  <div class="deck">
+    <div class="deck-row">
+      <span class="lbl">Width</span>
+      <input id="w" type="range" min="320" max="1600" step="8" value="1280" aria-label="Shell width in pixels">
+      <span class="readout"><b id="wv">1280</b>px · <b id="cls">regular</b></span>
+    </div>
+    <div class="deck-row">
+      <span class="lbl">Visible</span>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="frame" id="frame">
+      <div class="shell" id="shell">
+        <div class="s s--titlebar"   data-surface="titlebar">titlebar</div>
+        <div class="body">
+          <div class="s s--activitybar" data-surface="activitybar">activitybar</div>
+          <div class="s s--sidebar-left" data-surface="sidebar:left">sidebar:left</div>
+          <div class="grip" data-for="sidebar:left"></div>
+          <div class="center">
+            <div class="s s--main" data-surface="main">main</div>
+            <div class="grip grip--h" data-for="panel:bottom"></div>
+            <div class="s s--panel" data-surface="panel:bottom">panel:bottom</div>
+          </div>
+          <div class="grip" data-for="sidebar:right"></div>
+          <div class="s s--sidebar-right" data-surface="sidebar:right">sidebar:right</div>
+          <div class="scrim"></div>
+        </div>
+        <div class="s s--statusbar" data-surface="statusbar">statusbar</div>
+      </div>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Surface</th><th>Intent</th><th>Occupation</th><th>Takes space</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    <p>Narrow it to 900px with <code>sidebar:right</code> on. It floats — still open, still reachable, no longer competing with <code>main</code> for width. That is the behavior the hide/show framing misses.</p>
+  </div>
+
+  <h2>The rule being demonstrated</h2>
+  <p>Occupation is derived from <code>$/modus</code>. Intent is read, never written:</p>
+  <p><code>mobile</code> &lt; 640 · <code>compact</code> 640–1023 · <code>regular</code> 1024–1439 · <code>wide</code> ≥ 1440</p>
+
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Surface</th><th>compact</th><th>mobile</th></tr></thead>
+      <tbody>
+        <tr><td>sidebar:left</td><td>docked</td><td>floating</td></tr>
+        <tr><td>sidebar:right</td><td>floating</td><td>floating</td></tr>
+        <tr><td>panel:bottom</td><td>docked</td><td>sheet</td></tr>
+        <tr><td>activitybar</td><td>docked</td><td>bar</td></tr>
+        <tr><td>titlebar / statusbar / main</td><td>docked</td><td>docked</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    Surface arrangement mirrors web-next/src/shell/AppShell.tsx · grips stand in for ShellSplitter
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var SURFACES = [
+      { id: 'titlebar',      on: true  },
+      { id: 'activitybar',   on: true  },
+      { id: 'sidebar:left',  on: true  },
+      { id: 'main',          on: true,  locked: true },
+      { id: 'panel:bottom',  on: true  },
+      { id: 'sidebar:right', on: true  },
+      { id: 'statusbar',     on: true  }
+    ];
+
+    var intent = {};
+    SURFACES.forEach(function (s) { intent[s.id] = s.on; });
+
+    var shell = document.getElementById('shell');
+    var frame = document.getElementById('frame');
+    var slider = document.getElementById('w');
+    var wv = document.getElementById('wv');
+    var clsEl = document.getElementById('cls');
+    var rows = document.getElementById('rows');
+    var chips = document.getElementById('chips');
+
+    function classify(w) {
+      if (w >= 1440) return 'wide';
+      if (w >= 1024) return 'regular';
+      if (w >= 640) return 'compact';
+      return 'mobile';
+    }
+
+    // The policy under test. Occupation is derived — never persisted.
+    function occupationOf(id, cls) {
+      var compact = cls === 'compact' || cls === 'mobile';
+      var mobile = cls === 'mobile';
+      if (id === 'sidebar:right') return compact ? 'floating' : 'docked';
+      if (id === 'sidebar:left') return mobile ? 'floating' : 'docked';
+      if (id === 'panel:bottom') return mobile ? 'sheet' : 'docked';
+      if (id === 'activitybar') return mobile ? 'bar' : 'docked';
+      return 'docked';
+    }
+
+    function buildChips() {
+      SURFACES.forEach(function (s) {
+        if (s.locked) return;
+        var b = document.createElement('button');
+        b.className = 'chip';
+        b.type = 'button';
+        b.textContent = s.id;
+        b.setAttribute('aria-pressed', String(intent[s.id]));
+        b.addEventListener('click', function () {
+          intent[s.id] = !intent[s.id];
+          b.setAttribute('aria-pressed', String(intent[s.id]));
+          render();
+        });
+        chips.appendChild(b);
+      });
+    }
+
+    function render() {
+      var w = parseInt(slider.value, 10);
+      var cls = classify(w);
+
+      frame.style.width = w + 'px';
+      wv.textContent = String(w);
+      clsEl.textContent = cls;
+
+      var anyFloating = false;
+      rows.innerHTML = '';
+
+      SURFACES.forEach(function (s) {
+        var el = shell.querySelector('[data-surface="' + s.id + '"]');
+        var on = intent[s.id];
+        var occ = on ? occupationOf(s.id, cls) : 'off';
+
+        el.setAttribute('data-visible', String(on));
+        el.classList.toggle('is-floating', occ === 'floating');
+        el.classList.toggle('is-sheet', occ === 'sheet');
+        el.classList.toggle('is-bar', occ === 'bar');
+
+        if (occ === 'floating' || occ === 'sheet') anyFloating = true;
+
+        var takes = occ === 'docked' ? 'yes' : (occ === 'off' ? '—' : 'no');
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>' + s.id + '</td>' +
+          '<td>' + (on ? 'on' : 'off') + '</td>' +
+          '<td class="occ"><b class="occ-' + occ + '">' + occ + '</b></td>' +
+          '<td>' + takes + '</td>';
+        rows.appendChild(tr);
+      });
+
+      // A floating surface has nothing to resize against, so its grip goes.
+      shell.setAttribute('data-hide-grips', String(cls === 'mobile' || cls === 'compact'));
+      shell.setAttribute('data-scrim', String(anyFloating));
+      shell.setAttribute('data-nav', occupationOf('activitybar', cls) === 'bar' && intent['activitybar'] ? 'bar' : 'none');
+    }
+
+    slider.addEventListener('input', render);
+    buildChips();
+    render();
+  })();
+</script>

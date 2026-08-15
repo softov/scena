@@ -164,14 +164,14 @@ export function registerExplorer(scena: Scena) {
     scena.surfaces.mount({
       surface: 'sidebar:left',
       key: 'explorer:files',
-      when: '$/ui/sidebar/left/section == "explorer"',
+      when: '$/layout/surfaces/sidebar:left/section == "explorer"',
       resource: { component: 'ExplorerFiles' },
       props: { title: 'Files', icon: '\u{1F4C1}\u{FE0E}', color: 'amber' },
     }),
     scena.surfaces.mount({
       surface: 'sidebar:left',
       key: 'explorer:events',
-      when: '$/ui/sidebar/left/section == "explorer"',
+      when: '$/layout/surfaces/sidebar:left/section == "explorer"',
       resource: { component: 'ExplorerEvents' },
       props: { title: 'Event log', icon: '\u{1F4DC}\u{FE0E}', color: 'sky' },
     }),
