@@ -1,4 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import type { BindingPath } from '@softov/scena/types';
+import { resolveLabel, translate } from '@softov/scena';
 import { useScena } from '@softov/scena/react';
 import { Tree, type TreeNode } from '@softov/scena/ui';
 import './file-explorer-panel.css';
@@ -409,7 +411,10 @@ export function FileExplorerPanel(): ReactNode {
           ctx.host?.pushList({
             title: 'Open with',
             items: openers.map((def) => ({
-              title: def.opens?.title ?? def.component,
+              title: resolveLabel(def.opens?.title ?? def.component, {
+                get: (p) => ctx.scena.store.get(p as BindingPath),
+                translate,
+              }),
               icon: def.opens?.icon,
               color: def.opens?.color,
               onSelect: (h) => {
@@ -436,7 +441,6 @@ export function FileExplorerPanel(): ReactNode {
           const path = ctx.store.get<string>('$/resource/id') ?? '';
           if (!path) return;
           // Mock — we just log. Real impl would mutate the store/server.
-          // eslint-disable-next-line no-console
           console.log('[file.delete]', path);
           ctx.host?.closeMenu();
         },

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { BindingPath, HostCtx, PickerAction } from '@softov/scena/types';
+import { resolveLabel, translate } from '@softov/scena';
 import { useScena } from '@softov/scena/react';
 import { useChatPicker, ContextMenu } from '@softov/scena/ui';
 import './picker-panel.css';
@@ -449,7 +450,10 @@ export function PickerPanel(): ReactNode {
           ctx.host?.pushList({
             title: 'Open with',
             items: openers.map((def): PickerAction => ({
-              title: def.opens?.title ?? def.component,
+              title: resolveLabel(def.opens?.title ?? def.component, {
+                get: (p) => ctx.scena.store.get(p as BindingPath),
+                translate,
+              }),
               icon: def.opens?.icon,
               color: def.opens?.color,
               onSelect: (host) => {

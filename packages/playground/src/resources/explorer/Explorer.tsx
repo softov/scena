@@ -76,10 +76,14 @@ function buildTree(all: FsNode[]): TreeNode<FsNode>[] {
   return direct('/').map(toNode);
 }
 
+// Stable identity for the empty case; an inline `?? []` would mint a new array
+// every render and defeat the treeNodes useMemo below.
+const EMPTY_FILES: FsNode[] = [];
+
 // ── Files pane ──────────────────────────────────────────────────────────
 export function ExplorerFiles() {
   const scena = useScena();
-  const all = useStore<FsNode[]>('$/explorer/files/all') ?? [];
+  const all = useStore<FsNode[]>('$/explorer/files/all') ?? EMPTY_FILES;
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set(['/src', '/docs']));
 
