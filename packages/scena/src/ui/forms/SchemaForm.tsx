@@ -112,6 +112,10 @@ export function SchemaForm({
 
   useEffect(() => {
     onDirtyChange?.(dirty);
+    // Fires on dirty transitions only. `onDirtyChange` is excluded on purpose:
+    // callers routinely pass an inline arrow, and including it would re-fire
+    // the callback on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty]);
 
   const properties = schema.properties;

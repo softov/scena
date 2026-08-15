@@ -72,6 +72,9 @@ function computeInitialBounds(
 }
 
 const DEFAULT_VIEWPORT: SpatialViewport = { scale: 1, panX: 0, panY: 0 };
+// Stable identity for the "no saved bounds" case. An inline `?? {}` would mint
+// a new object every render and defeat the bounds useMemo below.
+const EMPTY_BOUNDS: Record<string, SpatialBounds> = {};
 const ZOOM_STEP = 1.1;
 
 // CampusView node registry. Spatial mounts all render as the `card` type.
@@ -93,7 +96,7 @@ export function SpatialLayout({
   const [cardMenu, setCardMenu] = useState<{ x: number; y: number; key: string } | null>(null);
 
   const arrangement = state.spatial?.arrangement ?? 'cascade';
-  const savedBounds = state.spatial?.bounds ?? {};
+  const savedBounds = state.spatial?.bounds ?? EMPTY_BOUNDS;
   const selectedKey = state.spatial?.selectedKey;
   const viewport = state.spatial?.viewport ?? DEFAULT_VIEWPORT;
 

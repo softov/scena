@@ -28,7 +28,10 @@ export function useI18n(namespace?: string): UseI18nResult {
   const t = useCallback(
     (key: string, fallbackOrOptions?: string | TranslateOptions) =>
       translate(namespace ? `${namespace}/${key}` : key, fallbackOrOptions),
-    // locale in deps so the returned `t` identity changes on locale switch
+    // `locale` is deliberately a dependency even though `translate` reads it
+    // internally: consumers memoize on `t`, so its identity must change on a
+    // locale switch or they render stale translations.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [namespace, locale],
   );
   return { t, locale, info: getLocaleInfo(locale), locales: listLocaleInfo(), setLocale };

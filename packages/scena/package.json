@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Graph-mounted reactive UI runtime (contracts + runtime)",
   "license": "MIT",
-  "author": "Luiz Softov <lfs@softov.dev>",
+  "author": "Luiz Fernando Softov <lfs@softov.dev>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/softov/scena.git",
@@ -82,7 +82,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
     "lint": "eslint src test",
     "test": "vitest run",
     "test:watch": "vitest"

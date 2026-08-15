@@ -12,6 +12,10 @@ export {
   clearMountLocal,
 } from './reactive-store.js';
 export { createBindingResolver } from './binding-resolver.js';
+// Pure Label resolver. `types/label.ts` documents this as the intended way to
+// resolve a Label outside React (useLabel is the reactive counterpart), so it
+// belongs on the public surface.
+export { resolveLabel } from './label.js';
 // Reference ScopeBackend implementations. The Yjs backend is a deep import
 // (`core/backends/yjs-backend.js`) so the barrel never references `yjs`.
 export {
