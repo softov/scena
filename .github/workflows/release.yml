@@ -6,8 +6,8 @@ on:
 
 permissions:
   contents: read
-  # Publishing to GitHub Packages. The built-in GITHUB_TOKEN is enough — no PAT
-  # secret to create or rotate, as long as the package scope (@softov) matches
+  # The GitHub Packages publish. The built-in GITHUB_TOKEN is enough for it —
+  # no PAT to create or rotate — as long as the package scope (@softov) matches
   # the repository owner, which GitHub Packages requires.
   packages: write
 
@@ -25,8 +25,6 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          registry-url: https://npm.pkg.github.com
-          scope: '@softov'
 
       - run: pnpm install --frozen-lockfile
 
@@ -47,11 +45,49 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
-      # No --provenance: that is an npmjs.org attestation and GitHub Packages
-      # does not accept it. Access follows the repository's visibility, so a
-      # private repo yields a private package — which is the point here.
-      - name: Publish to GitHub Packages
+      # ── npmjs.org ────────────────────────────────────────────────────────
+      # First, because this is the one consumers use: GitHub Packages' npm
+      # registry demands an authorization header on every read, public packages
+      # included, so `pnpm add @softov/scena` only works with nothing configured
+      # if the package is here.
+      #
+      # `setup-node` is re-run rather than configured once, because it writes a
+      # single `//<host>/:_authToken` line — one registry per invocation, and
+      # these two need different credentials.
+      #
+      # No `--registry` flag: publishConfig.registry already names npmjs, so a
+      # publish run by hand from packages/scena goes to the same place as this.
+      # `--access public` is in publishConfig too — scoped packages default to
+      # `restricted`, and restricted needs a paid plan, so without it the
+      # publish fails rather than quietly going private.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          scope: '@softov'
+
+      - name: Publish to npm
         run: npm publish
+        working-directory: packages/scena
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # ── GitHub Packages ──────────────────────────────────────────────────
+      # `--registry` is explicit here and required: a command-line registry is
+      # the one thing that overrides publishConfig.registry, which points at
+      # npmjs. Without the flag this step publishes to npm a second time and
+      # fails on the duplicate version.
+      #
+      # No `--provenance` anywhere: that is an npmjs attestation and GitHub
+      # Packages rejects it, and the same `npm publish` serves both.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: '@softov'
+
+      - name: Publish to GitHub Packages
+        run: npm publish --registry https://npm.pkg.github.com
         working-directory: packages/scena
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
