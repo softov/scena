@@ -34,7 +34,16 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-`.github/workflows/release.yml` runs typecheck, tests and build, then publishes to npm with provenance.
+`.github/workflows/release.yml` runs typecheck, tests and build, then publishes to **GitHub Packages**.
+The package stays private for as long as the repository is - GitHub Packages inherits repository visibility.
+
+Consumers need a `.npmrc` pointing the `@softov` scope at the GitHub registry, with a personal access token carrying `read:packages`:
+
+```
+@softov:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
 
 ## License
 

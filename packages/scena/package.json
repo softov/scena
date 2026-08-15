@@ -27,7 +27,7 @@
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
+      "types": "./dist/core/index.d.ts",
       "default": "./dist/core/index.js"
     },
     "./types": {
@@ -78,7 +78,7 @@
     "LICENSE"
   ],
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
