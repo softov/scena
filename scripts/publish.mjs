@@ -87,8 +87,17 @@ const status = run('git', ['status', '--porcelain'], { capture: true }).trim();
 if (status !== '') fail(`working tree is dirty - commit or stash first:\n${status}`);
 
 run('git', ['fetch', '--tags', '--quiet']);
-const behind = run('git', ['rev-list', '--count', 'HEAD..@{upstream}'], { capture: true }).trim();
-if (behind !== '0') fail(`local branch is ${behind} commit(s) behind upstream - pull first`);
+try {
+  const behind = run('git', ['rev-list', '--count', 'HEAD..@{upstream}'], { capture: true }).trim();
+  if (behind !== '0') fail(`local branch is ${behind} commit(s) behind upstream - pull first`);
+} catch (error) {
+  // A branch with no upstream is a legitimate place to cut from - a fork, a
+  // fresh clone of a maintenance branch - so this is a warning, not a stop.
+  // Anything git says other than "no upstream" still stops it.
+  const output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
+  if (!/no upstream|does not point to a branch/iu.test(output)) throw error;
+  console.warn('release: branch has no upstream, skipping the behind-check');
+}
 
 const tag = `v${version}`;
 const existing = run('git', ['tag', '--list', tag], { capture: true }).trim();
@@ -122,17 +131,29 @@ run('pnpm', ['test']);
 run('pnpm', ['build']);
 
 // ── What the tarball actually contains ────────────────────────────────────
-const packed = run('npm', ['pack', '--dry-run'], { capture: true, cwd: pkgRoot });
-for (const required of ['LICENSE', 'README.md', 'dist/']) {
-  if (!packed.includes(required)) fail(`tarball is missing ${required}`);
+// `--json`, because `npm pack --dry-run` prints its file listing to STDERR as
+// `npm notice` lines and puts only the tarball name on stdout - so reading
+// stdout for filenames finds none of them and every check "fails". With --json
+// the manifest is on stdout, and the paths are exact rather than substrings.
+const packed = JSON.parse(
+  run('npm', ['pack', '--dry-run', '--json'], { capture: true, cwd: pkgRoot }),
+)[0];
+const paths = packed.files.map((file) => file.path);
+
+for (const required of ['LICENSE', 'README.md']) {
+  if (!paths.includes(required)) fail(`tarball is missing ${required}`);
 }
-// `files` is a allowlist, so this only trips if somebody widened it.
-if (/\bsrc\//u.test(packed)) fail('tarball contains src/ - check the `files` field');
+if (!paths.some((path) => path.startsWith('dist/'))) {
+  fail('tarball has no dist/ - the build emitted nothing');
+}
+// `files` is an allowlist, so this only trips if somebody widened it.
+const leaked = paths.filter((path) => path.startsWith('src/'));
+if (leaked.length > 0) {
+  fail(`tarball contains src/ - check the \`files\` field:\n  ${leaked.slice(0, 5).join('\n  ')}`);
+}
 console.log(
-  packed
-    .split('\n')
-    .filter((line) => /name:|version:|package size:|total files:/u.test(line))
-    .join('\n'),
+  `release: ${packed.name}@${packed.version} - ${packed.entryCount} files, `
+  + `${(packed.size / 1024).toFixed(1)} kB packed / ${(packed.unpackedSize / 1024).toFixed(1)} kB unpacked`,
 );
 
 if (dryRun) {
