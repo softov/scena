@@ -81,3 +81,99 @@
     transition: none;
   }
 }
+
+/*
+ * ── Edge resize ──────────────────────────────────────────────────────────
+ *
+ * The alternative to a ShellSplitter element placed between two surfaces. The
+ * grip is a pseudo-element on the surface itself, so it takes no part in flex
+ * and cannot end up on the wrong side of a conditionally-rendered neighbour.
+ *
+ * The hit zone is 10px and the visible line is 1px. That gap is the point: a
+ * 1px target is unhittable and a 10px line is a gutter, so the two are
+ * separated - the gradient paints one pixel of the band and leaves the rest
+ * transparent.
+ *
+ * Only present on a docked surface. Floating, sheet and bar have no dock
+ * boundary to drag, and `useSurfaceResize` stops emitting `data-resize` for
+ * them, so the rule and the behaviour disappear together.
+ */
+.oo-surface[data-resize] {
+  position: relative;
+}
+
+.oo-surface[data-resize]::after {
+  content: '';
+  position: absolute;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oo-surface[data-resize]::after {
+    transition: none;
+  }
+}
+
+.oo-surface[data-resize='right']::after {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: ew-resize;
+  background: linear-gradient(
+    to right,
+    transparent 9px,
+    var(--oo-color-accent) 9px
+  );
+}
+
+.oo-surface[data-resize='left']::after {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: ew-resize;
+  background: linear-gradient(
+    to right,
+    var(--oo-color-accent) 1px,
+    transparent 1px
+  );
+}
+
+.oo-surface[data-resize='top']::after {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  cursor: ns-resize;
+  background: linear-gradient(
+    to bottom,
+    var(--oo-color-accent) 1px,
+    transparent 1px
+  );
+}
+
+.oo-surface[data-resize='bottom']::after {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  cursor: ns-resize;
+  background: linear-gradient(
+    to bottom,
+    transparent 9px,
+    var(--oo-color-accent) 9px
+  );
+}
+
+/* Hovering the band, then dragging it. Two steps rather than one, so the line
+   confirms the grip before the pointer goes down. */
+.oo-surface[data-resize][data-resize-state='hot']::after {
+  opacity: 0.55;
+}
+
+.oo-surface[data-resize][data-resize-state='active']::after {
+  opacity: 1;
+}
