@@ -2,8 +2,14 @@ import type { ReactNode } from 'react';
 import type { LayoutProps } from '../../types/layout.js';
 import type { ResolvedMount } from '../../types/mount-surface.js';
 
-// Vertical icon rail with two groups (top + bottom). The bottom group sticks
-// to the bottom via margin-top: auto; mount order within each group is preserved.
+// Icon rail with two groups (top + bottom). The second group sticks to the far
+// end via an auto margin; mount order within each group is preserved.
+//
+// Axis follows the hosting surface's presentation: a docked activitybar is a
+// vertical rail, and the same surface presented as a `bar` (pinned to the
+// bottom edge when the viewport is narrow) lays out horizontally. Both the
+// flex direction AND which margin does the pushing have to flip together —
+// margin-top: auto does nothing in a row.
 //
 // Mounts declare placement via a literal-string `pos` prop on the root node
 // (`pos: 'bottom'`). Anything else (including undefined) counts as top.
@@ -18,21 +24,32 @@ function posOf(mount: ResolvedMount): 'top' | 'bottom' {
   return 'top';
 }
 
-export function RailLayout({ mounts, renderMount }: LayoutProps) {
+export function RailLayout({ mounts, renderMount, presentation }: LayoutProps) {
   const top: ResolvedMount[] = [];
   const bottom: ResolvedMount[] = [];
   for (const m of mounts) {
     (posOf(m) === 'bottom' ? bottom : top).push(m);
   }
 
+  const horizontal = presentation === 'bar';
+  const direction = horizontal ? 'row' : 'column';
+  const pushEnd = horizontal ? { marginLeft: 'auto' } : { marginTop: 'auto' };
+
   return (
     <div
       className="oo-layout oo-layout--rail"
-      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+      data-orientation={horizontal ? 'horizontal' : 'vertical'}
+      style={{
+        display: 'flex',
+        flexDirection: direction,
+        height: horizontal ? undefined : '100%',
+        width: horizontal ? '100%' : undefined,
+        alignItems: horizontal ? 'center' : undefined,
+      }}
     >
       <div
         className="oo-rail__top"
-        style={{ display: 'flex', flexDirection: 'column' }}
+        style={{ display: 'flex', flexDirection: direction }}
       >
         {top.map((m) => (
           <div key={m.key} style={{ display: 'contents' }}>
@@ -42,7 +59,7 @@ export function RailLayout({ mounts, renderMount }: LayoutProps) {
       </div>
       <div
         className="oo-rail__bottom"
-        style={{ display: 'flex', flexDirection: 'column', marginTop: 'auto' }}
+        style={{ display: 'flex', flexDirection: direction, ...pushEnd }}
       >
         {bottom.map((m) => (
           <div key={m.key} style={{ display: 'contents' }}>
