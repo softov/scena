@@ -17,6 +17,7 @@ import { useScena } from './ScenaProvider.js';
 import { useLayout } from './hooks/useLayout.js';
 import { useMounts } from './hooks/useMounts.js';
 import { MountWrapper, ViewMount } from './ViewMount.js';
+import { useSurfaceResize, type SurfaceResizeSpec } from './useSurfaceResize.js';
 
 function renderOneMount(mount: ResolvedMount): ReactNode {
   return (
@@ -49,6 +50,11 @@ export interface SurfaceAreaProps {
   // keyed on the emitted `data-presentation`. Defaults to 'docked', which is
   // the pre-existing behavior — the shell keeps full control via `style`.
   presentation?: SurfacePresentation;
+  // Resize this surface by its own edge instead of by a ShellSplitter placed
+  // beside it. The two are alternatives, not layers: a shell picks one per
+  // surface. Omitted, the surface is not resizable by itself and the shell is
+  // free to put a splitter next to it as before.
+  resize?: SurfaceResizeSpec;
 }
 
 export function SurfaceArea({
@@ -57,10 +63,12 @@ export function SurfaceArea({
   style,
   className,
   presentation = 'docked',
+  resize,
 }: SurfaceAreaProps) {
   const scena = useScena();
   const layoutState = useLayout();
   const mounts = useMounts(surface);
+  const resizeBinding = useSurfaceResize(surface, presentation, resize);
   const surfaceState: SurfaceLayoutState =
     layoutState.surfaces[surface] ?? { visible: true };
   const layoutId = surfaceState.layout ?? layout ?? 'default';
@@ -124,6 +132,7 @@ export function SurfaceArea({
         .filter(Boolean)
         .join(' ')}
       style={style}
+      {...resizeBinding}
     >
       {layoutDef ? (
         (() => {

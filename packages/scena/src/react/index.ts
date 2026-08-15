@@ -4,6 +4,13 @@ export { DefaultShell } from './DefaultShell.js';
 export { ViewMount, MountWrapper } from './ViewMount.js';
 export { ShellSplitter } from './ShellSplitter.js';
 export { SurfaceArea } from './SurfaceArea.js';
+export type { SurfaceAreaProps } from './SurfaceArea.js';
+// The two resize models. `ShellSplitter` is an element the shell places between
+// surfaces; `useSurfaceResize` (reached through SurfaceArea's `resize` prop, or
+// directly for a custom surface component) puts the grip on the surface's own
+// edge. A shell picks one per surface.
+export { useSurfaceResize } from './useSurfaceResize.js';
+export type { SurfaceResizeSpec, SurfaceResizeBinding } from './useSurfaceResize.js';
 export {
   MountContext,
   DataContextContext,
