@@ -12,7 +12,7 @@ const tick = () => new Promise<void>((r) => setTimeout(r, 0));
 
 function wrapperFor(scena: ReturnType<typeof createScena>) {
   return ({ children }: { children: ReactNode }) =>
-    createElement(ScenaProvider, { scena }, children);
+    createElement(ScenaProvider, { scena, children });
 }
 
 describe('useStore', () => {

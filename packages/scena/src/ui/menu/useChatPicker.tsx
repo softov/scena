@@ -204,9 +204,11 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
   }), [input, caretIndex, prefixes, setInput, filterQuery, onCaretChange]);
 
   const top = stack[stack.length - 1];
-  const onBack = stack.length > 1
-    ? () => setStack((cur) => cur.slice(0, -1))
-    : undefined;
+  // Hoisted out of the conditional so `onBack` keeps a stable identity. Inline,
+  // it minted a new arrow every render and defeated the useCallback below that
+  // depends on it.
+  const popStack = useCallback(() => setStack((cur) => cur.slice(0, -1)), []);
+  const onBack = stack.length > 1 ? popStack : undefined;
 
   // Keyboard hook the host wires to its textarea onKeyDown. Returns true when
   // handled so the host knows whether to call its own default behavior.

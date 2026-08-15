@@ -277,7 +277,11 @@ export function CampusView({
     minScaleRef.current = minScale;
     maxScaleRef.current = maxScale;
     commitViewportThrottledRef.current = commitViewportThrottled;
-  }, [zoomStep, minScale, maxScale, commitViewportThrottled]);
+    // No dependency array on purpose. This syncs the latest values into refs
+    // that the native wheel listener reads without re-subscribing, so it must
+    // run on every render. `commitViewportThrottled` is redeclared each render,
+    // so the previous array was already "every render" spelled out the long way.
+  });
 
   useEffect(() => {
     const el = containerRef.current;
@@ -437,6 +441,14 @@ export function CampusView({
     }),
     // The handle captures `container` and `maxDepth` so it must re-build
     // when those change; everything else flows through refs.
+    //
+    // `commitViewport` and `zoomAroundCenter` are intentionally absent. They
+    // read only container/maxDepth/minScale/maxScale plus refs, and all four
+    // are listed here — so the captured closures are never stale. Listing the
+    // functions themselves would rebuild the handle on every render, since
+    // they are redeclared each time, defeating the memo and forcing every
+    // consumer holding the ref to re-run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [container, maxDepth, minScale, maxScale],
   );
 

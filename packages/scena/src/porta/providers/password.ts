@@ -43,7 +43,6 @@ export function passwordProvider(opts: PasswordProviderOpts): PortaProvider {
       },
     ],
     async signin(creds): Promise<Session> {
-      console.log('Password provider signin with creds:', creds);
       const { email, password } = creds as { email?: string; password?: string };
       if (!email || !password) throw new Error('Email and password are required.');
       const user = opts.users.find((u) => u.email === email && u.password === password);
