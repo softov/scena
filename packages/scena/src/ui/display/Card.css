@@ -1,0 +1,15 @@
+.oo-card {
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  padding: var(--oo-spacing-md);
+  background: var(--oo-card-bg);
+}
+.oo-card__title {
+  font-weight: 600;
+  margin-bottom: var(--oo-spacing-xs);
+}
+.oo-card__subtitle {
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+  margin-bottom: var(--oo-spacing-sm);
+}

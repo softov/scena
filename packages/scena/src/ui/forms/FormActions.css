@@ -1,0 +1,11 @@
+.oo-form-actions {
+  display: flex;
+  gap: var(--oo-spacing-sm);
+  align-items: center;
+}
+.oo-form-actions[data-align='end'] {
+  justify-content: flex-end;
+}
+.oo-form-actions[data-align='between'] {
+  justify-content: space-between;
+}

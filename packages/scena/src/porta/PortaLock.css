@@ -1,0 +1,14 @@
+.porta-locked {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  padding: var(--oo-spacing-md);
+  border: 1px dashed var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-color-surface);
+}
+.porta-locked__title {
+  font-weight: 600;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+}

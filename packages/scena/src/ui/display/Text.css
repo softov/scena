@@ -1,0 +1,20 @@
+.oo-text                { color: inherit; }
+.oo-text--muted         { color: var(--oo-color-muted); }
+.oo-text--bold          { font-weight: 600; }
+.oo-text--align-start   { text-align: left; }
+.oo-text--align-center  { text-align: center; }
+.oo-text--align-end     { text-align: right; }
+
+/* Semantic tone — wins over muted when both are present (later cascade). */
+.oo-text--tone-accent   { color: var(--oo-color-accent); }
+.oo-text--tone-success  { color: var(--oo-color-success); }
+.oo-text--tone-warning  { color: var(--oo-color-warning); }
+.oo-text--tone-danger   { color: var(--oo-color-danger); }
+
+.oo-text--body    { font-size: var(--oo-font-size-md); }
+.oo-text--caption { font-size: var(--oo-font-size-xs); }
+.oo-text--h1      { font-size: var(--oo-font-size-xl); font-weight: 600; }
+.oo-text--h2      { font-size: var(--oo-font-size-lg); font-weight: 600; }
+.oo-text--h3      { font-size: var(--oo-font-size-md); font-weight: 600; }
+.oo-text--h4      { font-size: var(--oo-font-size-md); font-weight: 600; opacity: 0.9; }
+.oo-text--h5      { font-size: var(--oo-font-size-sm); font-weight: 600; opacity: 0.85; }

@@ -1,0 +1,6 @@
+.oo-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: var(--oo-column-gap, var(--oo-spacing-md));
+}

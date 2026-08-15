@@ -1,0 +1,6 @@
+.oo-divider {
+  background: var(--oo-color-border);
+  flex: 0 0 auto;
+}
+.oo-divider--horizontal { width: 100%; height: 1px; }
+.oo-divider--vertical   { width: 1px;  height: 100%; }

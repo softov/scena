@@ -1,0 +1,15 @@
+.oo-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+}
+.oo-field-row__labelline {
+  display: flex;
+  align-items: baseline;
+  gap: var(--oo-spacing-xs);
+}
+.oo-field-row__label {
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-text);
+  font-weight: 600;
+}

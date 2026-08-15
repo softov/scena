@@ -1,0 +1,30 @@
+[data-theme-mode="dark"] {
+  color-scheme: dark;
+
+  --oo-rgb-canvas: 2 6 23;
+  --oo-rgb-panel: 15 23 42;
+  --oo-rgb-surface: 2 6 23;
+  --oo-rgb-raised: 24 32 48;
+
+  --oo-rgb-titlebar: 2 6 23;
+  --oo-rgb-activitybar: 15 23 42;
+  --oo-rgb-sidebar: 15 23 42;
+  --oo-rgb-statusbar: 15 23 42;
+
+  /* --oo-rgb-text: 226 232 240; */
+  --oo-rgb-text: 203 213 224;
+  /* --oo-rgb-muted: 148 163 184; */
+  --oo-rgb-muted: 116 131 154;
+  --oo-rgb-subtle: 100 116 139;
+
+  --oo-rgb-hover: 30 41 59;
+  --oo-rgb-active: 51 65 85;
+  --oo-rgb-selected: 20 83 76;
+
+  --oo-rgb-line: 116 131 154;
+  /* --oo-rgb-border: 148 163 184; */
+  --oo-rgb-border: 98 113 134;
+
+  --oo-line-alpha: 0.18;
+  --oo-border-alpha: 0.22;
+}

@@ -1,0 +1,190 @@
+.oo-listable {
+  display: flex;
+  flex-direction: column;
+  /* height: 100%; */
+  min-height: 0;
+  outline: none;
+  user-select: none;
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-fg);
+}
+.oo-listable:focus-visible {
+  outline: 1px solid var(--oo-color-accent);
+  outline-offset: -1px;
+}
+
+.oo-listable__header {
+  flex: 0 0 auto;
+  padding: var(--oo-spacing-sm);
+  border-bottom: 1px solid var(--oo-color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+}
+.oo-listable__title {
+  margin: 0;
+  font-size: var(--oo-font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--oo-color-muted);
+}
+
+.oo-listable__rows {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* In table mode, the rows container IS the parent grid. Head-row and each
+ * data-row are subgrids that inherit these columns — so `auto` and
+ * `minmax(0,1fr)` sizing is shared across the header and the rows.
+ * --oo-listable-template is set inline from JSX.
+ */
+.oo-listable[data-mode='table'] .oo-listable__rows {
+  display: grid;
+  grid-template-columns: var(--oo-listable-template);
+  grid-auto-rows: max-content;
+  align-content: start;
+}
+
+.oo-listable__empty {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+  padding: var(--oo-spacing-md);
+}
+
+/* ── Table mode ──────────────────────────────────────────────────────── */
+
+.oo-listable__head-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--oo-color-canvas);
+  border-bottom: 1px solid var(--oo-color-border);
+}
+
+.oo-listable__head-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  font-size: var(--oo-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--oo-color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+.oo-listable__head-cell[data-align='right'] {
+  justify-content: flex-end;
+}
+.oo-listable__head-cell[data-sortable='true'] {
+  cursor: pointer;
+}
+.oo-listable__head-cell[data-sortable='true']:hover {
+  color: var(--oo-color-fg);
+}
+.oo-listable__head-cell[data-sorted] {
+  color: var(--oo-color-fg);
+}
+
+.oo-listable__head-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.oo-listable__sort-arrow {
+  font-size: 9px;
+  line-height: 1;
+}
+
+.oo-listable__row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: stretch;
+  border-bottom: 1px solid var(--oo-color-border);
+  cursor: default;
+}
+
+.oo-listable__cell {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  font-size: var(--oo-font-size-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.oo-listable__cell[data-align='right'] {
+  justify-content: flex-end;
+}
+
+/* ── List (stacked) mode ─────────────────────────────────────────────── */
+
+.oo-listable__stack {
+  display: flex;
+  /* flex-direction: column; */
+  flex-direction: row;
+  align-items: start;
+  flex-grow: 0;
+  justify-content: space-between;
+  /* gap: 2px; */
+  gap: 6px;
+  padding: 6px 12px;
+  /* border-bottom: 1px solid var(--oo-color-border); */
+  cursor: default;
+}
+
+/* ── List (common) mode ─────────────────────────────────────────────── */
+
+.oo-listable__item:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+.oo-listable__item:hover {
+  color: var(--oo-color-text);
+  background: var(--oo-color-hover);
+}
+.oo-listable__item[data-selected='true'] {
+  color: var(--oo-color-text);
+  background: var(--oo-color-hover);
+  box-shadow: inset 2px 0 0 var(--oo-color-accent);
+}
+
+/* ── List (stacked) mode ─────────────────────────────────────────────── */
+.oo-listable__list-cell {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.oo-listable__list-label {
+  flex: 0 0 auto;
+  min-width: 64px;
+  font-size: 10px;
+  color: var(--oo-color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.oo-listable__list-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

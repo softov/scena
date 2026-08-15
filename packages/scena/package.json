@@ -1,0 +1,114 @@
+{
+  "name": "@softov/scena",
+  "version": "0.1.0",
+  "description": "Graph-mounted reactive UI runtime (contracts + runtime)",
+  "license": "MIT",
+  "author": "Luiz Softov <lfs@softov.dev>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/softov/scena.git",
+    "directory": "packages/scena"
+  },
+  "homepage": "https://github.com/softov/scena#readme",
+  "bugs": "https://github.com/softov/scena/issues",
+  "keywords": [
+    "ui",
+    "runtime",
+    "reactive",
+    "schema-driven",
+    "server-driven-ui",
+    "react"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/core/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/core/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/types/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "default": "./dist/react/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "default": "./dist/ui/index.js"
+    },
+    "./ui/builtins": {
+      "types": "./dist/ui/register.d.ts",
+      "default": "./dist/ui/register.js"
+    },
+    "./ui/*": {
+      "types": "./dist/ui/*/index.d.ts",
+      "default": "./dist/ui/*/index.js"
+    },
+    "./react/core": {
+      "types": "./dist/react/core.d.ts",
+      "default": "./dist/react/core.js"
+    },
+    "./styles": {
+      "types": "./dist/styles/index.d.ts",
+      "default": "./dist/styles/index.js"
+    },
+    "./styles/*": "./dist/styles/*",
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "default": "./dist/runtime/index.js"
+    },
+    "./porta": {
+      "types": "./dist/porta/index.d.ts",
+      "default": "./dist/porta/index.js"
+    },
+    "./porta/examples": {
+      "types": "./dist/porta/providers/examples/index.d.ts",
+      "default": "./dist/porta/providers/examples/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^22.x",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "jsdom": "^29.0.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4",
+    "yjs": "^13.6.20"
+  }
+}

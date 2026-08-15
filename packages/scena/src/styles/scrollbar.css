@@ -1,0 +1,45 @@
+:root {
+  --oo-scrollbar-width: 15px;
+  --oo-scrollbar-track-color: rgb(var(--oo-rgb-surface) / 0.25);
+  /* --oo-scrollbar-track-color: transparent; */
+  --oo-scrollbar-border-color: transparent;
+  /* --oo-scrollbar-border-color: rgb(var(--oo-rgb-surface)); */
+  --oo-scrollbar-border-width: 3px;
+  --oo-scrollbar-thumb-radius: 15px;
+  --oo-scrollbar-thumb-color: rgb(var(--oo-rgb-border) / 0.35);
+  /* --oo-scrollbar-thumb-color: none; */
+  --oo-scrollbar-thumb-hover: rgb(var(--oo-rgb-border) / 0.5);
+  /* --oo-scrollbar-thumb-hover: rgb(var(--oo-rgb-accent)); */
+}
+
+/* ----------------------------------------
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: var(--oo-scrollbar-width, 15px);
+  height: var(--oo-scrollbar-width, 15px);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--oo-scrollbar-track-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--oo-scrollbar-thumb-color);
+  /* border-radius: var(--oo-scrollbar-thumb-radius, 9999px); */
+  border-width: var(--oo-scrollbar-border-width, 0px);
+  border-style: solid;
+  border-color: var(--oo-scrollbar-border-color, var(--oo-scrollbar-track-color));
+  /* border: 3px solid transparent; */
+  background-clip: content-box;
+  transition: background-color 160ms ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--oo-scrollbar-thumb-hover);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: medium;
+  scrollbar-color: var(--oo-scrollbar-thumb-color) var(--oo-scrollbar-track-color);
+}

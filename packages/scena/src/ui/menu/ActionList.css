@@ -1,0 +1,262 @@
+/* Picker engine — chat slash, palette, right-click menus.
+ * Layout / typography / spacing through tokens so themes drive everything. */
+:root {
+  --oo-action-list-min-width: 240px;
+  --oo-action-list-max-width: none;
+  --oo-action-list-max-height: 360px;
+}
+
+.oo-action-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: var(--oo-action-list-min-width);
+  max-width: var(--oo-action-list-max-width);
+  max-height: var(--oo-action-list-max-height);
+  background: var(--oo-color-surface);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-md, 8px);
+  box-shadow: var(--oo-shadow-lg, 0 12px 28px rgba(0, 0, 0, 0.26));
+  overflow: hidden;
+  color: var(--oo-color-fg);
+  font-size: var(--oo-font-size-sm);
+}
+
+/* Re-resolve indicator — floats top-right over the kept-visible rows so the
+   list doesn't flash to a loading screen while an async provider refetches. */
+.oo-action-list__pending {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  z-index: 2;
+  font-size: 10px;
+  font-family: var(--oo-font-mono);
+  color: var(--oo-color-muted);
+  background: var(--oo-color-surface);
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--oo-color-border);
+  opacity: 0.9;
+  pointer-events: none;
+  animation: oo-action-list-pulse 1s ease-in-out infinite;
+}
+
+@keyframes oo-action-list-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.95; }
+}
+
+.oo-action-list__custom-header {
+  flex: 0 0 auto;
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  border-bottom: 1px solid var(--oo-color-border);
+}
+
+.oo-action-list__back {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--oo-color-border);
+  color: var(--oo-color-muted);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.oo-action-list__back:hover {
+  background: var(--oo-color-active);
+  color: var(--oo-color-fg);
+}
+
+.oo-action-list__body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.oo-action-list__items {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.oo-action-list__detail {
+  flex: 0 0 40%;
+  min-width: 0;
+  padding: var(--oo-spacing-sm);
+  border-left: 1px solid var(--oo-color-border);
+  background: var(--oo-color-canvas);
+  overflow: auto;
+}
+
+.oo-action-list__header {
+  flex: 0 0 auto;
+  padding: var(--oo-spacing-sm);
+  border-bottom: 1px solid var(--oo-color-border);
+  background: var(--oo-color-canvas);
+}
+
+.oo-action-list__group-label {
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm) 2px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--oo-color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.oo-action-list__divider {
+  height: 1px;
+  background: var(--oo-color-border);
+}
+
+.oo-action-list__row {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  padding: 6px var(--oo-spacing-sm);
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.oo-action-list__row:hover {
+  color: var(--oo-color-text);
+  background: var(--oo-color-hover);
+}
+
+.oo-action-list__row[data-selected='true'] {
+  color: var(--oo-color-text);
+  background: var(--oo-color-hover);
+}
+
+.oo-action-list__row[data-disabled='true'] {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.oo-action-list__row[data-selected='true'] .oo-action-list__title {
+  font-weight: 700;
+  color: var(--oo-color-accent);
+}
+
+.oo-action-list .oo-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  font-size: 14px;
+  /* flex-shrink: 0; */
+  color: rgb(var(--oo-color, var(--oo-color-muted)));
+}
+
+[data-cmd-group='danger'] .oo-icon {
+  --oo-color: var(--oo-color-red);
+}
+
+[data-cmd-group='create'] .oo-icon {
+  --oo-color: var(--oo-color-green);
+}
+
+[data-cmd-group='open'] .oo-icon {
+  --oo-color: var(--oo-color-blue);
+}
+
+[data-cmd-group='config'] .oo-icon {
+  --oo-color: var(--oo-color-violet);
+}
+
+.oo-action-list__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.oo-action-list__description {
+  flex: 0 0 auto;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}
+
+/* Rich rows — title stacked over a muted subtitle (web composer style). */
+.oo-action-list__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.oo-action-list__subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+  line-height: 1.2;
+}
+
+.oo-action-list__row:hover .oo-action-list__subtitle,
+.oo-action-list__row[data-selected='true'] .oo-action-list__subtitle {
+  color: var(--oo-color-text);
+}
+
+.oo-action-list__shortcut {
+  flex: 0 0 auto;
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  background: var(--oo-color-canvas);
+  border: 1px solid var(--oo-color-border);
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+.oo-action-list__row[data-selected='true'] .oo-action-list__shortcut {
+  background: var(--oo-color-active);
+  color: var(--oo-color-surface);
+}
+.oo-action-list__row:hover .oo-action-list__shortcut {
+  background: var(--oo-color-active);
+  color: var(--oo-color-surface);
+}
+
+.oo-action-list__check {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--oo-color-accent);
+}
+
+.oo-action-list__empty,
+.oo-action-list__loading,
+.oo-action-list__error {
+  padding: var(--oo-spacing-md) var(--oo-spacing-sm);
+  color: var(--oo-color-muted);
+  text-align: center;
+  font-size: var(--oo-font-size-xs);
+}
+
+.oo-action-list__footer {
+  flex: 0 0 auto;
+  padding: 4px var(--oo-spacing-sm);
+  border-top: 1px solid var(--oo-color-border);
+  color: var(--oo-color-muted);
+  font-size: 10px;
+  font-family: var(--oo-font-mono);
+  user-select: none;
+}

@@ -1,0 +1,15 @@
+.oo-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  padding: var(--oo-spacing-md);
+  margin: 0;
+}
+.oo-field-group__legend {
+  font-size: var(--oo-font-size-xs);
+  font-weight: 600;
+  color: var(--oo-color-muted);
+  padding: 0 var(--oo-spacing-xs);
+}

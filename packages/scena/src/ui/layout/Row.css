@@ -1,0 +1,16 @@
+.oo-row {
+  --oo-row-gap: var(--oo-spacing-md);
+  display: flex;
+  /* flex: var(--weight); */
+  /* flex-direction: row; */
+  /* min-width: 0; */
+  /* gap: var(--oo-row-gap, var(--oo-spacing-md)); */
+}
+
+.oo-row>section {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 100%;
+  gap: var(--oo-row-gap, var(--oo-spacing-md));
+}

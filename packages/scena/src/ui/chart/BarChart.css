@@ -1,0 +1,53 @@
+.oo-barchart {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.oo-barchart__track {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 100%;
+}
+.oo-barchart__bar {
+  flex: 1;
+  min-width: 2px;
+  border-radius: 2px 2px 0 0;
+}
+.oo-barchart__bar--stacked {
+  display: flex;
+  flex-direction: column-reverse;
+  overflow: hidden;
+}
+.oo-barchart__bar--grouped {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 100%;
+}
+.oo-barchart__bar--grouped .oo-barchart__seg {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+}
+.oo-barchart__seg {
+  width: 100%;
+}
+.oo-barchart__labels {
+  display: flex;
+  gap: 2px;
+}
+.oo-barchart__label {
+  flex: 1;
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.oo-barchart--empty {
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  font-style: italic;
+}

@@ -1,0 +1,264 @@
+:root {
+
+  --input-padding-y: var(--oo-spacing-xs);
+  --input-padding-x: var(--oo-spacing-sm);
+  --input-background: var(--oo-color-canvas);
+  --input-color: var(--oo-color-text);
+  --input-border-color: var(--oo-color-border);
+  --input-border-radius: var(--oo-radius-sm);
+  --input-border-width: 1px;
+  /* Inherit input styles, but allow overrides via --textarea-*. */
+  --textarea-padding-y: var(--input-padding-y);
+  --textarea-padding-x: var(--input-padding-x);
+  --textarea-background: var(--input-background);
+  --textarea-color: var(--input-color);
+  --textarea-border-color: var(--input-border-color);
+  --textarea-border-radius: var(--input-border-radius);
+  --textarea-border-width: var(--input-border-width);
+
+  --button-background: none;
+  --button-background-hover: rgb(var(--oo-rgb-primary) / 0.88);
+  --button-background-active: var(--oo-color-active);
+  --button-text: inherit;
+  --button-text-hover: var(--oo-color-hover);
+  --button-border: var(--oo-color-border);
+  --button-border-width: 1px;
+  --button-radius: 0;
+  --button-padding-y: var(--oo-spacing-xs);
+  --button-padding-x: var(--oo-spacing-xs);
+  --button-font-size: var(--oo-font-size-sm);
+}
+
+/* Minimal reset + body defaults consuming scena theme tokens. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--oo-font-family);
+  font-size: var(--oo-font-size-md);
+  line-height: var(--oo-line-height);
+  color: var(--oo-color-text);
+  background: var(--oo-color-canvas);
+}
+
+a {
+  color: var(--oo-color-primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:active {
+  color: var(--oo-color-active);
+}
+
+button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  /* justify-content: center; */
+  gap: var(--oo-spacing-xs);
+
+  /* padding: var(--button-padding-y) var(--button-padding-x); */
+  padding-inline: var(--button-padding-x);
+  padding-block: var(--button-padding-y);
+  border-radius: var(--button-radius);
+  border-width: var(--button-border-width);
+  border-style: solid;
+  border-color: var(--button-border);
+  background: var(--button-background);
+  color: var(--button-text);
+
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--button-font-size);
+  line-height: 1;
+
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease,
+    opacity 120ms ease,
+    filter 120ms ease;
+}
+
+button[data-variant="primary"] {
+  --button-background: none;
+  --button-text: var(--oo-color-primary);
+  --button-border: var(--oo-color-primary);
+  --button-text-hover: var(--oo-color-surface);
+  --button-background-hover: rgb(var(--oo-rgb-primary) / 0.88);
+  --button-background-active: rgb(var(--oo-rgb-primary) / 0.76);
+}
+
+button [data-variant="secondary"] {
+  --button-background: none;
+  --button-text: var(--oo-color-text);
+  --button-border: var(--oo-color-border);
+  --button-text-hover: var(--oo-color-surface);
+  --button-background-hover: rgb(var(--oo-rgb-text) / 0.8);
+  --button-background-active: rgb(var(--oo-rgb-text) / 0.76);
+}
+
+button[data-variant="danger"] {
+  --button-background: none;
+  --button-text: var(--oo-color-danger);
+  --button-border: var(--oo-color-danger);
+  --button-text-hover: var(--oo-color-surface);
+  --button-background-hover: rgb(var(--oo-rgb-danger) / 0.88);
+  --button-background-active: rgb(var(--oo-rgb-danger) / 0.76);
+}
+
+button[data-variant="ghost"] {
+  --button-background: none;
+  --button-text: var(--oo-color-text);
+  --button-text-hover: var(--oo-color-primary);
+  --button-background-hover: none;
+  --button-background-active: none;
+  border: none;
+  background: none;
+}
+
+button[data-variant="borderless"] {
+  --button-background: var(--oo-color-hover);
+  --button-text: var(--oo-color-text);
+  --button-border-width: 0;
+  --button-background-hover: var(--oo-color-surface);
+  --button-background-active: var(--oo-color-active);
+}
+
+button[data-selected="true"] {
+  color: var(--oo-color-surface);
+  background: var(--oo-color-active);
+}
+
+button:active,
+button[data-active="true"] {
+  background: var(--button-background-active);
+}
+
+button[disabled],
+button[data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+button:hover {
+  background: var(--button-background-hover);
+  color: var(--button-text-hover);
+}
+
+code,
+pre {
+  font-family: var(--oo-font-mono);
+}
+
+
+select {
+  color: inherit;
+  font: inherit;
+  box-sizing: border-box;
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
+  background: var(--oo-color-canvas);
+  color: var(--oo-color-fg);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+}
+
+input {
+  color: inherit;
+  font: inherit;
+  box-sizing: border-box;
+  padding: var(--input-padding-y) var(--input-padding-x);
+  background: var(--input-background);
+  color: var(--input-color);
+  border: var(--input-border-width) solid var(--input-border-color);
+  border-radius: var(--input-border-radius);
+}
+
+textarea {
+  color: inherit;
+  font: inherit;
+  box-sizing: border-box;
+  padding: var(--textarea-padding-y) var(--textarea-padding-x);
+  background: var(--textarea-background);
+  color: var(--textarea-color);
+  border: var(--textarea-border-width) solid var(--textarea-border-color);
+  border-radius: var(--textarea-border-radius);
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+  outline: 1px solid var(--oo-color-accent);
+  outline-offset: -2px;
+}
+
+/*
+ * `display: contents` makes the wrapper transparent to layout — the user
+ * component becomes a direct child of the layout's body, inheriting flex /
+ * grid context (and 100% height) instead of being limited by an
+ * uncontrolled wrapper div.
+ */
+.oo-mount {
+  display: contents;
+}
+
+
+.oo-loading-dots {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  gap: 4px;
+}
+
+.oo-loading-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.35;
+  animation: dotPulse 1s infinite ease-in-out;
+}
+
+.oo-loading-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.oo-loading-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dotPulse {
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0.75);
+    opacity: 0.35;
+  }
+
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

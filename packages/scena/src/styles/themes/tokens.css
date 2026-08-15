@@ -1,0 +1,222 @@
+:root {
+  color-scheme: light;
+
+  /* ----------------------------------------
+   * Palette: raw RGB channels only
+   * ---------------------------------------- */
+  --oo-rgb-white: 255 255 255;
+  --oo-rgb-black: 17 24 39;
+
+  --oo-rgb-slate: 100 116 139;
+  --oo-rgb-gray: 107 114 128;
+  --oo-rgb-zinc: 113 113 122;
+  --oo-rgb-neutral: 115 115 115;
+  --oo-rgb-stone: 120 113 108;
+
+  --oo-rgb-red: 239 68 68;
+  --oo-rgb-orange: 249 115 22;
+  --oo-rgb-amber: 245 158 11;
+  --oo-rgb-yellow: 234 179 8;
+  --oo-rgb-lime: 132 204 22;
+  --oo-rgb-green: 34 197 94;
+  --oo-rgb-emerald: 16 185 129;
+  --oo-rgb-teal: 20 184 166;
+  --oo-rgb-cyan: 6 182 212;
+  --oo-rgb-sky: 14 165 233;
+  --oo-rgb-blue: 59 130 246;
+  --oo-rgb-indigo: 99 102 241;
+  --oo-rgb-violet: 139 92 246;
+  --oo-rgb-purple: 168 85 247;
+  --oo-rgb-fuchsia: 217 70 239;
+  --oo-rgb-pink: 236 72 153;
+  --oo-rgb-rose: 244 63 94;
+
+  --oo-color-white: rgb(var(--oo-rgb-white));
+  --oo-color-black: rgb(var(--oo-rgb-black));
+  --oo-color-slate: rgb(var(--oo-rgb-slate));
+  --oo-color-gray: rgb(var(--oo-rgb-gray));
+  --oo-color-zinc: rgb(var(--oo-rgb-zinc));
+  --oo-color-neutral: rgb(var(--oo-rgb-neutral));
+  --oo-color-stone: rgb(var(--oo-rgb-stone));
+  --oo-color-red: rgb(var(--oo-rgb-red));
+  --oo-color-orange: rgb(var(--oo-rgb-orange));
+  --oo-color-amber: rgb(var(--oo-rgb-amber));
+  --oo-color-yellow: rgb(var(--oo-rgb-yellow));
+  --oo-color-lime: rgb(var(--oo-rgb-lime));
+  --oo-color-green: rgb(var(--oo-rgb-green));
+  --oo-color-emerald: rgb(var(--oo-rgb-emerald));
+  --oo-color-teal: rgb(var(--oo-rgb-teal));
+  --oo-color-cyan: rgb(var(--oo-rgb-cyan));
+  --oo-color-sky: rgb(var(--oo-rgb-sky));
+  --oo-color-blue: rgb(var(--oo-rgb-blue));
+  --oo-color-indigo: rgb(var(--oo-rgb-indigo));
+  --oo-color-violet: rgb(var(--oo-rgb-violet));
+  --oo-color-purple: rgb(var(--oo-rgb-purple));
+  --oo-color-fuchsia: rgb(var(--oo-rgb-fuchsia));
+  --oo-color-pink: rgb(var(--oo-rgb-pink));
+  --oo-color-rose: rgb(var(--oo-rgb-rose));
+
+  /* ----------------------------------------
+   * Base shell colors
+   * ---------------------------------------- */
+  --oo-rgb-canvas: 255 255 255;
+  --oo-rgb-panel: 248 248 248;
+  --oo-rgb-surface: 255 255 255;
+  --oo-rgb-raised: 255 255 255;
+
+  --oo-rgb-titlebar: var(--oo-rgb-panel);
+  --oo-rgb-activitybar: var(--oo-rgb-panel);
+  --oo-rgb-sidebar: var(--oo-rgb-panel);
+  --oo-rgb-statusbar: var(--oo-rgb-panel);
+
+  /* ----------------------------------------
+   * Text
+   * ---------------------------------------- */
+  --oo-rgb-text: 45 53 92;
+  --oo-rgb-muted: 152 152 172;
+  --oo-rgb-subtle: 170 170 188;
+  --oo-rgb-inverse: 255 255 255;
+
+  /* ----------------------------------------
+   * Interaction states
+   * ---------------------------------------- */
+  --oo-rgb-hover: 240 240 240;
+  --oo-rgb-active: 232 232 232;
+  --oo-rgb-selected: 230 250 246;
+
+  /* ----------------------------------------
+   * Borders / separators
+   * ---------------------------------------- */
+  --oo-rgb-line: 185 185 255;
+  --oo-rgb-border: 185 185 255;
+
+  --oo-line-alpha: 0.25;
+  --oo-border-alpha: 0.25;
+
+  /* ----------------------------------------
+   * Intent / brand
+   * ---------------------------------------- */
+  --oo-rgb-accent: 78 201 176;
+  --oo-rgb-primary: var(--oo-rgb-accent);
+  --oo-rgb-danger: 204 0 0;
+  --oo-rgb-success: 0 170 0;
+  --oo-rgb-warning: 204 136 0;
+  --oo-rgb-info: var(--oo-blue);
+
+  /* ----------------------------------------
+   * Resolved semantic colors
+   * ---------------------------------------- */
+  --oo-color-canvas: rgb(var(--oo-rgb-canvas));
+  --oo-color-panel: rgb(var(--oo-rgb-panel));
+  --oo-color-surface: rgb(var(--oo-rgb-surface));
+  --oo-color-raised: rgb(var(--oo-rgb-raised));
+
+  --oo-color-titlebar: rgb(var(--oo-rgb-titlebar));
+  --oo-color-activitybar: rgb(var(--oo-rgb-activitybar));
+  --oo-color-sidebar: rgb(var(--oo-rgb-sidebar));
+  --oo-color-statusbar: rgb(var(--oo-rgb-statusbar));
+
+  --oo-color-text: rgb(var(--oo-rgb-text));
+  --oo-color-muted: rgb(var(--oo-rgb-muted));
+  --oo-color-subtle: rgb(var(--oo-rgb-subtle));
+  --oo-color-inverse: rgb(var(--oo-rgb-inverse));
+
+  --oo-color-hover: rgb(var(--oo-rgb-hover));
+  --oo-color-active: rgb(var(--oo-rgb-active));
+  --oo-color-selected: rgb(var(--oo-rgb-selected));
+
+  --oo-color-line: rgb(var(--oo-rgb-line) / var(--oo-line-alpha));
+  --oo-color-border: rgb(var(--oo-rgb-border) / var(--oo-border-alpha));
+
+  --oo-color-accent: rgb(var(--oo-rgb-accent));
+  --oo-color-primary: rgb(var(--oo-rgb-primary));
+  --oo-color-danger: rgb(var(--oo-rgb-danger));
+  --oo-color-success: rgb(var(--oo-rgb-success));
+  --oo-color-warning: rgb(var(--oo-rgb-warning));
+  --oo-color-info: rgb(var(--oo-rgb-info));
+
+  /* ----------------------------------------
+   * Component aliases
+   * ---------------------------------------- */
+  --oo-app-bg: var(--oo-color-canvas);
+  --oo-app-fg: var(--oo-color-text);
+
+  --oo-titlebar-bg: var(--oo-color-titlebar);
+  --oo-titlebar-fg: var(--oo-color-muted);
+
+  --oo-activitybar-bg: var(--oo-color-activitybar);
+  --oo-activitybar-fg: var(--oo-color-muted);
+  --oo-activitybar-fg-hover: var(--oo-color-accent);
+  --oo-activitybar-bg-hover: var(--oo-color-hover);
+  --oo-activitybar-fg-active: var(--oo-color-accent);
+  --oo-activitybar-bg-active: var(--oo-color-active);
+
+  --oo-sidebar-left-bg: var(--oo-color-sidebar);
+  --oo-sidebar-left-fg: var(--oo-color-text);
+  --oo-sidebar-right-bg: var(--oo-color-sidebar);
+  --oo-sidebar-right-fg: var(--oo-color-text);
+
+  --oo-card-bg: var(--oo-color-surface);
+  --oo-card-fg: var(--oo-color-text);
+  --oo-card-border: var(--oo-color-border);
+
+  --oo-popup-bg: var(--oo-color-raised);
+  --oo-popup-fg: var(--oo-color-text);
+  --oo-popup-border: var(--oo-color-border);
+
+  --oo-input-bg: var(--oo-color-surface);
+  --oo-input-fg: var(--oo-color-text);
+  --oo-input-border: var(--oo-color-border);
+  --oo-input-placeholder: var(--oo-color-muted);
+
+  /* ----------------------------------------
+   * Spacing
+   * ---------------------------------------- */
+  --oo-spacing-xs: 3px;
+  --oo-spacing-sm: 6px;
+  --oo-spacing-md: 14px;
+  --oo-spacing-lg: 22px;
+  --oo-spacing-xl: 30px;
+
+  --oo-row-gap: var(--oo-spacing-md);
+  --oo-column-gap: var(--oo-spacing-md);
+  --oo-list-gap: var(--oo-spacing-sm);
+  --oo-list-padding: 0;
+
+  /* ----------------------------------------
+   * Radius
+   * ---------------------------------------- */
+  --oo-radius-xs: 3px;
+  --oo-radius-sm: 4px;
+  --oo-radius-md: 6px;
+  --oo-radius-lg: 12px;
+  --oo-radius-xl: 18px;
+  --oo-radius-full: 999px;
+
+  /* ----------------------------------------
+   * Typography
+   * ---------------------------------------- */
+  --oo-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --oo-font-mono: 'SF Mono', Monaco, Consolas, monospace;
+
+  --oo-font-size-xs: 11px;
+  --oo-font-size-sm: 13px;
+  --oo-font-size-md: 14px;
+  --oo-font-size-lg: 16px;
+  --oo-font-size-xl: 20px;
+
+  --oo-line-height: 1.5;
+
+  /* ----------------------------------------
+   * Elevation
+   * ---------------------------------------- */
+  --oo-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.08);
+  --oo-shadow-md: 0 4px 8px rgb(0 0 0 / 0.12);
+  --oo-shadow-lg: 0 12px 24px rgb(0 0 0 / 0.16);
+
+  /* ----------------------------------------
+   * Z layers
+   * ---------------------------------------- */
+  --oo-z-overlay: 1000;
+  --oo-z-popup: 9999;
+}

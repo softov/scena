@@ -1,0 +1,8 @@
+.oo-linechart {
+  display: block;
+  overflow: visible;
+}
+.oo-linechart__axis {
+  stroke: var(--oo-color-border);
+  stroke-width: 1;
+}

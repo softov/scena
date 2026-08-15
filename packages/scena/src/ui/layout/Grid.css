@@ -1,0 +1,5 @@
+.oo-grid {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+}

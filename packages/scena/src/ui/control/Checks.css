@@ -1,0 +1,6 @@
+.oo-checks {
+  color: var(--oo-color-danger);
+  font-size: var(--oo-font-size-xs);
+  margin-top: 2px;
+}
+.oo-checks__item { line-height: 1.4; }

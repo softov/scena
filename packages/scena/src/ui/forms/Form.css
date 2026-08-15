@@ -1,0 +1,14 @@
+.oo-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-form-gap, var(--oo-spacing-md));
+  padding: var(--oo-form-padding, var(--oo-spacing-md));
+}
+
+/* Async-load state. Placeholder treatment — refine per design. Disables input
+   while data streams in and fades the body. */
+.oo-form[data-loading='true'] {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
