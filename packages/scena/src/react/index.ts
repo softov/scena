@@ -22,3 +22,4 @@ export type { TranslateProps } from './Translate.js';
 export { useCommand } from './hooks/useCommand.js';
 export { useLayout } from './hooks/useLayout.js';
 export { useMounts } from './hooks/useMounts.js';
+export { useSurfacePresentation } from './hooks/useSurfacePresentation.js';

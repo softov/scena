@@ -47,6 +47,20 @@ export interface TabPanelSplit {
   second: TabPanelNode;
 }
 
+// How a surface occupies space in the shell — a separate axis from whether it
+// is visible. A floating sidebar is still open and still reachable; it has just
+// stopped competing with `main` for width.
+//
+//   docked   — flex child, consumes width/height, splitter applies (the default)
+//   floating — lifted out of flow over `main`, consumes nothing, splitter moot
+//   sheet    — floating from an edge; what `panel:bottom` becomes when narrow
+//   bar      — pinned to the cross edge; what `activitybar` becomes when narrow
+//
+// Deliberately NOT part of SurfaceLayoutState: that interface is persisted
+// through LayoutStorage, and presentation is derived from the environment. A
+// phone session must not teach a desktop that the sidebar floats.
+export type SurfacePresentation = 'docked' | 'floating' | 'sheet' | 'bar';
+
 export interface SurfaceLayoutState {
   visible: boolean;
   size?: number;
@@ -144,6 +158,12 @@ export interface LayoutProps {
   surface: SurfaceName;
   mounts: ResolvedMount[];
   state: SurfaceLayoutState;
+  // How the hosting surface occupies space. A layout whose own axis depends on
+  // it — RailLayout stacks vertically when docked, horizontally as a `bar` —
+  // reads this instead of hard-coding a direction. Optional so third-party
+  // layouts written before presentation existed keep compiling; absent means
+  // 'docked'.
+  presentation?: SurfacePresentation;
   setState(patch: Partial<SurfaceLayoutState>): void;
   renderMount(mount: ResolvedMount): unknown;
   onActivate(key: string): void;

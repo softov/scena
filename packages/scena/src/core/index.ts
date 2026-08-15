@@ -23,6 +23,22 @@ export {
   createLocalStorageStorage,
 } from './backends/storage-backend.js';
 export type { BackendStorage } from './backends/storage-backend.js';
+// `$/modus` — display environment (size class, orientation, pointer accuracy)
+// published as a scope so `when` clauses can gate surfaces on it.
+export {
+  createModusBackend,
+  DEFAULT_MODUS_BREAKPOINTS,
+} from './backends/modus-backend.js';
+export type {
+  ModusClass,
+  ModusBreakpoints,
+  ModusBackendOptions,
+} from './backends/modus-backend.js';
+// Maps a `$/modus` size class to how each surface occupies space. The policy
+// is supplied by the app — scena ships the mechanism, not the opinion.
+// `isOverlaid` tells a shell whether to drop the splitter and draw a scrim.
+export { resolveSurfacePresentation, isOverlaid } from './surface-presentation.js';
+export type { PresentationPolicy } from './surface-presentation.js';
 // i18n — registry (source of truth + active locale) + the `$/t` ScopeBackend.
 export {
   registerMessages,

@@ -10,6 +10,7 @@ import type {
   LayoutDefinition,
   LayoutProps,
   SurfaceLayoutState,
+  SurfacePresentation,
 } from '../types/layout.js';
 import type { SurfaceName, ResolvedMount } from '../types/mount-surface.js';
 import { useScena } from './ScenaProvider.js';
@@ -44,9 +45,19 @@ export interface SurfaceAreaProps {
   layout?: string;
   style?: CSSProperties;
   className?: string;
+  // How this surface occupies space. Positioning lives in styles/surface.css,
+  // keyed on the emitted `data-presentation`. Defaults to 'docked', which is
+  // the pre-existing behavior — the shell keeps full control via `style`.
+  presentation?: SurfacePresentation;
 }
 
-export function SurfaceArea({ surface, layout, style, className }: SurfaceAreaProps) {
+export function SurfaceArea({
+  surface,
+  layout,
+  style,
+  className,
+  presentation = 'docked',
+}: SurfaceAreaProps) {
   const scena = useScena();
   const layoutState = useLayout();
   const mounts = useMounts(surface);
@@ -75,6 +86,7 @@ export function SurfaceArea({ surface, layout, style, className }: SurfaceAreaPr
     surface,
     mounts,
     state: surfaceState,
+    presentation,
     setState: setSurfaceState,
     renderMount: renderOneMount,
     onActivate: (key) => scena.surfaces.focus(key),
@@ -103,6 +115,7 @@ export function SurfaceArea({ surface, layout, style, className }: SurfaceAreaPr
   return (
     <div
       data-surface={surface}
+      data-presentation={presentation}
       className={[
         'oo-surface',
         `oo-surface--${surface.replace(':', '-')}`,
