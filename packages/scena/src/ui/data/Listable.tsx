@@ -173,6 +173,9 @@ export interface ListableProps<T> {
   // auto-stacks each visible non-table column as `label: value`.
   renderListRow?: (item: T) => ReactNode;
 
+  // Optional per-row style. Merged under the cellProps of each column.
+  getRowStyle?: (item: T, renderCtx: ListableRenderContext) => CSSProperties | undefined;
+
   // Right-click → ContextMenu (mirrors Tree's wiring).
   contextMenuSlot?: string;
   contextFor?: (item: T) => Record<string, unknown>;
@@ -237,6 +240,7 @@ export function Listable<T>({
   onSortChange,
   tableBreakpoint = DEFAULT_TABLE_BREAKPOINT,
   renderListRow,
+  getRowStyle,
   contextMenuSlot,
   contextFor,
   contextDataContext,
@@ -468,6 +472,7 @@ export function Listable<T>({
   function renderStackedRow(item: T): ReactNode {
     const key = getKey(item);
     const selected = key === selectedKey;
+    const styleRow = getRowStyle ? getRowStyle(item, renderCtx) : undefined;
     return (
       <div
         key={key}
@@ -481,7 +486,8 @@ export function Listable<T>({
         onDoubleClick={() => onActivate?.(item)}
         onContextMenu={(e) => openContextMenu(e, item)}
         style={{
-          cursor: onSelect ? 'pointer' : undefined
+          cursor: onSelect ? 'pointer' : undefined,
+          ...styleRow,
         }}
       >
         {renderListRow

@@ -7,6 +7,12 @@ export interface DangerZoneProps {
   // Explanation shown above the button.
   description?: ReactNode;
   // window.confirm text; when set, the action only runs if confirmed.
+  //
+  // For an `onConfirm` that does NOT ask for itself. Most callers dispatch a
+  // command, and a destructive command normally asks on its own - setting this
+  // as well makes deleting a two-step confirmation for one action, and this
+  // prompt is `window.confirm`, so it also bypasses whatever the application
+  // uses to ask everywhere else.
   confirmMessage?: string;
   onConfirm: () => void | Promise<void>;
 }
