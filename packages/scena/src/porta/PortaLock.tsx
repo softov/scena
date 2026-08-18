@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
+import { lazy, Suspense } from 'react';
 import { useStore } from '../react/hooks/useStore.js';
 import { SIGILLUM_PATHS } from './sigillum.js';
 import type { Session } from './provider.js';
-import { LoginForm } from '../ui/forms/LoginForm.js';
 import { hasScope } from './match.js';
 import './PortaLock.css';
 
@@ -22,6 +22,12 @@ export interface PortaLockProps {
   children?: ReactNode;
 }
 
+const LoginForm = lazy(() =>
+  import('../ui/forms/LoginForm.js').then((module) => ({
+    default: module.LoginForm,
+  }))
+);
+
 export function PortaLock({
   permission,
   fallback,
@@ -37,7 +43,13 @@ export function PortaLock({
       <span className="porta-locked__title">
         {title ?? (permission ? `Sign in required (${permission})` : 'Sign in required')}
       </span>
-      {fallback ?? <LoginForm />}
+      {fallback ?? (
+        <Suspense fallback={null}>
+          <LoginForm />
+        </Suspense>
+      )}
     </div>
   );
 }
+
+export default PortaLock;
