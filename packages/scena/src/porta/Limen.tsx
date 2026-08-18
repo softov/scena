@@ -71,3 +71,5 @@ export function Limen({
     </div>
   );
 }
+
+export default Limen;

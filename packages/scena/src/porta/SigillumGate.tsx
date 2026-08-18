@@ -28,3 +28,5 @@ export function Sigillum({
   const session = useStore<Session | null>(SIGILLUM_PATHS.session) ?? null;
   return hasScope(session, permission) ? (child ?? children) : fallback;
 }
+
+export default Sigillum;

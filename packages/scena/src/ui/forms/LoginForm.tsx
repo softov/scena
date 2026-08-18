@@ -432,3 +432,5 @@ function DigitsInput({
     </div>
   );
 }
+
+export default LoginForm;
