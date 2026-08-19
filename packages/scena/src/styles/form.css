@@ -1,0 +1,10 @@
+.oo-settings {
+  --space-gap: var(--oo-spacing-md);
+}
+
+.oo-settings__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-gap);
+  padding: var(--space-gap);
+}

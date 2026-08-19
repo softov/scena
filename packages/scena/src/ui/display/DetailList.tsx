@@ -16,11 +16,14 @@ export interface DetailListProps {
   style?: CSSProperties;
 }
 
-export function DetailList({ items, columns = 2, style }: DetailListProps) {
+export function DetailList({ items, columns, style }: DetailListProps) {
+
+  const styleColumns = columns ? `repeat(${columns}, minmax(0, 1fr))` : `repeat(auto-fill, minmax(160px, 1fr))`;
   return (
     <dl
+
       className="oo-detail-list"
-      style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, ...style }}
+      style={{ gridTemplateColumns: styleColumns, ...style }}
     >
       {items.map((item, i) => (
         <div
