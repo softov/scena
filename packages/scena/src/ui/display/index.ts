@@ -21,3 +21,5 @@ export { AddPlaceholder } from './AddPlaceholder.js';
 export type { AddPlaceholderProps } from './AddPlaceholder.js';
 export { SectionTitle } from './SectionTitle.js';
 export type { SectionTitleProps } from './SectionTitle.js';
+export { StatusDot } from './StatusDot.js';
+export type { StatusDotProps, StatusDotTone } from './StatusDot.js';

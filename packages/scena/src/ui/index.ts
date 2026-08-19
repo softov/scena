@@ -24,6 +24,8 @@ export { Toolbar } from './navigation/index.js';
 export type { ToolbarProps } from './navigation/index.js';
 export { Badge } from './display/Badge.js';
 export type { BadgeProps, BadgeTone } from './display/Badge.js';
+export { StatusDot } from './display/StatusDot.js';
+export type { StatusDotProps, StatusDotTone } from './display/StatusDot.js';
 export { Breadcrumb } from './navigation/index.js';
 export type { BreadcrumbProps, BreadcrumbItem } from './navigation/index.js';
 export { Progress } from './display/Progress.js';

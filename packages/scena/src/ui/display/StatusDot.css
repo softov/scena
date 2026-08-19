@@ -1,0 +1,46 @@
+.oo-status-dot {
+  --oo-status-dot-size: 8px;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: var(--oo-status-dot-size);
+  height: var(--oo-status-dot-size);
+  border-radius: 50%;
+  background: rgb(var(--oo-color, var(--oo-rgb-muted)));
+}
+
+/* Semantic presets, the same names Badge and Alert use, so one vocabulary
+   covers every way a state is shown. */
+.oo-status-dot[data-tone='default'] { --oo-color: var(--oo-rgb-muted); }
+.oo-status-dot[data-tone='success'] { --oo-color: var(--oo-rgb-green); }
+.oo-status-dot[data-tone='warning'] { --oo-color: var(--oo-rgb-amber); }
+.oo-status-dot[data-tone='danger']  { --oo-color: var(--oo-rgb-red); }
+.oo-status-dot[data-tone='info']    { --oo-color: var(--oo-rgb-blue); }
+
+/* Hollow, for a state that is *not* happening - offline, unregistered, never
+   run. A filled grey dot and a filled green one differ only in hue, which is
+   the one channel a colour-blind reader may not have. */
+.oo-status-dot[data-outline='true'] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px rgb(var(--oo-color, var(--oo-rgb-muted)));
+}
+
+.oo-status-dot-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.oo-status-dot-label {
+  font-size: var(--oo-font-size-xs);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The label takes the dot's colour only when asked. A row of coloured words is
+   harder to read than a row of black words with coloured dots beside them. */
+.oo-status-dot-wrap[data-tint='true'] .oo-status-dot-label {
+  color: rgb(var(--oo-color, var(--oo-rgb-muted)));
+}
