@@ -1,26 +1,34 @@
 .oo-badge {
+  --oo-badge-gap: 4px;
   --oo-badge-padding-y: 2px;
   --oo-badge-padding-x: 8px;
+  --oo-badge-font-size: var(--oo-font-size-xs);
+  --oo-badge-font-family: var(--oo-mono);
+  --oo-badge-font-weight: 500;
+  --oo-badge-line-height: 1.4;
+  --oo-badge-rgb: var(--oo-badge-color, var(--oo-rgb-muted));
+  --oo-badge-background: rgb(var(--oo-badge-rgb, var(--oo-rgb-muted)) / 0.15);
+  --oo-badge-color: rgb(var(--oo-badge-rgb, var(--oo-rgb-muted)));
+  
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--oo-badge-gap);
   padding: var(--oo-badge-padding-y) var(--oo-badge-padding-x);
+  font-size: var(--oo-badge-font-size);
+  font-family: var(--oo-badge-font-family);
+  font-weight: var(--oo-badge-font-weight);
+  line-height: var(--oo-badge-line-height);
+  background: var(--oo-badge-background);
+  color: var(--oo-badge-color);
   border-radius: 9999px;
-  font-size: var(--oo-font-size-xs);
-  font-weight: 500;
-  line-height: 1.4;
-  background: rgb(var(--oo-color, var(--oo-rgb-muted)) / 0.15);
-  color: rgb(var(--oo-color, var(--oo-rgb-muted)));
   white-space: nowrap;
 }
-.oo-badge[data-variant='default'] {
-  --oo-color: var(--oo-rgb-muted);
-}
-.oo-badge[data-variant='success'] { --oo-color: var(--oo-rgb-green); }
-.oo-badge[data-variant='warning'] { --oo-color: var(--oo-rgb-amber); }
-.oo-badge[data-variant='danger']  { --oo-color: var(--oo-rgb-red); }
-.oo-badge[data-variant='info']    { --oo-color: var(--oo-rgb-blue); }
+.oo-badge[data-variant='default'] { --oo-badge-rgb: var(--oo-rgb-muted); }
+.oo-badge[data-variant='success'] { --oo-badge-rgb: var(--oo-rgb-green); }
+.oo-badge[data-variant='warning'] { --oo-badge-rgb: var(--oo-rgb-amber); }
+.oo-badge[data-variant='danger']  { --oo-badge-rgb: var(--oo-rgb-red);  }
+.oo-badge[data-variant='info']    { --oo-badge-rgb: var(--oo-rgb-blue); }
 .oo-badge[data-outline='true'] {
   background: transparent;
-  border: 1px solid rgb(var(--oo-color, var(--oo-rgb-muted)) / 0.5);
+  border: 1px solid rgb(var(--oo-badge-color, var(--oo-rgb-muted)) / 0.5);
 }
