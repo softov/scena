@@ -8,24 +8,24 @@ import '@softov/scena/styles/bar.css';
 import '@softov/scena/styles/scrollbar.css';
 import '@softov/scena/styles/surface.css';
 
-import { applyTheme, type ThemeMode } from '@softov/scena/styles';
+import { applyTheme, resolveThemeMode, type ThemeModeChoice } from '@softov/scena/styles';
 import './app.css';
 import App from './App.js';
+import { THEME_ID_KEY, THEME_MODE_KEY } from './theme-keys.js';
 
 // Boot is deliberately flat: no lazy App, no boot screen, no auth wall. The
 // playground has all three and they are worth having there; here they would
 // only stand between a change and seeing whether it worked.
-const MODE_KEY = 'scena-demo.theme-mode';
+//
+// The theme is applied once BEFORE React, from the same storage keys
+// registerThemeController will use, so the first paint is already correct.
+// The controller re-applies on mount and then owns it.
+const savedId = window.localStorage.getItem(THEME_ID_KEY) ?? 'default';
+const savedMode = window.localStorage.getItem(THEME_MODE_KEY);
+const choice: ThemeModeChoice =
+  savedMode === 'light' || savedMode === 'dark' || savedMode === 'system' ? savedMode : 'system';
 
-const saved = window.localStorage.getItem(MODE_KEY);
-const mode: ThemeMode =
-  saved === 'light' || saved === 'dark'
-    ? saved
-    : window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
-
-applyTheme(document.documentElement, 'default', mode);
+applyTheme(document.documentElement, savedId, resolveThemeMode(choice));
 
 const root = document.getElementById('root');
 if (!root) throw new Error('No #root element');

@@ -24,7 +24,7 @@ export function registerTags(scena: Scena): Disposable {
         label: 'Tags',
         section: 'tags',
         badge: { path: '$/summary/tags/total' },
-        onClick: { functionCall: { call: 'sidebar.activate', args: { section: 'tags' } } },
+        badgeLabel: 'tags',
       },
     }),
 

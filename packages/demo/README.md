@@ -35,25 +35,42 @@ It also uses **`DefaultShell`**, which neither of the others do — both compose
 thing in the package, so this app runs it as-is and treats whatever is missing
 as a missing feature rather than as something each app quietly writes for itself.
 
-## What it has found so far
+## What it found, and what came of it
 
-**`ActivityBarItem` is written three times.** [`chrome.tsx`](src/chrome.tsx)
-here, `chrome.tsx` in the playground, `shell/ActivityBarItem.tsx` (180 lines) in
-Advisor. Three implementations behind one registry name, and every resource
-module in all three references it as though it shipped with scena. They differ —
-Advisor's has badge tones and bottom anchoring, the playground's takes a colour
-token — but nobody chose those differences; they are what each app needed on the
-day.
+**`ActivityBarItem` was written three times** — here, `chrome.tsx` in the
+playground, `shell/ActivityBarItem.tsx` (180 lines) in Advisor. Three
+implementations behind one registry name, and every resource module in all three
+referenced it as though it shipped with scena.
 
-**`sidebar.activate` is written three times.** Here, `register-boot.ts` in the
-playground, `shell/commands.ts` in Advisor. All three do the same two things:
-write the section, then force `visible: true`. Every app discovers that second
-line the hard way, because an activity bar that does not open the sidebar it
-activates looks broken.
+**Now it does.** `ui/navigation/ActivityBarItem` is the union of what each copy
+had grown: badge with a tone and a `badgeLabel`, `pos` for bottom anchoring,
+`sectionPath` for a rail that reflects a surface other than the left sidebar.
+This app deleted its copy and mounts the builtin. Advisor and the playground
+still carry theirs — the registry overwrites silently, so an app that wants its
+own keeps it.
+
+The same pass promoted three more: **`ButtonBar`** (the button that goes in a
+bar — one component for the title bar and the status bar, the difference carried
+by `[data-surface]` in CSS rather than by a prop), **`ThemePicker`** and
+**`ThemeModeToggle`**, along with **`registerThemeController`**, which owns
+`applyTheme`, storage and the OS-preference listener so the two widgets can be
+pure views over `$/ui/theme/id` and `$/ui/theme/mode`.
+
+**`sidebar.activate` is still written three times, and should be.** Here,
+`register-boot.ts` in the playground, `shell/commands.ts` in Advisor. scena's
+`ActivityBarItem` *executes* it by name but does not define it: what activating
+means — which surface, whether it also reveals — is the app's decision. Sharing
+the component while keeping the two lines of policy local is the right split.
 
 **The presentation policy is written three times**, and it is four lines each
 time. That one may be correct — scena deliberately ships the mechanism and not
 the opinion — but the *shape* being identical across three apps is worth noting.
+
+**The explorer had a hand-rolled context menu, and did not need one.**
+`Listable` already owns rows, selection, keyboard activation, the table/list
+breakpoint and `contextMenuSlot` + `contextFor`. Writing that by hand is exactly
+how an app ends up with a fourth copy of a catalog component — worth recording
+as the failure mode, since it happened here while writing this app.
 
 **`DefaultShell` ignores the presentation policy.** It renders from `visible`
 and `size` only, so on a narrow viewport a sidebar keeps taking width from
