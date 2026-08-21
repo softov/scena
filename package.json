@@ -5,7 +5,9 @@
   "description": "Workspace root for @softov/scena - graph-mounted reactive UI runtime",
   "scripts": {
     "dev": "pnpm --filter @softov/scena-playground dev",
+    "demo": "pnpm --filter @softov/scena build && pnpm --filter @softov/scena-demo dev",
     "build": "pnpm --filter @softov/scena build",
+    "build:apps": "pnpm --filter @softov/scena build && pnpm --filter @softov/scena-playground build && pnpm --filter @softov/scena-demo build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm --filter @softov/scena test",
     "test:watch": "pnpm --filter @softov/scena test:watch",

@@ -20,6 +20,7 @@ architecture, the vocabulary, and the rules a consumer has to follow.
 
 ```bash
 pnpm dev          # playground on http://localhost:5174
+pnpm demo         # builds scena, then the demo app on http://localhost:5175
 pnpm typecheck    # every workspace
 pnpm test         # the runtime's suite
 pnpm lint
@@ -50,7 +51,10 @@ packages/scena/         the runtime and its contracts — published to npm
   src/ui/               the component catalog, by category
   src/porta/            sign-in: the wall (Limen), the session (Sigillum), providers
   src/styles/           tokens and themes
-packages/playground/    local dev app and showcase. Private, never published
+packages/playground/    local dev app and showcase. Aliases to scena/src. Private
+packages/demo/          small reference app. Consumes the PUBLISHED exports (no
+                        src aliases), so it catches export-map and packaging
+                        breakage the playground hides. Private
 docs/                   the documents above, plus layout prototypes
 ```
 

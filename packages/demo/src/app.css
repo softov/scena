@@ -1,0 +1,58 @@
+/* App styling, tokens only -- so every registered theme applies cleanly. */
+
+.demo-explorer {
+  display: flex;
+  flex-direction: column;
+  padding: var(--oo-spacing-sm);
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.demo-explorer__empty {
+  padding: var(--oo-spacing-md);
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-sm);
+}
+
+.demo-explorer__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--oo-spacing-sm);
+  width: 100%;
+  padding: var(--oo-spacing-sm);
+  border: none;
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: var(--oo-color-text);
+  font: inherit;
+  font-size: var(--oo-font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.demo-explorer__row:hover {
+  background: var(--oo-color-hover);
+}
+
+.demo-explorer__row[data-selected='true'] {
+  background: var(--oo-color-selected);
+}
+
+.demo-explorer__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demo-explorer__meta {
+  flex: 0 0 auto;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}
+
+.demo-detail {
+  padding: var(--oo-spacing-lg);
+  overflow-y: auto;
+}
