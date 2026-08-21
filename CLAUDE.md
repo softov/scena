@@ -74,7 +74,9 @@ docs/                   the documents above, plus layout prototypes
   convention, not the set. An app may define `alert:top`, a second status bar,
   four sidebars, or no sidebar. Anything that sweeps surfaces must ask
   `surfaces.listSurfaces()`; a hardcoded list of names silently skips whatever
-  the app defined, which is how the session snapshot used to drop mounts.
+  the app defined, which is how the session snapshot used to drop mounts. An
+  app declares its own set with `surfaceDefaults` (replaces), which is a
+  different question from `initialLayout` (restores, merges).
 - **Registries are late-binding.** Components, commands, converters, layouts
   and shells are resolved by name at mount time, never imported by the graph.
   That is what lets a page be data, and it is why a missing registration is a

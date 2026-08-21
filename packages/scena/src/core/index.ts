@@ -97,7 +97,7 @@ export { createEventBus } from './controls/events.js';
 export { createWhenEngine } from './controls/when.js';
 export { createCommandRegistry } from './controls/command.js';
 export { createKeybindingRegistry } from './controls/keybinding.js';
-export { createLayoutAPI, createLayoutRegistry } from './controls/layout.js';
+export { createLayoutAPI, createLayoutRegistry, DEFAULT_SURFACE_LAYOUTS } from './controls/layout.js';
 export { createSessionAPI } from './controls/session.js';
 export { createShellRegistry } from './controls/shell.js';
 export { createManifestAPI } from './controls/manifest.js';

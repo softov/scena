@@ -10,7 +10,7 @@ import type { PermissionEngine } from './permissions.js';
 import type { CommandRegistry } from './command.js';
 import type { KeybindingRegistry } from './keybinding.js';
 import type { ShellRegistry } from './shell.js';
-import type {
+import type { SurfaceLayoutState,
   LayoutAPI,
   LayoutRegistry,
   LayoutStorage,
@@ -60,6 +60,18 @@ export interface CreateScenaOptions {
   layoutStorage?: LayoutStorage;
   events?: EventBus;
   defaultSurface?: SurfaceName;
+  // The surfaces this app has, and how each one starts.
+  //
+  // REPLACES scena's nine rather than merging over them, which is the whole
+  // point: `initialLayout` can change a default but never remove one, so an
+  // app with no sidebar was still carrying `sidebar:left` in its layout state,
+  // in the store, and in whatever `layoutStorage` persisted.
+  //
+  // Omit for the nine scena's own DefaultShell draws. Spread
+  // DEFAULT_SURFACE_LAYOUTS to start from them and add.
+  surfaceDefaults?: Partial<Record<SurfaceName, SurfaceLayoutState>>;
+  // Layout state to restore -- a saved session, not a declaration of which
+  // surfaces exist. Merges over whichever defaults are in effect.
   initialLayout?: ScenaLayout;
   initialShellId?: string;
   // Per-scope value backends (persistence, Yjs, socket). Absent scopes use the

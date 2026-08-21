@@ -18,9 +18,23 @@ interface LayoutDeps {
   store: ReactiveStore;
   initial?: ScenaLayout;
   storage?: LayoutStorage;
+  // Replaces DEFAULT_SURFACE_LAYOUTS. See CreateScenaOptions.surfaceDefaults.
+  surfaceDefaults?: Partial<Record<SurfaceName, SurfaceLayoutState>>;
 }
 
-const DEFAULT_SURFACE_LAYOUTS: Partial<Record<SurfaceName, SurfaceLayoutState>> = {
+/**
+ * How the nine surfaces scena's own DefaultShell draws start out.
+ *
+ * These are a convenience, not a claim about what surfaces exist: an app that
+ * has its own set passes `surfaceDefaults` to createScena and these are not
+ * used at all. Exported so an app that wants scena's nine *plus* its own can
+ * spread rather than retype them.
+ *
+ * They are deliberately the base rather than something `initialLayout` merges
+ * into, because the two answer different questions -- which surfaces this app
+ * has, versus what state to restore.
+ */
+export const DEFAULT_SURFACE_LAYOUTS: Partial<Record<SurfaceName, SurfaceLayoutState>> = {
   titlebar: { visible: true, layout: 'bar' },
   activitybar: { visible: true, layout: 'rail' },
   'sidebar:left': { visible: true, layout: 'single', size: 240 },
@@ -32,8 +46,12 @@ const DEFAULT_SURFACE_LAYOUTS: Partial<Record<SurfaceName, SurfaceLayoutState>> 
   detached: { visible: false, layout: 'single' },
 };
 
-function defaultLayout(): ScenaLayout {
-  return { surfaces: { ...DEFAULT_SURFACE_LAYOUTS } };
+function defaultLayout(defaults?: Partial<Record<SurfaceName, SurfaceLayoutState>>): ScenaLayout {
+  // `?? DEFAULT_SURFACE_LAYOUTS`, not a merge: an app that passes its own set
+  // is saying those ARE its surfaces, and merging would put back the ones it
+  // just declined. An empty object is therefore a legitimate answer -- no
+  // surfaces until something calls setSurface.
+  return { surfaces: { ...(defaults ?? DEFAULT_SURFACE_LAYOUTS) } };
 }
 
 // Long enough to swallow a gesture, short enough that letting go of a splitter
@@ -61,9 +79,10 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
 } {
   const { events, store } = deps;
   let storage: LayoutStorage | null = deps.storage ?? null;
+  const base = (): ScenaLayout => defaultLayout(deps.surfaceDefaults);
   let state: ScenaLayout = deps.initial
-    ? applyDeep(defaultLayout(), deps.initial as DeepPartial<ScenaLayout>)
-    : defaultLayout();
+    ? applyDeep(base(), deps.initial as DeepPartial<ScenaLayout>)
+    : base();
   const subscribers = new Set<(layout: ScenaLayout) => void>();
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -165,7 +184,7 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
   if (storage) {
     void storage.load().then((loaded) => {
       if (loaded) {
-        state = applyDeep(defaultLayout(), loaded as DeepPartial<ScenaLayout>);
+        state = applyDeep(base(), loaded as DeepPartial<ScenaLayout>);
         notify();
       }
     });
