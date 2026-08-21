@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { resolveColorAlpha, type ResourceColor } from '../../types/colors.js';
+import { resolveColorAlpha, type ResourceColor } from '../../sdk/colors.js';
 
 // Renders inline SVG from either a raw `markup` string (full <svg>...</svg>)
 // or a single `path` d-attribute. The latter is convenient for icon glyphs;

@@ -1,4 +1,4 @@
-import type { ComponentDefinition } from '../../types/component-registry.js';
+import type { ComponentDefinition } from '../../sdk/component-registry.js';
 
 // Catalog registration for layout primitives. Dynamic import() so importing
 // this file pulls nothing eager — components load on first render. Direct

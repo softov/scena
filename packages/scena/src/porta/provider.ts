@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { DataBinding } from '../types/component-graph.js';
+import type { DataBinding } from '../sdk/component-graph.js';
 
 // A label that is either literal text or a store binding (e.g.
 // `{ path: '$/t/auth/usernameLabel' }`, resolved by the i18n $/t backend).

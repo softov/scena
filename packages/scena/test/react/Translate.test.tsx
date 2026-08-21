@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, act, cleanup } from '@testing-library/react';
-import { registerMessages, setLocale, clearMessages } from '../../src/i18n/registry.js';
+import { registerMessages, setLocale, clearMessages } from '../../src/core/i18n/registry.js';
 import { Translate } from '../../src/react/Translate.js';
 
 beforeEach(() => clearMessages());

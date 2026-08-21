@@ -11,7 +11,7 @@ import {
   allKeys,
   listLocales,
   clearMessages,
-} from '../../src/i18n/registry.js';
+} from '../../src/core/i18n/registry.js';
 
 beforeEach(() => clearMessages());
 

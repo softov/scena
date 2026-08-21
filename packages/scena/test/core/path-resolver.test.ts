@@ -4,10 +4,10 @@ import {
   joinSegments,
   readPath,
   writePath,
-} from '../../src/core/path-resolver.js';
-import { createReactiveStore } from '../../src/core/reactive-store.js';
-import { createEventBus } from '../../src/controls/events.js';
-import type { BindingPath } from '../../src/types/component-graph.js';
+} from '../../src/core/resolve/path-resolver.js';
+import { createReactiveStore } from '../../src/core/store/reactive-store.js';
+import { createEventBus } from '../../src/core/controls/events.js';
+import type { BindingPath } from '../../src/sdk/component-graph.js';
 
 const p = (s: string) => s as BindingPath;
 function mk() {

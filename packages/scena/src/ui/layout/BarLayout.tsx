@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import type { LayoutProps } from '../../types/layout.js';
-import type { ResolvedMount } from '../../types/mount-surface.js';
+import type { LayoutProps } from '../../sdk/layout.js';
+import type { ResolvedMount } from '../../sdk/mount-surface.js';
 
 // Horizontal bar with three slots (left | center | right). Each mount picks
 // its slot via a literal-string `slot` prop on its component node:

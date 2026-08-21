@@ -10,7 +10,7 @@ import type {
   SpatialArrangement,
   SpatialBounds,
   SpatialViewport,
-} from '../../types/layout.js';
+} from '../../sdk/layout.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { CampusView } from '../campus/CampusView.js';

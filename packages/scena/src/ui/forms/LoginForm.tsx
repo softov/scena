@@ -14,7 +14,7 @@ import { Button } from '../control/Button.js';
 import { usePorta } from '../../porta/PortaContext.js';
 import { SIGILLUM_PATHS } from '../../porta/sigillum.js';
 import type { AuthField, PortaProvider, ProviderLabel } from '../../porta/provider.js';
-import type { BindingPath } from '../../types/component-graph.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 import type { UseI18nResult } from '../../react/hooks/useI18n.js';
 // import { Field } from '../ui/forms/Field.js';
 import '../control/_field-parts.css';

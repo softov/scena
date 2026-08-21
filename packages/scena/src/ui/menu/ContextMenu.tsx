@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { BindingPath } from '../../types/component-graph.js';
-import type { HostCtx, ListSpec } from '../../types/host.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
+import type { HostCtx, ListSpec } from '../../sdk/host.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { Popup } from '../overlay/Popup.js';
 import { ActionList } from './ActionList.js';

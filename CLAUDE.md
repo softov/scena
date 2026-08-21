@@ -33,15 +33,22 @@ pinned (`pnpm@10.28.0`) — pnpm, not npm or yarn. Node ≥ 22.
 
 ```
 packages/scena/         the runtime and its contracts — published to npm
-  src/types/            the contracts. Nothing here imports a runtime value
-  src/core/             the store, the registries, the graph, the resolvers
-  src/runtime/          mounting and rendering the graph
+  src/index.ts          the root export: core + runtime, assembled
+  src/sdk/              the contracts, and the pure functions over them
+  src/core/             the runtime that implements the sdk
+    store/              the reactive store, the computed DSL, scope backends
+    graph/              the component graph, mount surfaces, presentation
+    resolve/            path, binding, dynamic and permission resolution
+    registry/           the component and converter registries
+    controls/           commands, keybindings, layout, session, shell, manifest
+    i18n/               translation registry and the `$/t` backend
+    converters/         value converters
+    scena.ts            the composition root
+  src/runtime/          behaviour wired onto a live scena — bridge, sockets,
+                        the layout and opener command sets
   src/react/            the React bindings — Scena, ViewMount, SurfaceArea, hooks
   src/ui/               the component catalog, by category
   src/porta/            sign-in: the wall (Limen), the session (Sigillum), providers
-  src/controls/         controls with their own storage
-  src/converters/       value converters
-  src/i18n/             translation
   src/styles/           tokens and themes
 packages/playground/    local dev app and showcase. Private, never published
 docs/                   the documents above, plus layout prototypes
@@ -49,10 +56,15 @@ docs/                   the documents above, plus layout prototypes
 
 ## Conventions
 
-- **`types/` is the contract, and it is source-first.** Every shape lives in
-  `src/types/` and nothing there imports a runtime value. A consumer that has
-  to reach into `core/` for a type is a contract with a hole in it — fix the
-  type, then the runtime.
+- **`sdk/` is the contract, and it is source-first.** Every shape lives in
+  `src/sdk/`, and so does the pure function over it — `Disposable` sits beside
+  `combineDisposables`, `Label` beside `resolveLabel`. Nothing in `sdk/`
+  imports from a layer above it. A consumer that has to reach into `core/` for
+  a type is a contract with a hole in it — fix the sdk, then the runtime.
+- **The layers only point down.** `sdk → core → runtime → react → ui`, and
+  nothing points back. `core/` must never import `runtime/`; when the root
+  export needs both, `src/index.ts` assembles them. A back-edge means the two
+  modules are really one — merge them rather than importing upward.
 - **Registries are late-binding.** Components, commands, converters, layouts
   and shells are resolved by name at mount time, never imported by the graph.
   That is what lets a page be data, and it is why a missing registration is a

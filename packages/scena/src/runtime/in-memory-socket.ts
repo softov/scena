@@ -1,5 +1,5 @@
-import type { Disposable } from '../types/disposable.js';
-import type { SocketBridge } from '../types/reactive-store.js';
+import type { Disposable } from '../sdk/disposable.js';
+import type { SocketBridge } from '../sdk/reactive-store.js';
 
 // In-memory adapter implementing the SocketBridge contract. Useful for
 // tests, playgrounds, and the web-next agent simulator. Adds two extras

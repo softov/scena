@@ -23,6 +23,21 @@ A page is a graph of component nodes held in a layered reactive store; component
 | [`@softov/scena`](packages/scena) | The runtime and its contracts. Published to npm. |
 | `@softov/scena-playground` | Local dev app and component showcase. Private, never published. |
 
+`@softov/scena` ships one package with layered entry points:
+
+| Entry | What it is |
+| --- | --- |
+| `@softov/scena` | The root surface — core plus the runtime wired on top |
+| `@softov/scena/sdk` | The contracts, and the pure functions over them. Depends on nothing |
+| `@softov/scena/core` | The store, graph, resolvers and registries |
+| `@softov/scena/runtime` | Surface bridge, sockets, layout and opener commands |
+| `@softov/scena/react` | React bindings (`/react/core` is the narrow boot entry) |
+| `@softov/scena/ui` | The component catalog (`/ui/<category>` per section) |
+| `@softov/scena/porta` | Sign-in |
+| `@softov/scena/styles` | Theme registry and stylesheets |
+
+`@softov/scena/types` is the former name of `/sdk` and still resolves to it.
+
 ## Development
 
 ```bash

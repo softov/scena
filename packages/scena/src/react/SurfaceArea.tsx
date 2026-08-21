@@ -11,8 +11,8 @@ import type {
   LayoutProps,
   SurfaceLayoutState,
   SurfacePresentation,
-} from '../types/layout.js';
-import type { SurfaceName, ResolvedMount } from '../types/mount-surface.js';
+} from '../sdk/layout.js';
+import type { SurfaceName, ResolvedMount } from '../sdk/mount-surface.js';
 import { useScena } from './ScenaProvider.js';
 import { useLayout } from './hooks/useLayout.js';
 import { useMounts } from './hooks/useMounts.js';

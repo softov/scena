@@ -4,9 +4,9 @@ import {
   localPath,
   rewriteLocal,
   clearMountLocal,
-} from '../../src/core/reactive-store.js';
-import { createEventBus } from '../../src/controls/events.js';
-import type { BindingPath } from '../../src/types/component-graph.js';
+} from '../../src/core/store/reactive-store.js';
+import { createEventBus } from '../../src/core/controls/events.js';
+import type { BindingPath } from '../../src/sdk/component-graph.js';
 
 const p = (s: string) => s as BindingPath;
 const tick = () => new Promise<void>((r) => setTimeout(r, 0));

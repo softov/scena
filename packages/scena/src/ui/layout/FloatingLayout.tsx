@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { LayoutProps } from '../../types/layout.js';
+import type { LayoutProps } from '../../sdk/layout.js';
 
 // Floating overlay. Used for the `overlay` surface. The container is
 // pointer-events: none so it doesn't block underlying chrome; each child

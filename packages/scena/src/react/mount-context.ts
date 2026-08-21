@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext } from 'react';
-import type { BindingPath } from '../types/component-graph.js';
+import type { BindingPath } from '../sdk/component-graph.js';
 
 // Active mount key — used by useStore to rewrite `$/local/<rest>` paths to
 // `$/local/<mountKey>/<rest>`. Set by MountWrapper around each rendered mount.

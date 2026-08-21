@@ -1,5 +1,5 @@
-import type { BindingPath } from '../types/component-graph.js';
-import type { Scena } from '../types/scena.js';
+import type { BindingPath } from '../sdk/component-graph.js';
+import type { Scena } from '../sdk/scena.js';
 import type { Session } from './provider.js';
 
 export const SIGILLUM_PATHS = {

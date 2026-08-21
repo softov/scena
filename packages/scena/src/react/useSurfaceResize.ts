@@ -1,6 +1,6 @@
 import { type PointerEvent as ReactPointerEvent, useCallback, useRef } from 'react';
-import type { SurfaceName } from '../types/mount-surface.js';
-import type { SurfacePresentation } from '../types/layout.js';
+import type { SurfaceName } from '../sdk/mount-surface.js';
+import type { SurfacePresentation } from '../sdk/layout.js';
 import { useScena } from './ScenaProvider.js';
 
 /**

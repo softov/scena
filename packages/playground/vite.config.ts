@@ -18,7 +18,9 @@ export default defineConfig({
       // only the provider + hook, not the heavy renderers the barrel re-exports.
       '@softov/scena/react/core': resolve(src, 'react/core.ts'),
       '@softov/scena/react': resolve(src, 'react/index.ts'),
-      '@softov/scena/types': resolve(src, 'types/index.ts'),
+      '@softov/scena/sdk': resolve(src, 'sdk/index.ts'),
+      '@softov/scena/types': resolve(src, 'sdk/index.ts'),
+      '@softov/scena/core': resolve(src, 'core/index.ts'),
       // Barrel-free boot entry - must precede the '/ui' alias so it matches
       // first. Pulls only the dynamic-import catalog + lazy layouts.
       '@softov/scena/ui/builtins': resolve(src, 'ui/register.ts'),
@@ -39,7 +41,7 @@ export default defineConfig({
       '@softov/scena/styles': resolve(src, 'styles'),
       '@softov/scena/porta/examples': resolve(src, 'porta/providers/examples/index.ts'),
       '@softov/scena/porta': resolve(src, 'porta/index.ts'),
-      '@softov/scena': resolve(src, 'core/index.ts'),
+      '@softov/scena': resolve(src, 'index.ts'),
     },
   },
   server: {

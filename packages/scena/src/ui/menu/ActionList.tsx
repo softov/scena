@@ -9,13 +9,13 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { PickerAction, HostCtx, ListSpec } from '../../types/host.js';
-import type { Command, CommandContext } from '../../types/command.js';
-import type { BindingPath } from '../../types/component-graph.js';
+import type { PickerAction, HostCtx, ListSpec } from '../../sdk/host.js';
+import type { Command, CommandContext } from '../../sdk/command.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { canonicalShortcut } from './token.js';
 import './ActionList.css';
-import { resolveColorVar } from '../../types/colors.js';
+import { resolveColorVar } from '../../sdk/colors.js';
 
 // ---------- Internal row shape -------------------------------------------------
 

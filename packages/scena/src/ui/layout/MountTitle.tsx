@@ -1,12 +1,12 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useStoreLabel } from '../../react/hooks/useStoreLabel.js';
-import { readPath } from '../../core/path-resolver.js';
-import { translate } from '../../i18n/registry.js';
-import type { Scena } from '../../types/scena.js';
-import type { ResolvedMount } from '../../types/mount-surface.js';
-import type { Label } from '../../types/label.js';
-import type { BindingPath } from '../../types/component-graph.js';
+import { readPath } from '../../core/resolve/path-resolver.js';
+import { translate } from '../../core/i18n/registry.js';
+import type { Scena } from '../../sdk/scena.js';
+import type { ResolvedMount } from '../../sdk/mount-surface.js';
+import type { Label } from '../../sdk/label.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 
 // Shared title resolution for layout headers. A mount's title is
 // `mount.props.title ?? the component's registered default`, resolved against

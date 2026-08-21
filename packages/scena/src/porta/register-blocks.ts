@@ -1,6 +1,6 @@
-import type { Scena } from '../types/scena.js';
-import type { Disposable } from '../types/disposable.js';
-import { combineDisposables } from '../core/disposable.js';
+import type { Scena } from '../sdk/scena.js';
+import type { Disposable } from '../sdk/disposable.js';
+import { combineDisposables } from '../sdk/disposable.js';
 import { Limen } from './Limen.js';
 
 // Registers the porta blocks as scena components so they can be referenced

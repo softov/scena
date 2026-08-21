@@ -1,6 +1,6 @@
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import { useI18n } from '../../react/hooks/useI18n.js';
-import type { LocaleInfo } from '../../i18n/registry.js';
+import type { LocaleInfo } from '../../core/i18n/registry.js';
 import './LocaleToggle.css';
 
 export type LocaleToggleDisplay = 'text' | 'emoji' | 'both';

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import type { LayoutProps } from '../../types/layout.js';
-import type { ResolvedMount } from '../../types/mount-surface.js';
+import type { LayoutProps } from '../../sdk/layout.js';
+import type { ResolvedMount } from '../../sdk/mount-surface.js';
 
 // Icon rail with two groups (top + bottom). The second group sticks to the far
 // end via an auto margin; mount order within each group is preserved.

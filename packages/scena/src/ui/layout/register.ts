@@ -1,7 +1,7 @@
 import { lazy } from 'react';
-import type { Scena } from '../../types/scena.js';
-import type { Disposable } from '../../types/disposable.js';
-import { combineDisposables } from '../../core/disposable.js';
+import type { Scena } from '../../sdk/scena.js';
+import type { Disposable } from '../../sdk/disposable.js';
+import { combineDisposables } from '../../sdk/disposable.js';
 
 // Layout components are React.lazy so registering them pulls no layout code at
 // boot — each surface render strategy (and the heavy SpatialLayout/Campus) only

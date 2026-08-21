@@ -13,12 +13,12 @@ import type {
   TabPanelLeaf,
   TabPanelNode,
   TabPanelSplit,
-} from '../../types/layout.js';
-import type { ResolvedMount } from '../../types/mount-surface.js';
+} from '../../sdk/layout.js';
+import type { ResolvedMount } from '../../sdk/mount-surface.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { Divisor } from '../display/Divisor.js';
-import { resolveColorRgb } from '../../types/colors.js';
+import { resolveColorRgb } from '../../sdk/colors.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { useStoreLabel } from '../../react/hooks/useStoreLabel.js';
 

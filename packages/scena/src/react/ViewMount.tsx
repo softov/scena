@@ -14,17 +14,17 @@ import type {
   DataBinding,
   FunctionCall,
   PropValue,
-} from '../types/component-graph.js';
+} from '../sdk/component-graph.js';
 import {
   isAction,
   isComponentNode,
   isDataBinding,
   isDynamicChildList,
   isFunctionCall,
-} from '../types/component-graph.js';
-import type { ComponentDefinition } from '../types/component-registry.js';
-import type { Disposable } from '../types/disposable.js';
-import type { Scena } from '../types/scena.js';
+} from '../sdk/component-graph.js';
+import type { ComponentDefinition } from '../sdk/component-registry.js';
+import type { Disposable } from '../sdk/disposable.js';
+import type { Scena } from '../sdk/scena.js';
 import { useScena } from './ScenaProvider.js';
 import {
   DataContextContext,
@@ -34,13 +34,13 @@ import {
   useCurrentMountKey,
   useDataContext,
 } from './mount-context.js';
-import { joinAbsolute, readPath } from '../core/path-resolver.js';
+import { joinAbsolute, readPath } from '../core/resolve/path-resolver.js';
 import {
   resolveAction,
   resolveDynamicValue,
   writeDynamic,
-} from '../core/dynamic-resolver.js';
-import { rewriteLocal } from '../core/reactive-store.js';
+} from '../core/resolve/dynamic-resolver.js';
+import { rewriteLocal } from '../core/store/reactive-store.js';
 
 const RESERVED_KEYS = new Set(['id', 'component', '$meta']);
 

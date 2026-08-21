@@ -11,11 +11,11 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { BindingPath } from '../../types/component-graph.js';
-import type { PickerAction } from '../../types/host.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
+import type { PickerAction } from '../../sdk/host.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import './Tree.css';
-import { resolveColorVar } from '../../types/colors.js';
+import { resolveColorVar } from '../../sdk/colors.js';
 
 // Generic hierarchical tree. Controlled selection + expansion, kbd nav,
 // optional right-click ContextMenu, optional drag-drop and clipboard hooks.

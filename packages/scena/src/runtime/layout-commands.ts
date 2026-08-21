@@ -1,17 +1,17 @@
-import type { Scena } from '../types/scena.js';
-import type { Disposable } from '../types/disposable.js';
-import type { CommandContext } from '../types/command.js';
+import type { Scena } from '../sdk/scena.js';
+import type { Disposable } from '../sdk/disposable.js';
+import type { CommandContext } from '../sdk/command.js';
 import type {
   ScenaLayout,
   SurfaceLayoutState,
   TabPanelLeaf,
   TabPanelNode,
   TabPanelSplit,
-} from '../types/layout.js';
-import type { SurfaceName } from '../types/mount-surface.js';
-import { combineDisposables } from '../core/disposable.js';
-import { BindingPath } from '../types/component-graph.js';
-import { translate } from '../i18n/registry.js';
+} from '../sdk/layout.js';
+import type { SurfaceName } from '../sdk/mount-surface.js';
+import { combineDisposables } from '../sdk/disposable.js';
+import { BindingPath } from '../sdk/component-graph.js';
+import { translate } from '../core/i18n/registry.js';
 
 function joinAbs(root: BindingPath | undefined, rel: string): BindingPath {
   if (rel.startsWith('$/')) return rel as BindingPath;

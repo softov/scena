@@ -1,11 +1,11 @@
-import type { BindingPath } from '../../types/component-graph.js';
-import type { SurfaceName } from '../../types/mount-surface.js';
-import type { SurfacePresentation } from '../../types/layout.js';
-import type { ModusClass } from '../../core/backends/modus-backend.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
+import type { SurfaceName } from '../../sdk/mount-surface.js';
+import type { SurfacePresentation } from '../../sdk/layout.js';
+import type { ModusClass } from '../../core/store/backends/modus-backend.js';
 import {
   resolveSurfacePresentation,
   type PresentationPolicy,
-} from '../../core/surface-presentation.js';
+} from '../../core/graph/surface-presentation.js';
 import { useStore } from './useStore.js';
 
 // Reads `$/modus/class` and maps it to how this surface should occupy space.

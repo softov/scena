@@ -1,7 +1,7 @@
-import type { Scena } from '../types/scena.js';
-import type { Disposable } from '../types/disposable.js';
-import type { ComponentDefinition } from '../types/component-registry.js';
-import { combineDisposables } from '../core/disposable.js';
+import type { Scena } from '../sdk/scena.js';
+import type { Disposable } from '../sdk/disposable.js';
+import type { ComponentDefinition } from '../sdk/component-registry.js';
+import { combineDisposables } from '../sdk/disposable.js';
 import { CATALOG_LAYOUT_MAP } from './layout/catalog.js';
 import { CATALOG_DISPLAY_MAP } from './display/catalog.js';
 import { CATALOG_DATA_MAP } from './data/catalog.js';

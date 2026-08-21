@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { resolveColorVar, type ResourceColor } from '../../types/colors.js';
+import { resolveColorVar, type ResourceColor } from '../../sdk/colors.js';
 import './StatusDot.css';
 
 // A state, as a coloured dot, optionally with the word beside it.
