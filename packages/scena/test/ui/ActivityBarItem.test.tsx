@@ -105,7 +105,7 @@ describe('ActivityBarItem', () => {
     it('names what the number counts, so it is not a bare digit to a screen reader', () => {
       const scena = createScena();
       mount(scena, <ActivityBarItem icon="N" label="Notes" badge={4} badgeLabel="unread" />);
-      expect(screen.getByRole('button').getAttribute('aria-label')).toBe('Notes — 4 unread');
+      expect(screen.getByRole('button').getAttribute('aria-label')).toBe('Notes: 4 unread');
     });
 
     it('carries the tone through to the badge', () => {
@@ -117,6 +117,82 @@ describe('ActivityBarItem', () => {
       expect(container.querySelector('.oo-activity-item__badge')?.getAttribute('data-tone')).toBe(
         'danger',
       );
+    });
+
+    // Three digits do not fit the pill, and the rail is not where anyone reads
+    // the difference between 120 and 400.
+    it('clamps a count that does not fit, and leaves a string alone', () => {
+      const scena = createScena();
+      const { container, unmount } = mount(scena, <ActivityBarItem icon="N" badge={120} />);
+      expect(container.querySelector('.oo-activity-item__badge')?.textContent).toBe('99+');
+      unmount();
+
+      const edge = mount(scena, <ActivityBarItem icon="N" badge={99} />);
+      expect(edge.container.querySelector('.oo-activity-item__badge')?.textContent).toBe('99');
+      unmount();
+    });
+
+    it('still says the true number to a screen reader after clamping', () => {
+      const scena = createScena();
+      mount(scena, <ActivityBarItem icon="N" label="Runs" badge={412} badgeLabel="in flight" />);
+      // The pill is a glance; the accessible name is the answer.
+      expect(screen.getByRole('button').getAttribute('aria-label')).toBe('Runs: 412 in flight');
+    });
+  });
+
+  describe('second badge', () => {
+    it('renders in the opposite corner, with its own tone', () => {
+      const scena = createScena();
+      const { container } = mount(
+        scena,
+        <ActivityBarItem icon="S" badge={2} secondBadge={5} secondBadgeTone="warning" />,
+      );
+
+      const badges = container.querySelectorAll('.oo-activity-item__badge');
+      expect(badges.length).toBe(2);
+      expect(badges[1]?.classList.contains('oo-activity-item__badge--second')).toBe(true);
+      expect(badges[1]?.getAttribute('data-tone')).toBe('warning');
+    });
+
+    it('follows the same zero rule as the first', () => {
+      const scena = createScena();
+      const { container } = mount(scena, <ActivityBarItem icon="S" badge={2} secondBadge={0} />);
+      expect(container.querySelectorAll('.oo-activity-item__badge').length).toBe(1);
+    });
+
+    it('stands alone when only the second has a count', () => {
+      const scena = createScena();
+      const { container } = mount(scena, <ActivityBarItem icon="S" secondBadge={7} />);
+      const badges = container.querySelectorAll('.oo-activity-item__badge');
+      expect(badges.length).toBe(1);
+      expect(badges[0]?.classList.contains('oo-activity-item__badge--second')).toBe(true);
+    });
+
+    // Colour is the only thing separating the two badges on screen, which is
+    // no separation at all for a lot of people. The sentence is where they are
+    // actually told apart.
+    it('names both counts in one sentence', () => {
+      const scena = createScena();
+      mount(
+        scena,
+        <ActivityBarItem
+          icon="S"
+          label="Live sessions"
+          badge={2}
+          badgeLabel="running"
+          secondBadge={5}
+          secondBadgeLabel="unread"
+        />,
+      );
+      expect(screen.getByRole('button').getAttribute('aria-label')).toBe(
+        'Live sessions: 2 running, 5 unread',
+      );
+    });
+
+    it('falls back to the bare number when nothing says what it counts', () => {
+      const scena = createScena();
+      mount(scena, <ActivityBarItem icon="S" label="Notes" badge={3} />);
+      expect(screen.getByRole('button').getAttribute('aria-label')).toBe('Notes: 3');
     });
   });
 

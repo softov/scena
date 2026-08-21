@@ -24,6 +24,11 @@ export interface ThemePickerProps {
  * component knowing anything about it. That is also why it reads the registry
  * on render instead of caching: `registerTheme` has no change event, and the
  * list is short enough that it does not matter.
+ *
+ * Renders nothing below two choices. One theme is not a choice, and a select
+ * with a single option is a control that cannot do anything — an app that ships
+ * only the built-in theme can mount this unconditionally and it stays out of
+ * the way until a second theme is registered.
  */
 export function ThemePicker({
   themes,
@@ -39,6 +44,8 @@ export function ThemePicker({
   const items = themes
     ? themes.map((id) => all.find((t) => t.id === id)).filter((t) => t !== undefined)
     : all;
+
+  if (items.length < 2) return null;
 
   return (
     <label

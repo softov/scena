@@ -49,14 +49,33 @@
   min-width: 15px;
   padding: 0 3px;
   border-radius: var(--oo-radius-full);
-  background: var(--oo-color-accent);
-  color: var(--oo-color-inverse);
   font-size: 10px;
   line-height: 15px;
   text-align: center;
+  /* So a count that ticks 9 → 10 → 11 does not shuffle the digits sideways. */
+  font-variant-numeric: tabular-nums;
 }
 
-.oo-activity-item__badge[data-tone='danger']  { background: var(--oo-color-danger); }
-.oo-activity-item__badge[data-tone='warning'] { background: var(--oo-color-warning); }
-.oo-activity-item__badge[data-tone='success'] { background: var(--oo-color-success); }
-.oo-activity-item__badge[data-tone='muted']   { background: var(--oo-color-muted); }
+/* Background and the ink that stays readable on it, paired rather than one
+ * colour with a fixed foreground: the accent is a pale tint in most dark
+ * themes and wants dark text, while the status colours are saturated
+ * mid-tones in both modes and want light text. */
+.oo-activity-item__badge {
+  background: var(--oo-color-accent);
+  color: var(--oo-color-canvas);
+}
+
+.oo-activity-item__badge[data-tone='info']    { background: var(--oo-color-info);    color: var(--oo-color-inverse); }
+.oo-activity-item__badge[data-tone='danger']  { background: var(--oo-color-danger);  color: var(--oo-color-inverse); }
+.oo-activity-item__badge[data-tone='warning'] { background: var(--oo-color-warning); color: var(--oo-color-inverse); }
+.oo-activity-item__badge[data-tone='success'] { background: var(--oo-color-success); color: var(--oo-color-inverse); }
+.oo-activity-item__badge[data-tone='muted']   { background: var(--oo-color-muted);   color: var(--oo-color-inverse); }
+
+/* The second count goes in the opposite corner, so the two never overlap and
+ * neither has to move when the other appears. A ring in the rail's own colour
+ * keeps it legible where it crosses the icon. */
+.oo-activity-item__badge--second {
+  inset-block-end: auto;
+  inset-block-start: 3px;
+  box-shadow: 0 0 0 2px var(--oo-activitybar-bg, var(--oo-color-canvas));
+}
