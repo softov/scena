@@ -109,10 +109,22 @@ user does not mount rather than mounting disabled.
 
 ## Surfaces, mounts and layouts
 
-A **surface** is a named region: `titlebar`, `activitybar`, `sidebar:left`,
-`sidebar:right`, `main`, `panel:bottom`, `statusbar`, `overlay`, `detached`.
-Nine names, fixed, because they are the vocabulary a layout and a keybinding
-scope share.
+A **surface** is a named region. scena ships nine names — `titlebar`,
+`activitybar`, `sidebar:left`, `sidebar:right`, `main`, `panel:bottom`,
+`statusbar`, `overlay`, `detached` — because they are the vocabulary
+`DefaultShell` draws, `layout` seeds defaults for, and a keybinding scope
+shares.
+
+They are a **convention, not the set**. A surface is whatever an app mounts to:
+mounts, layout state and store paths are all keyed by the string, so an app may
+define `alert:top`, a second status bar, four sidebars, or no sidebar at all,
+and only its own shell needs to know how to draw them.
+
+The consequence is for anything that sweeps surfaces rather than addressing
+one: ask `surfaces.listSurfaces()`, which reports what is actually occupied. A
+list of names written into scena cannot know what an app defined — the session
+snapshot iterated one for a while, and dropped mounts on app-defined surfaces
+with no error.
 
 A **mount** is one component in one surface, under a key, with:
 
