@@ -1,0 +1,22 @@
+.oo-theme-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+  height: 22px;
+  padding: 0 var(--oo-spacing-sm);
+  border: none;
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--oo-font-size-xs);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.oo-theme-mode-toggle:hover { background: var(--oo-color-hover); }
+.oo-theme-mode-toggle:focus-visible {
+  outline: 1px solid var(--oo-color-accent);
+  outline-offset: -1px;
+}
+.oo-theme-mode-toggle[data-mode='system'] { color: var(--oo-color-muted); }

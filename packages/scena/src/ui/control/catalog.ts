@@ -10,4 +10,7 @@ export const CATALOG_CONTROLS_MAP: ComponentDefinition[] = [
   { component: 'Slider', category: 'inline', renderer: { kind: 'react', load: () => import('./Slider.js').then((m) => ({ default: m.Slider })) } },
   { component: 'DateTimeInput', category: 'inline', renderer: { kind: 'react', load: () => import('./DateTimeInput.js').then((m) => ({ default: m.DateTimeInput })) } },
   { component: 'LocaleToggle', category: 'inline', renderer: { kind: 'react', load: () => import('./LocaleToggle.js').then((m) => ({ default: m.LocaleToggle })) } },
+  { component: 'ButtonBar', category: 'inline', renderer: { kind: 'react', load: () => import('./ButtonBar.js').then((m) => ({ default: m.ButtonBar })) } },
+  { component: 'ThemePicker', category: 'inline', renderer: { kind: 'react', load: () => import('./ThemePicker.js').then((m) => ({ default: m.ThemePicker })) } },
+  { component: 'ThemeModeToggle', category: 'inline', renderer: { kind: 'react', load: () => import('./ThemeModeToggle.js').then((m) => ({ default: m.ThemeModeToggle })) } },
 ];

@@ -4,4 +4,5 @@ import type { ComponentDefinition } from '../../sdk/component-registry.js';
 export const CATALOG_NAVIGATION_MAP: ComponentDefinition[] = [
   { component: 'Tabs', category: 'page', renderer: { kind: 'react', load: () => import('./Tabs.js').then((m) => ({ default: m.Tabs })) } },
   { component: 'Link', category: 'inline', renderer: { kind: 'react', load: () => import('./Link.js').then((m) => ({ default: m.Link })) } },
+  { component: 'ActivityBarItem', category: 'inline', renderer: { kind: 'react', load: () => import('./ActivityBarItem.js').then((m) => ({ default: m.ActivityBarItem })) } },
 ];

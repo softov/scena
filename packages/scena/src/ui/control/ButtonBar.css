@@ -1,0 +1,54 @@
+.oo-button-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+  height: var(--oo-button-bar-height, 22px);
+  padding: 0 var(--oo-spacing-sm);
+  border: none;
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--oo-font-size-xs);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.oo-button-bar[data-interactive='true'] { cursor: pointer; }
+.oo-button-bar[data-interactive='true']:hover { background: var(--oo-color-hover); }
+.oo-button-bar[data-interactive='true']:active { background: var(--oo-color-active); }
+
+.oo-button-bar:focus-visible {
+  outline: 1px solid var(--oo-color-accent);
+  outline-offset: -1px;
+}
+
+.oo-button-bar[disabled] { opacity: 0.5; cursor: default; }
+.oo-button-bar[data-active='true'] {
+  background: var(--oo-color-active);
+  color: var(--oo-color-accent);
+}
+
+.oo-button-bar[data-tone='accent']  { color: var(--oo-color-accent); }
+.oo-button-bar[data-tone='danger']  { color: var(--oo-color-danger); }
+.oo-button-bar[data-tone='warning'] { color: var(--oo-color-warning); }
+.oo-button-bar[data-tone='success'] { color: var(--oo-color-success); }
+.oo-button-bar[data-tone='muted']   { color: var(--oo-color-muted); }
+
+.oo-button-bar__value { font-weight: 600; }
+
+/* The title bar / status bar difference is context, not a prop: SurfaceArea
+ * stamps `data-surface` on the surface root, so the status bar can style the
+ * same component more quietly without the caller choosing a variant.
+ *
+ * Two classes here, so this beats `.oo-bar__slot button` in bar.css (one class
+ * + one type) rather than tying on specificity and losing to source order. */
+[data-surface='statusbar'] .oo-button-bar {
+  height: var(--oo-button-bar-height-sm, 20px);
+  color: var(--oo-color-muted);
+}
+
+[data-surface='statusbar'] .oo-button-bar[data-interactive='true']:hover {
+  color: var(--oo-color-text);
+}

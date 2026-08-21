@@ -25,7 +25,18 @@ strategies: `TabLayout`, `TabPanelLayout`, `SingleLayout`, `SplitLayout`,
 registers all of them.
 
 **`ui/control`** — `Button`, `ReloadButton`, `TextField`, `CheckBox`, `Checks`,
-`ChoicePicker`, `Slider`, `DateTimeInput`, `LocaleToggle`.
+`ChoicePicker`, `Slider`, `DateTimeInput`, `LocaleToggle`, `ButtonBar`,
+`ThemePicker`, `ThemeModeToggle`.
+
+`ButtonBar` is the button that goes in a bar — one component for the title bar
+and the status bar rather than two, because the difference between them is
+presentational and carried by `[data-surface]` in CSS, not by a prop.
+
+`ThemePicker` and `ThemeModeToggle` are views over `$/ui/theme/id` and
+`$/ui/theme/mode`. They write the store and nothing else; the applying is
+`registerThemeController`'s job (see **Theming** below). That is what lets a
+picker in the title bar and a select in a settings panel agree without knowing
+about each other.
 
 **`ui/forms`** — `Form` (+ `FormContext`, `useFormContext`), `Field` with
 `FieldLabel` / `FieldHint` / `FieldError`, `FieldGroup`, `FormSection`,
@@ -45,6 +56,17 @@ you take over one `format` without taking over the form.
 `contextMenuSlot` plus `contextFor`, and an `emptyState`. `Pagination` and
 `Filter` bind to a namespace and drive its `query` path, so a list, its filter
 and its paginator need no wiring between them.
+
+**`ui/navigation`** — `Breadcrumb`, `Tabs`, `Toolbar`, `Link`, `ActivityBarItem`.
+
+`ActivityBarItem` derives its own active state from which sidebar section is
+showing (`sectionPath`, defaulting to the left sidebar) rather than taking it
+as a prop — the caller is usually a `surfaces.mount` in a resource module that
+has no idea what else is mounted, so a rail of independently-registered entries
+could not otherwise agree on which one is current. Clicking runs `command` if
+given and then executes `sidebar.activate`. That command is **not** part of
+scena: what activating means — which surface, whether it also reveals — is the
+app's decision.
 
 **`ui/display`** — `Card`, `Divider`, `Text`, `SectionTitle`, `Image`, `Icon`,
 `Alert`, `Badge` (with `BadgeTone`), `Progress`, `Spinner`, `Skeleton`,
@@ -98,6 +120,71 @@ JavaScript.
 
 Where a token may not be defined in a given theme, use a fallback:
 `var(--oo-color-success, #6ec46e)`.
+
+Prefer overriding the `--oo-rgb-*` channels over the resolved `--oo-color-*`
+when writing a theme. The resolved colours are composited from the channels —
+`rgb(var(--oo-rgb-border) / var(--oo-border-alpha))` — so a theme that replaces
+only the resolved value silently loses every alpha-composited hover wash,
+alert tint and scrollbar thumb derived from it.
+
+## Theming
+
+A theme has two independent axes: the **family** (`default`, and whatever the
+app registers) and the **mode** (`light`, `dark`, or `system` — follow the OS).
+`registerThemeController(scena, options)` puts both in the store, at
+`THEME_ID_PATH` and `THEME_MODE_PATH`, and is the only thing that calls
+`applyTheme`, writes `localStorage`, or listens for the OS preference changing.
+
+```ts
+import { registerThemeController } from '@softov/scena/styles';
+
+registerThemeController(scena, {
+  idKey: 'myapp.theme-id',
+  modeKey: 'myapp.theme-mode',
+});
+```
+
+Namespace the storage keys per app; two scena apps on one origin otherwise
+fight over a single preference.
+
+`system` is a stored choice rather than the absence of one. An app that
+resolves the OS preference once at boot stops following it when the user
+changes it, and there is no way back to that behaviour from a stored
+`light` | `dark`.
+
+Apply the theme once in the entry, before React, from the same storage keys —
+otherwise the first paint uses the default and the controller corrects it a
+frame later, which is a visible flash:
+
+```ts
+applyTheme(document.documentElement, savedId, resolveThemeMode(savedChoice));
+```
+
+The controller reads `data-theme` off the root as its fallback, so the two
+agree with no extra plumbing.
+
+### Surface separators
+
+Surfaces draw no hairline between them by default — separation by background
+alone is a legitimate design, and turning borders on for everyone would change
+every existing app's chrome. A theme opts in on the root:
+
+```css
+[data-theme='mine'][data-theme-mode='dark'] {
+  --oo-surface-border-width: 1px;
+  --oo-surface-border: rgb(43 43 43);   /* defaults to --oo-color-border */
+}
+```
+
+Each surface draws on the edge facing `main`, using logical properties so the
+chrome flips under `dir="rtl"`. Overlaid surfaces (`floating`, `sheet`) draw
+none — they are out of the flow and carry a shadow instead.
+
+Note that `surface.css` consumes these as `var(--oo-surface-border-width, 0px)`
+rather than declaring a default on `.oo-surface`. That is deliberate: a custom
+property set on the element beats the same property inherited from the root, so
+declaring the default would silently override every theme that tried to switch
+borders on.
 
 ## Writing a component for the catalog
 

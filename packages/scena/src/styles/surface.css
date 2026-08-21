@@ -19,6 +19,57 @@
   --oo-surface-overlay-shadow: 0 0 28px rgb(0 0 0 / 0.32);
 }
 
+/*
+ * Separators between surfaces.
+ *
+ * OFF by default: a shell that separates its regions by background alone is a
+ * legitimate design -- `paper` is exactly that -- and turning hairlines on for
+ * everyone would change every existing app's chrome. A theme opts in on the
+ * root:
+ *
+ *   --oo-surface-border-width: 1px;
+ *
+ * The defaults are `var()` fallbacks rather than declarations on `.oo-surface`,
+ * and that is load-bearing: a custom property set ON the element beats the same
+ * property inherited from `<html>`, so declaring `--oo-surface-border-width: 0`
+ * here would silently override every theme that tried to turn borders on.
+ *
+ * Each surface draws on the edge facing `main`. Logical properties, so the
+ * chrome flips correctly under `dir="rtl"`.
+ */
+.oo-surface--activitybar,
+.oo-surface--sidebar-left {
+  border-inline-end:
+    var(--oo-surface-border-width, 0px) solid
+    var(--oo-surface-border, var(--oo-color-border));
+}
+
+.oo-surface--sidebar-right {
+  border-inline-start:
+    var(--oo-surface-border-width, 0px) solid
+    var(--oo-surface-border, var(--oo-color-border));
+}
+
+.oo-surface--titlebar {
+  border-block-end:
+    var(--oo-surface-border-width, 0px) solid
+    var(--oo-surface-border, var(--oo-color-border));
+}
+
+.oo-surface--statusbar,
+.oo-surface--panel-bottom {
+  border-block-start:
+    var(--oo-surface-border-width, 0px) solid
+    var(--oo-surface-border, var(--oo-color-border));
+}
+
+/* An overlaid surface is lifted out of the flow with its own shadow, so a
+ * border on the edge it no longer touches would draw a line into open space. */
+.oo-surface[data-presentation='floating'],
+.oo-surface[data-presentation='sheet'] {
+  border: 0;
+}
+
 /* ── floating: lifted over `main`, consumes no width ─────────────────── */
 .oo-surface[data-presentation='floating'] {
   position: absolute;
