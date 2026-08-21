@@ -1,41 +1,47 @@
 /*
  * Coder — purple nuances, in the Night Owl register.
  *
- * Dark is the real one: a deep indigo-violet ground with Night Owl's syntax
- * palette carried onto the semantic tokens (#c792ea accent, #addb67 success,
- * #ffcb6b warning, #82aaff info). Light is a day counterpart rather than an
- * inversion — the same hue family, lifted, with the accent darkened enough to
- * stay readable on white.
+ * The ground is near-black with a violet cast, not violet. That is the part
+ * worth getting right: Night Owl reads as a purple theme because its *syntax*
+ * is purple against a very dark ground (#011627), not because everything is
+ * lilac. A mid-purple background flattens the whole app into one hue with
+ * nothing separating the regions, and the accent stops being an accent because
+ * it no longer has anything to contrast against.
+ *
+ * So: chrome darker than the editor (the modern arrangement), text near-white,
+ * and #c792ea kept for the things that are actually meant to stand out.
  *
  * Overrides the `--oo-rgb-*` channels, so alpha compositing keeps working.
  */
 [data-theme='coder'][data-theme-mode='dark'] {
   color-scheme: dark;
 
-  --oo-rgb-canvas: 27 20 41;
-  --oo-rgb-panel: 34 25 51;
-  --oo-rgb-surface: 30 22 45;
-  --oo-rgb-raised: 44 33 66;
+  /* Editor ground, and the chrome a step darker than it. */
+  --oo-rgb-canvas: 20 15 30;
+  --oo-rgb-panel: 13 9 20;
+  --oo-rgb-surface: 20 15 30;
+  --oo-rgb-raised: 38 29 56;
 
-  --oo-rgb-titlebar: 23 17 35;
-  --oo-rgb-activitybar: 23 17 35;
-  --oo-rgb-sidebar: var(--oo-rgb-panel);
-  --oo-rgb-statusbar: 23 17 35;
+  --oo-rgb-titlebar: 13 9 20;
+  --oo-rgb-activitybar: 13 9 20;
+  --oo-rgb-sidebar: 13 9 20;
+  --oo-rgb-statusbar: 13 9 20;
 
-  --oo-rgb-text: 214 222 235;
-  --oo-rgb-muted: 133 126 168;
-  --oo-rgb-subtle: 106 100 138;
-  --oo-rgb-inverse: 27 20 41;
+  --oo-rgb-text: 223 229 243;
+  --oo-rgb-muted: 143 134 176;
+  --oo-rgb-subtle: 106 99 138;
+  --oo-rgb-inverse: 20 15 30;
 
-  --oo-rgb-hover: 48 36 71;
-  --oo-rgb-active: 62 46 92;
-  --oo-rgb-selected: 58 43 86;
+  --oo-rgb-hover: 33 25 49;
+  --oo-rgb-active: 48 36 72;
+  --oo-rgb-selected: 58 40 92;
 
-  --oo-rgb-line: 138 122 186;
-  --oo-rgb-border: 138 122 186;
-  --oo-line-alpha: 0.22;
+  --oo-rgb-line: 132 114 182;
+  --oo-rgb-border: 132 114 182;
+  --oo-line-alpha: 0.2;
   --oo-border-alpha: 0.3;
 
+  /* Night Owl's palette, carried onto the semantic tokens. */
   --oo-rgb-accent: 199 146 234;
   --oo-rgb-primary: var(--oo-rgb-accent);
   --oo-rgb-danger: 239 83 80;
@@ -45,16 +51,16 @@
 
   --oo-font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', monospace;
 
-  --oo-shadow-sm: 0 1px 2px rgb(9 5 18 / 0.5);
-  --oo-shadow-md: 0 4px 10px rgb(9 5 18 / 0.55);
-  --oo-shadow-lg: 0 12px 28px rgb(9 5 18 / 0.6);
+  --oo-shadow-sm: 0 1px 2px rgb(4 2 9 / 0.6);
+  --oo-shadow-md: 0 4px 10px rgb(4 2 9 / 0.65);
+  --oo-shadow-lg: 0 12px 28px rgb(4 2 9 / 0.7);
 }
 
 [data-theme='coder'][data-theme-mode='light'] {
   color-scheme: light;
 
-  --oo-rgb-canvas: 252 250 255;
-  --oo-rgb-panel: 245 241 252;
+  --oo-rgb-canvas: 253 251 255;
+  --oo-rgb-panel: 244 239 252;
   --oo-rgb-surface: 255 255 255;
   --oo-rgb-raised: 255 255 255;
 
@@ -63,17 +69,17 @@
   --oo-rgb-sidebar: var(--oo-rgb-panel);
   --oo-rgb-statusbar: var(--oo-rgb-panel);
 
-  --oo-rgb-text: 44 32 66;
-  --oo-rgb-muted: 122 110 148;
-  --oo-rgb-subtle: 150 140 172;
+  --oo-rgb-text: 40 28 62;
+  --oo-rgb-muted: 118 106 144;
+  --oo-rgb-subtle: 148 138 170;
   --oo-rgb-inverse: 255 255 255;
 
-  --oo-rgb-hover: 240 234 250;
-  --oo-rgb-active: 231 222 246;
-  --oo-rgb-selected: 236 228 250;
+  --oo-rgb-hover: 238 231 250;
+  --oo-rgb-active: 228 217 246;
+  --oo-rgb-selected: 234 224 250;
 
-  --oo-rgb-line: 168 148 208;
-  --oo-rgb-border: 168 148 208;
+  --oo-rgb-line: 162 141 204;
+  --oo-rgb-border: 162 141 204;
   --oo-line-alpha: 0.35;
   --oo-border-alpha: 0.45;
 

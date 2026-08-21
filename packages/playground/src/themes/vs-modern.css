@@ -4,9 +4,14 @@
  *
  * Distinguishing traits worth having in the set: the chrome is *darker* than
  * the canvas rather than lighter (#181818 panels against a #1f1f1f editor),
- * and the separators are opaque hairlines rather than washes — so both alpha
- * tokens sit at 1 and the line colour carries the value directly. That is the
- * opposite arrangement from `paper`, which is why the two are useful together.
+ * and every region is separated by an opaque hairline rather than by a wash.
+ *
+ * That second trait is why this theme sets `--oo-surface-border-width`. scena
+ * draws no separator between surfaces by default — a shell that separates its
+ * regions by background alone is a legitimate design, and `paper` is exactly
+ * that — so the rules exist in styles/surface.css and a theme opts in. This is
+ * the theme that wants them; `paper` is the one that must not have them, which
+ * is why the two are useful to have side by side.
  */
 [data-theme='vs-modern'][data-theme-mode='dark'] {
   color-scheme: dark;
@@ -35,6 +40,10 @@
   --oo-rgb-border: 60 60 60;
   --oo-line-alpha: 1;
   --oo-border-alpha: 1;
+
+  /* Separators between activity bar, sidebars, title bar and status bar. */
+  --oo-surface-border-width: 1px;
+  --oo-surface-border: rgb(43 43 43);
 
   --oo-rgb-accent: 0 120 212;
   --oo-rgb-primary: var(--oo-rgb-accent);
@@ -74,6 +83,9 @@
   --oo-rgb-border: 229 229 229;
   --oo-line-alpha: 1;
   --oo-border-alpha: 1;
+
+  --oo-surface-border-width: 1px;
+  --oo-surface-border: rgb(229 229 229);
 
   --oo-rgb-accent: 0 95 184;
   --oo-rgb-primary: var(--oo-rgb-accent);
