@@ -101,7 +101,7 @@
   --oo-rgb-danger: 204 0 0;
   --oo-rgb-success: 0 170 0;
   --oo-rgb-warning: 204 136 0;
-  --oo-rgb-info: var(--oo-blue);
+  --oo-rgb-info: var(--oo-rgb-blue);
 
   /* ----------------------------------------
    * Resolved semantic colors

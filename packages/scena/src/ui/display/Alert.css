@@ -1,5 +1,5 @@
 .oo-alert {
-  --oo-alert-rgb: var(--oo-rgb-blue); 
+  --oo-alert-rgb: var(--oo-rgb-blue);
   --oo-alert-color: rgb(var(--oo-alert-rgb));
   --oo-alert-spacing: var(--oo-spacing-sm);
   --oo-alert-background: rgb(var(--oo-alert-rgb) / 0.1);
@@ -12,7 +12,7 @@
   font-size: var(--oo-font-size-sm);
   line-height: 1.5;
   background: var(--oo-alert-background);
-  color: rgb(var(--oo-alert-color));
+  color: var(--oo-alert-color);
   border: 1px solid var(--oo-alert-border);
 }
 .oo-alert[data-tone='info']    { --oo-alert-rgb: var(--oo-rgb-blue); }
