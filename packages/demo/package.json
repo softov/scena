@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "pnpm --filter @softov/scena build && tsc -p tsconfig.json --noEmit",
     "lint": "eslint src"
   },
   "dependencies": {
