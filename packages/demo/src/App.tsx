@@ -8,6 +8,7 @@ import {
 import { Scena as ScenaRoot, useScena } from '@softov/scena/react/core';
 import { DefaultShell } from '@softov/scena/react';
 import { registerApp } from './register-app.js';
+import { DEMO_PRESENTATION } from './presentation.js';
 
 const layoutStorage = createLocalStorageLayoutStorage({ key: 'scena-demo.layout.v1' });
 
@@ -59,8 +60,13 @@ export default function App(): ReactElement {
           shell is the least-exercised thing in the package -- so this app uses
           it, and anything missing from it shows up as a missing feature rather
           than as something each app quietly wrote for itself.
+
+          That worked: the shell used to ignore the presentation policy and
+          render no scrim, which this app reported live in its status bar until
+          the shell learned to do both. Narrow the window now and the sidebar
+          lifts over `main` with a scrim behind it.
         */}
-        <DefaultShell />
+        <DefaultShell presentation={DEMO_PRESENTATION} />
       </AppRegistrations>
     </ScenaRoot>
   );

@@ -167,6 +167,20 @@ each surface with the edge it closes on and the kind of region it is —
 keys on those rather than on surface names, which is what lets it style a
 surface it has never heard of.
 
+`DefaultShell` is the one scena ships. Give it a `PresentationPolicy` and it
+resolves the policy per surface, stops reserving space for a surface that is no
+longer taking any, and renders the scrim when something is lifted over `main`.
+Without one, every surface stays `docked` — adopting it changes nothing by
+itself.
+
+It resizes by each surface's own edge (`SurfaceArea`'s `resize`) rather than by
+placing a `ShellSplitter` between surfaces. The two are alternatives: a splitter
+is an element *between* two surfaces, so a shell has to know the arrangement
+well enough to place one, and it has nothing to sit against once a surface
+floats. Self-edge resize travels with the surface and disables itself when the
+presentation stops being `docked`. `ShellSplitter` is still exported for shells
+that want the explicit version.
+
 A **session snapshot** is the mounts, the surface states and the persisted
 context, captured together. Restoring one is how a reload comes back to the
 same three tabs open in the same order.
