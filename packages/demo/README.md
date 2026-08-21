@@ -22,6 +22,16 @@ pnpm --filter @softov/scena build   # required first — this app reads dist/
 pnpm --filter @softov/scena-demo dev
 ```
 
+That prerequisite is not just a convenience here, and it caught a real hole: the
+release workflow ran `typecheck` before `build`, which was fine while every
+package aliased into `../scena/src`, and broke the moment one of them resolved
+`dist/` instead. A fresh checkout has no `dist/`, so the workspace typecheck
+failed on 24 unresolved imports in this package — in CI, on a release tag.
+
+So this package's `typecheck` script builds scena itself rather than assuming
+somebody already did. `pnpm typecheck` is then correct from a clean clone, in
+whatever order a workflow happens to run its steps.
+
 ## 2. It is a third data point
 
 Advisor and the playground each grew their own answer to the same problems. One
