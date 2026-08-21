@@ -69,6 +69,12 @@ docs/                   the documents above, plus layout prototypes
   nothing points back. `core/` must never import `runtime/`; when the root
   export needs both, `src/index.ts` assembles them. A back-edge means the two
   modules are really one — merge them rather than importing upward.
+- **A surface is whatever an app mounts to.** The nine names in `SurfaceName`
+  are what `DefaultShell` draws and what `layout` seeds defaults for — a
+  convention, not the set. An app may define `alert:top`, a second status bar,
+  four sidebars, or no sidebar. Anything that sweeps surfaces must ask
+  `surfaces.listSurfaces()`; a hardcoded list of names silently skips whatever
+  the app defined, which is how the session snapshot used to drop mounts.
 - **Registries are late-binding.** Components, commands, converters, layouts
   and shells are resolved by name at mount time, never imported by the graph.
   That is what lets a page be data, and it is why a missing registration is a

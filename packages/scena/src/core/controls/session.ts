@@ -4,7 +4,6 @@ import type { ReactiveStore } from '../../sdk/reactive-store.js';
 import type {
   MountHandle,
   MountSurfaceRegistry,
-  SurfaceName,
 } from '../../sdk/mount-surface.js';
 import type {
   SessionAPI,
@@ -23,18 +22,6 @@ interface Deps {
   storage?: SessionStorage;
 }
 
-const ALL_SURFACES: SurfaceName[] = [
-  'titlebar',
-  'activitybar',
-  'sidebar:left',
-  'sidebar:right',
-  'main',
-  'panel:bottom',
-  'statusbar',
-  'overlay',
-  'detached',
-];
-
 export function createSessionAPI(deps: Deps): SessionAPI & {
   setStorage(s: SessionStorage | null): void;
 } {
@@ -45,7 +32,10 @@ export function createSessionAPI(deps: Deps): SessionAPI & {
 
   function snapshot(): SessionSnapshot {
     const mounts: SessionMount[] = [];
-    for (const surface of ALL_SURFACES) {
+    // Whatever is actually occupied, not a list of names this file was
+    // written with: an app-defined surface used to be dropped from the
+    // snapshot silently, and restore came back missing its mounts.
+    for (const surface of surfaces.listSurfaces()) {
       for (const m of surfaces.listAt(surface)) {
         mounts.push({
           key: m.key,

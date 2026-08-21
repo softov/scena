@@ -4,6 +4,23 @@ import type { WhenClause } from './when.js';
 import type { ResourceColor } from './colors.js';
 import type { Label } from './label.js';
 
+/**
+ * Where something mounts.
+ *
+ * The nine below are the ones scena's own DefaultShell renders and the ones
+ * `layout` seeds defaults for — they are a convention, not the set. An app
+ * mounts to whatever names its shell draws: a second status bar, an
+ * `alert:top` band, four sidebars, or no sidebar at all.
+ *
+ * The runtime never had an opinion here — mounts, layout state and store paths
+ * are all keyed by the string — but this type used to say otherwise, which made
+ * the contract narrower than the thing it described. The `(string & {})` arm
+ * keeps editor completion for the nine while admitting any other name.
+ *
+ * Consequence for anything that sweeps surfaces: ask
+ * `surfaces.listSurfaces()`. A list of names written here cannot know what an
+ * app defined.
+ */
 export type SurfaceName =
   | 'titlebar'
   | 'activitybar'
@@ -13,7 +30,8 @@ export type SurfaceName =
   | 'panel:bottom'
   | 'statusbar'
   | 'overlay'
-  | 'detached';
+  | 'detached'
+  | (string & {});
 
 // A mount target: either an inline ComponentNode (which may be a full page
 // tree) or a DataBinding whose value is a ComponentNode (late-resolved
@@ -99,6 +117,10 @@ export interface MountSurfaceRegistry {
   close(key: string, opts?: { reason?: string }): void;
   focus(key: string): void;
   listAt(surface: SurfaceName): ResolvedMount[];
+  // Surfaces that currently hold a visible mount, ordered by first mount.
+  // Sweep with this rather than with a list of names — an app defines its
+  // own surfaces, so a hardcoded list skips whatever it predates.
+  listSurfaces(): SurfaceName[];
   move(opts: { key: string; toSurface: SurfaceName; fromSurface?: SurfaceName }): void;
 }
 

@@ -220,6 +220,25 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
     events.emit('scena:mount:focused', { key, surface: m.surface });
   }
 
+  // Which surfaces currently hold a visible mount.
+  //
+  // Anything that needs to sweep every surface has to ask, rather than iterate
+  // a list of names it was compiled with: a surface is whatever an app mounts
+  // to, so a hardcoded list silently skips the ones it has not heard of. The
+  // session snapshot used to do exactly that.
+  //
+  // Ordered by first mount, so a caller sweeping surfaces is deterministic.
+  function listSurfaces(): SurfaceName[] {
+    const seen = new Set<SurfaceName>();
+    const out: SurfaceName[] = [];
+    for (const m of [...mountsByKey.values()].sort((a, b) => a.openedAt - b.openedAt)) {
+      if (!visibleByKey.has(m.key) || seen.has(m.surface)) continue;
+      seen.add(m.surface);
+      out.push(m.surface);
+    }
+    return out;
+  }
+
   function listAt(surface: SurfaceName): ResolvedMount[] {
     const out: ResolvedMount[] = [];
     for (const m of mountsByKey.values()) {
@@ -250,5 +269,5 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
     }
   }
 
-  return { mount, open, openResource, close, focus, listAt, move };
+  return { mount, open, openResource, close, focus, listAt, listSurfaces, move };
 }
