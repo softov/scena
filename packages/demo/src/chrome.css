@@ -1,0 +1,57 @@
+/* Chrome styling, in app tokens only -- nothing here hardcodes a colour, so
+ * the app follows whatever theme is applied. */
+
+.demo-activity-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--oo-activitybar-fg);
+  border-left: 2px solid transparent;
+  user-select: none;
+}
+
+.demo-activity-item:hover {
+  color: var(--oo-activitybar-fg-hover);
+  background: var(--oo-activitybar-bg-hover);
+}
+
+.demo-activity-item[data-active='true'] {
+  color: var(--oo-activitybar-fg-active);
+  background: var(--oo-activitybar-bg-active);
+  border-left-color: var(--oo-color-accent);
+}
+
+.demo-activity-item__badge {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  min-width: 15px;
+  padding: 0 3px;
+  border-radius: var(--oo-radius-full);
+  background: var(--oo-color-accent);
+  color: var(--oo-color-inverse);
+  font-size: 10px;
+  line-height: 15px;
+  text-align: center;
+}
+
+.demo-status-item {
+  padding: 0 var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+}
+
+.demo-title {
+  padding: 0 var(--oo-spacing-sm);
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-titlebar-fg);
+}
+
+.demo-status-item[data-warn='true'] {
+  color: var(--oo-color-warning);
+}

@@ -21,7 +21,8 @@ A page is a graph of component nodes held in a layered reactive store; component
 | Package | Description |
 | --- | --- |
 | [`@softov/scena`](packages/scena) | The runtime and its contracts. Published to npm. |
-| `@softov/scena-playground` | Local dev app and component showcase. Private, never published. |
+| `@softov/scena-playground` | Local dev app and component showcase. Aliases to `packages/scena/src`. Private. |
+| [`@softov/scena-demo`](packages/demo) | Small reference app. Resolves the package through its published exports, so it catches what the playground's src aliases hide. Private. |
 
 `@softov/scena` ships one package with layered entry points:
 
