@@ -29,10 +29,10 @@ export const sunsetTheme: ThemeDefinition = {
         '--oo-sidebar-right-bg': '#ffedd5',
         '--oo-sidebar-right-fg': '#431407',
 
-        '--scrollbar-track-color': 'transparent',
-        '--scrollbar-thumb-color': 'var(--oo-color-border)',
-        '--scrollbar-thumb-border': 'var(--oo-color-border)',
-        '--scrollbar-thumb-hover': 'var(--oo-color-active)',
+        '--oo-scrollbar-track-color': 'transparent',
+        '--oo-scrollbar-thumb-color': 'var(--oo-color-border)',
+        '--oo-scrollbar-border-color': 'var(--oo-color-border)',
+        '--oo-scrollbar-thumb-hover': 'var(--oo-color-active)',
 
         '--oo-activitybar-bg': '#ffedd5',
         '--oo-activitybar-fg': '#7c2d12',
@@ -65,10 +65,10 @@ export const sunsetTheme: ThemeDefinition = {
         '--oo-sidebar-right-bg': '#2a0f04',
         '--oo-sidebar-right-fg': '#fed7aa',
 
-        '--scrollbar-track-color': 'transparent',
-        '--scrollbar-thumb-color': 'var(--oo-color-border)',
-        '--scrollbar-thumb-border': 'var(--oo-color-border)',
-        '--scrollbar-thumb-hover': 'var(--oo-color-active)',
+        '--oo-scrollbar-track-color': 'transparent',
+        '--oo-scrollbar-thumb-color': 'var(--oo-color-border)',
+        '--oo-scrollbar-border-color': 'var(--oo-color-border)',
+        '--oo-scrollbar-thumb-hover': 'var(--oo-color-active)',
 
         '--oo-activitybar-bg': '#2a0f04',
         '--oo-activitybar-fg': '#fed7aa',

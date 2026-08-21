@@ -55,6 +55,16 @@
   --oo-radius-sm: 2px;
   --oo-radius-md: 4px;
   --oo-radius-lg: 6px;
+
+  /* VS Code's slider is a neutral overlay grey, not a tint of the border --
+   * deriving it from --oo-rgb-border (60 60 60) would put dark grey on a dark
+   * grey ground and make it effectively invisible. Square, like the original. */
+  --oo-scrollbar-width: 14px;
+  --oo-scrollbar-track-color: transparent;
+  --oo-scrollbar-border-width: 0px;
+  --oo-scrollbar-thumb-radius: 0px;
+  --oo-scrollbar-thumb-color: rgb(121 121 121 / 0.4);
+  --oo-scrollbar-thumb-hover: rgb(159 159 159 / 0.7);
 }
 
 [data-theme='vs-modern'][data-theme-mode='light'] {
@@ -97,4 +107,11 @@
   --oo-radius-sm: 2px;
   --oo-radius-md: 4px;
   --oo-radius-lg: 6px;
+
+  --oo-scrollbar-width: 14px;
+  --oo-scrollbar-track-color: transparent;
+  --oo-scrollbar-border-width: 0px;
+  --oo-scrollbar-thumb-radius: 0px;
+  --oo-scrollbar-thumb-color: rgb(100 100 100 / 0.2);
+  --oo-scrollbar-thumb-hover: rgb(100 100 100 / 0.45);
 }
