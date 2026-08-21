@@ -1,16 +1,16 @@
-import type { Disposable } from '../types/disposable.js';
-import type { BindingPath, ComponentNode } from '../types/component-graph.js';
-import type { EventBus } from '../types/events.js';
+import type { Disposable } from '../sdk/disposable.js';
+import type { BindingPath, ComponentNode } from '../sdk/component-graph.js';
+import type { EventBus } from '../sdk/events.js';
 import type {
   ReactiveStore,
   SocketBridge,
-} from '../types/reactive-store.js';
+} from '../sdk/reactive-store.js';
 import type {
   MountSurfaceRegistry,
   SurfaceName,
-} from '../types/mount-surface.js';
-import type { ConverterRegistry } from '../types/converter-registry.js';
-import { combineDisposables } from '../core/disposable.js';
+} from '../sdk/mount-surface.js';
+import type { ConverterRegistry } from '../sdk/converter-registry.js';
+import { combineDisposables } from '../sdk/disposable.js';
 
 interface Deps {
   store: ReactiveStore;

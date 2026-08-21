@@ -1,4 +1,4 @@
-import type { ComponentDefinition } from '../../types/component-registry.js';
+import type { ComponentDefinition } from '../../sdk/component-registry.js';
 
 // Catalog registration for navigation components (dynamic import — no eager load).
 export const CATALOG_NAVIGATION_MAP: ComponentDefinition[] = [

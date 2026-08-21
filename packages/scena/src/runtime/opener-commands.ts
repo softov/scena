@@ -1,12 +1,12 @@
-import type { Scena } from '../types/scena.js';
-import type { Disposable } from '../types/disposable.js';
-import type { CommandContext } from '../types/command.js';
-import type { ComponentDefinition } from '../types/component-registry.js';
-import type { BindingPath } from '../types/component-graph.js';
-import type { SurfaceName } from '../types/mount-surface.js';
-import { disposableFrom } from '../core/disposable.js';
-import { resolveLabel } from '../core/label.js';
-import { translate } from '../i18n/registry.js';
+import type { Scena } from '../sdk/scena.js';
+import type { Disposable } from '../sdk/disposable.js';
+import type { CommandContext } from '../sdk/command.js';
+import type { ComponentDefinition } from '../sdk/component-registry.js';
+import type { BindingPath } from '../sdk/component-graph.js';
+import type { SurfaceName } from '../sdk/mount-surface.js';
+import { disposableFrom } from '../sdk/disposable.js';
+import { resolveLabel } from '../sdk/label.js';
+import { translate } from '../core/i18n/registry.js';
 
 // Generate slot-driven `openWith.*` commands from the components registered
 // as openers for a given resource kind. One command per viewer; they appear

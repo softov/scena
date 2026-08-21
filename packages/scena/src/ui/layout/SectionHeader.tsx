@@ -1,11 +1,11 @@
 import { type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode, useState } from 'react';
-import type { MountAction } from '../../types/mount-surface.js';
-import { resolveLabel } from '../../core/label.js';
-import type { Label } from '../../types/label.js';
-import type { BindingPath } from '../../types/component-graph.js';
+import type { MountAction } from '../../sdk/mount-surface.js';
+import { resolveLabel } from '../../sdk/label.js';
+import type { Label } from '../../sdk/label.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
-import { translate } from '../../i18n/registry.js';
+import { translate } from '../../core/i18n/registry.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 
 export interface SectionHeaderProps {

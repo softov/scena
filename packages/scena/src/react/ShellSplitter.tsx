@@ -1,5 +1,5 @@
 import { type CSSProperties, type PointerEvent, useRef } from 'react';
-import type { SurfaceName } from '../types/mount-surface.js';
+import type { SurfaceName } from '../sdk/mount-surface.js';
 import { useScena } from './ScenaProvider.js';
 
 export interface ShellSplitterProps {

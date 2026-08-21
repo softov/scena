@@ -1,4 +1,4 @@
-import type { ComponentDefinition } from '../../types/component-registry.js';
+import type { ComponentDefinition } from '../../sdk/component-registry.js';
 import { Button } from './Button.js';
 
 // Catalog registration for control components (dynamic import — no eager load).

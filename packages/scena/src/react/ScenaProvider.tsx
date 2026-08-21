@@ -1,5 +1,5 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import type { Scena } from '../types/scena.js';
+import type { Scena } from '../sdk/scena.js';
 
 const ScenaContext = createContext<Scena | null>(null);
 

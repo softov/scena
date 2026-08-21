@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import type { LayoutProps } from '../../types/layout.js';
-import type { ResolvedMount } from '../../types/mount-surface.js';
+import type { LayoutProps } from '../../sdk/layout.js';
+import type { ResolvedMount } from '../../sdk/mount-surface.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useMountTitle } from './MountTitle.js';
 import { NAMED_GLYPH } from '../display/Icon.js';

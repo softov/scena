@@ -1,4 +1,4 @@
-import type { Scena } from '../types/scena.js';
+import type { Scena } from '../sdk/scena.js';
 import type { PortaProvider, Session } from './provider.js';
 import { SIGILLUM_PATHS } from './sigillum.js';
 

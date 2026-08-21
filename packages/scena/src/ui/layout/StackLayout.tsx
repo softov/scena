@@ -5,7 +5,7 @@ import {
   type ReactNode,
   useState,
 } from 'react';
-import type { LayoutProps } from '../../types/layout.js';
+import type { LayoutProps } from '../../sdk/layout.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { StackHeader } from './StackHeader.js';

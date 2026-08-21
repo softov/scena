@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { resolveColorVar, type ResourceColor } from '../../types/colors.js';
+import { resolveColorVar, type ResourceColor } from '../../sdk/colors.js';
 import './Badge.css';
 
 // Inline status pill. `tone` selects a semantic preset; `color` overrides via

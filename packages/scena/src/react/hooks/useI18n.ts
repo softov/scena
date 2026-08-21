@@ -8,7 +8,7 @@ import {
   setLocale,
   type LocaleInfo,
   type TranslateOptions,
-} from '../../i18n/registry.js';
+} from '../../core/i18n/registry.js';
 
 export interface UseI18nResult {
   // t(key), t(key, 'Inline fallback'), or t(key, { fallback, ...params }).

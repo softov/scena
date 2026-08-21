@@ -1,4 +1,4 @@
-import type { LayoutProps } from '../../types/layout.js';
+import type { LayoutProps } from '../../sdk/layout.js';
 import type { ReactNode } from 'react';
 import { useScena } from '../../react/ScenaProvider.js';
 import { SectionHeader } from './SectionHeader.js';

@@ -1,6 +1,6 @@
 import { lazy, type ReactNode, Suspense, useEffect, useRef } from 'react';
-import type { Scena as ScenaInstance } from '../types/scena.js';
-import type { CreateScenaOptions } from '../types/scena.js';
+import type { Scena as ScenaInstance } from '../sdk/scena.js';
+import type { CreateScenaOptions } from '../sdk/scena.js';
 import { createScena } from '../core/scena.js';
 import { ScenaProvider } from './ScenaProvider.js';
 // import { DefaultShell } from './DefaultShell.js';

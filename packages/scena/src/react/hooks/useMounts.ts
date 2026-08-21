@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { ResolvedMount, SurfaceName } from '../../types/mount-surface.js';
+import type { ResolvedMount, SurfaceName } from '../../sdk/mount-surface.js';
 import { useScena } from '../ScenaProvider.js';
 
 export function useMounts(surface: SurfaceName): ResolvedMount[] {

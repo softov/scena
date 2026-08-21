@@ -5,7 +5,7 @@ import { renderHook, act } from '@testing-library/react';
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { useStore } from '../../src/react/hooks/useStore.js';
-import type { BindingPath } from '../../src/types/component-graph.js';
+import type { BindingPath } from '../../src/sdk/component-graph.js';
 
 const p = (s: string) => s as BindingPath;
 const tick = () => new Promise<void>((r) => setTimeout(r, 0));

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useI18n } from './hooks/useI18n.js';
-import type { TranslateOptions } from '../i18n/registry.js';
+import type { TranslateOptions } from '../core/i18n/registry.js';
 
 export interface TranslateProps {
   // Message key, e.g. 'user/nameLabel' (dots or slashes). With `ns` it's

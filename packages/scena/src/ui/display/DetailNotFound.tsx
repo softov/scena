@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { translate } from '../../i18n/registry.js';
+import { translate } from '../../core/i18n/registry.js';
 import { Button, type ButtonProps } from '../control/Button.js';
-import type { ResourceColor } from '../../types/colors.js';
+import type { ResourceColor } from '../../sdk/colors.js';
 
 export interface DetailNotFoundAction {
   label: string;

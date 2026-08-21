@@ -4,8 +4,8 @@ import { render, cleanup, act } from '@testing-library/react';
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { SurfaceArea } from '../../src/react/SurfaceArea.js';
-import type { Scena } from '../../src/types/scena.js';
-import type { SurfacePresentation } from '../../src/types/layout.js';
+import type { Scena } from '../../src/sdk/scena.js';
+import type { SurfacePresentation } from '../../src/sdk/layout.js';
 import type { SurfaceResizeSpec } from '../../src/react/useSurfaceResize.js';
 
 // jsdom lays nothing out, so every element measures 0. The drag reads the

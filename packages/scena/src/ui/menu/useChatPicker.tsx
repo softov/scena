@@ -9,8 +9,8 @@ import {
   type ReactNode,
   type SetStateAction,
 } from 'react';
-import type { PickerAction, HostCtx, ListSpec } from '../../types/host.js';
-import type { BindingPath } from '../../types/component-graph.js';
+import type { PickerAction, HostCtx, ListSpec } from '../../sdk/host.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import {
   canonicalShortcut,

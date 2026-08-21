@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createReactiveStore } from '../../src/core/reactive-store.js';
-import { createEventBus } from '../../src/controls/events.js';
-import type { ReactiveStore } from '../../src/types/reactive-store.js';
-import type { BindingPath } from '../../src/types/component-graph.js';
+import { createReactiveStore } from '../../src/core/store/reactive-store.js';
+import { createEventBus } from '../../src/core/controls/events.js';
+import type { ReactiveStore } from '../../src/sdk/reactive-store.js';
+import type { BindingPath } from '../../src/sdk/component-graph.js';
 
 const p = (s: string) => s as BindingPath;
 function mk() {

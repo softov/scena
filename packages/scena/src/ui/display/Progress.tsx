@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { resolveColorVar, type ResourceColor } from '../../types/colors.js';
+import { resolveColorVar, type ResourceColor } from '../../sdk/colors.js';
 import './Progress.css';
 
 export interface ProgressProps {

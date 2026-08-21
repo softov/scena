@@ -1,4 +1,4 @@
-import type { Disposable } from '../types/disposable.js';
+import type { Disposable } from '../sdk/disposable.js';
 
 // Plugin-side client handlers for FunctionCall ids that need an inline JS
 // implementation (typically declared with `callableFrom: 'clientOnly'`).

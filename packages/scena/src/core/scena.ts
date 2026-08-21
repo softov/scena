@@ -1,25 +1,25 @@
-import type { BindingPath } from '../types/component-graph.js';
-import type { CreateScena, CreateScenaOptions, Scena } from '../types/scena.js';
-import type { SocketBridge } from '../types/reactive-store.js';
-import type { SurfaceName } from '../types/mount-surface.js';
+import type { BindingPath } from '../sdk/component-graph.js';
+import type { CreateScena, CreateScenaOptions, Scena } from '../sdk/scena.js';
+import type { SocketBridge } from '../sdk/reactive-store.js';
+import type { SurfaceName } from '../sdk/mount-surface.js';
 
-import { createEventBus } from '../controls/events.js';
-import { createWhenEngine } from '../controls/when.js';
-import { createCommandRegistry } from '../controls/command.js';
-import { createKeybindingRegistry } from '../controls/keybinding.js';
-import { createLayoutAPI, createLayoutRegistry } from '../controls/layout.js';
-import { createSessionAPI } from '../controls/session.js';
-import { createShellRegistry } from '../controls/shell.js';
-import { createManifestAPI } from '../controls/manifest.js';
+import { createEventBus } from './controls/events.js';
+import { createWhenEngine } from './controls/when.js';
+import { createCommandRegistry } from './controls/command.js';
+import { createKeybindingRegistry } from './controls/keybinding.js';
+import { createLayoutAPI, createLayoutRegistry } from './controls/layout.js';
+import { createSessionAPI } from './controls/session.js';
+import { createShellRegistry } from './controls/shell.js';
+import { createManifestAPI } from './controls/manifest.js';
 
-import { createPermissionEngine } from './permissions.js';
-import { createReactiveStore } from './reactive-store.js';
-import { createBindingResolver } from './binding-resolver.js';
-import { createComponentRegistry } from './component-registry.js';
-import { createConverterRegistry } from './converter-registry.js';
-import { createMountSurfaceRegistry } from './mount-surface.js';
-import { createMountMenuRegistry } from './mount-menu.js';
-import { registerBuiltinFunctions } from '../runtime/builtins.js';
+import { createPermissionEngine } from './resolve/permissions.js';
+import { createReactiveStore } from './store/reactive-store.js';
+import { createBindingResolver } from './resolve/binding-resolver.js';
+import { createComponentRegistry } from './registry/component-registry.js';
+import { createConverterRegistry } from './registry/converter-registry.js';
+import { createMountSurfaceRegistry } from './graph/mount-surface.js';
+import { createMountMenuRegistry } from './graph/mount-menu.js';
+import { registerBuiltinFunctions } from './builtins.js';
 
 interface CreateScenaInternalOptions extends CreateScenaOptions {
   socket?: SocketBridge;

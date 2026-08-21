@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { registerMessages, setLocale, clearMessages } from '../../src/i18n/registry.js';
+import { registerMessages, setLocale, clearMessages } from '../../src/core/i18n/registry.js';
 import { useI18n } from '../../src/react/hooks/useI18n.js';
 
 beforeEach(() => clearMessages());

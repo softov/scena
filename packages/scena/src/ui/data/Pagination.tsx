@@ -2,8 +2,8 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useStore } from '../../react/hooks/useStore.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
-import type { BindingPath } from '../../types/component-graph.js';
-import type { ListView, Query } from '../../types/query.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
+import type { ListView, Query } from '../../sdk/query.js';
 
 export interface PaginationProps {
   // Resource namespace; reads `$/<namespace>/view` + `$/<namespace>/query`.

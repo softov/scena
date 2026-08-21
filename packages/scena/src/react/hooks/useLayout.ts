@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { ScenaLayout } from '../../types/layout.js';
+import type { ScenaLayout } from '../../sdk/layout.js';
 import { useScena } from '../ScenaProvider.js';
 
 const EMPTY: ScenaLayout = { surfaces: {} };

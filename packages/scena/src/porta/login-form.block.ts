@@ -1,4 +1,4 @@
-import type { ComponentNode } from '../types/component-graph.js';
+import type { ComponentNode } from '../sdk/component-graph.js';
 
 // Declarative equivalent of <LoginForm />. Reference 'Porta.LoginForm' from
 // agent-sent payloads or any ComponentNode tree.

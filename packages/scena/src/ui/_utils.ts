@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
-import { resolveLabel } from '../core/label.js';
-import type { Label } from '../types/label.js';
-import { translate } from '../i18n/registry.js';
+import { resolveLabel } from '../sdk/label.js';
+import type { Label } from '../sdk/label.js';
+import { translate } from '../core/i18n/registry.js';
 
 // Resolve a Label (string | { t }) to a plain string for non-reactive contexts.
 // `{ path }` titles are resolved reactively by the layout headers via

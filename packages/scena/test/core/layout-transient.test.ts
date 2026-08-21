@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createReactiveStore } from '../../src/core/reactive-store.js';
-import { createEventBus } from '../../src/controls/events.js';
-import { createLayoutAPI } from '../../src/controls/layout.js';
-import type { BindingPath } from '../../src/types/component-graph.js';
-import type { LayoutStorage, ScenaLayout } from '../../src/types/layout.js';
+import { createReactiveStore } from '../../src/core/store/reactive-store.js';
+import { createEventBus } from '../../src/core/controls/events.js';
+import { createLayoutAPI } from '../../src/core/controls/layout.js';
+import type { BindingPath } from '../../src/sdk/component-graph.js';
+import type { LayoutStorage, ScenaLayout } from '../../src/sdk/layout.js';
 
 const SIZE = '$/layout/surfaces/sidebar:left/size' as BindingPath;
 

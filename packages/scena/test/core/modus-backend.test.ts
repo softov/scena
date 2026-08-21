@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createReactiveStore } from '../../src/core/reactive-store.js';
-import { createEventBus } from '../../src/controls/events.js';
-import { createModusBackend } from '../../src/core/backends/modus-backend.js';
-import type { ScopeBackendFactory } from '../../src/types/scope-backend.js';
-import type { BindingPath } from '../../src/types/component-graph.js';
+import { createReactiveStore } from '../../src/core/store/reactive-store.js';
+import { createEventBus } from '../../src/core/controls/events.js';
+import { createModusBackend } from '../../src/core/store/backends/modus-backend.js';
+import type { ScopeBackendFactory } from '../../src/sdk/scope-backend.js';
+import type { BindingPath } from '../../src/sdk/component-graph.js';
 
 const p = (s: string) => s as BindingPath;
 const tick = () => new Promise<void>((r) => setTimeout(r, 0));

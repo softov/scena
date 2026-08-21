@@ -1,6 +1,6 @@
-import { translate } from '../../i18n/registry.js';
-import { BindingPath } from '../../types/component-graph.js';
-import { Label } from '../../types/label.js';
+import { translate } from '../../core/i18n/registry.js';
+import { BindingPath } from '../../sdk/component-graph.js';
+import { Label } from '../../sdk/label.js';
 import { useStore } from './useStore.js';
 
 const EMPTY_LABEL_PATH = '$/__label__/empty' as BindingPath;

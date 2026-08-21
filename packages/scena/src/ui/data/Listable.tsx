@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { BindingPath } from '../../types/component-graph.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import './Listable.css';
 

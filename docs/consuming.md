@@ -187,7 +187,7 @@ all. Anything that must be seen belongs somewhere that is always mounted, or
 behind a command that reveals its surface first.
 
 **Reaching into `core/` for a type.** If a contract is only expressible by
-importing a runtime module, the contract has a hole. Fix `types/`.
+importing a runtime module, the contract has a hole. Fix `sdk/`.
 
 ## Theming
 

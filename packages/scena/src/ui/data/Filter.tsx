@@ -2,8 +2,8 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useStore } from '../../react/hooks/useStore.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
-import type { BindingPath } from '../../types/component-graph.js';
-import type { Query, WhereClause, WhereOp } from '../../types/query.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
+import type { Query, WhereClause, WhereOp } from '../../sdk/query.js';
 
 // A preset filter chip — toggles a fixed where clause on/off.
 export interface FilterField {

@@ -1,7 +1,7 @@
 import { type CSSProperties, type MouseEvent as ReactMouseEvent, useSyncExternalStore } from 'react';
 import { useCampus } from './context.js';
 import type { CampusMappaNode } from './types.js';
-import { resolveColorAlpha } from '../../types/colors.js';
+import { resolveColorAlpha } from '../../sdk/colors.js';
 
 // Floating minimap overlay for a CampusView. Pulls container size + viewport
 // from CampusContext so it can compute the visible-region rectangle without

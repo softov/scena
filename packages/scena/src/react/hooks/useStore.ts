@@ -1,9 +1,9 @@
 import { useMemo, useSyncExternalStore } from 'react';
-import type { BindingPath } from '../../types/component-graph.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 import { useScena } from '../ScenaProvider.js';
 import { useCurrentMountKey, useDataContext } from '../mount-context.js';
-import { rewriteLocal } from '../../core/reactive-store.js';
-import { joinAbsolute, readPath } from '../../core/path-resolver.js';
+import { rewriteLocal } from '../../core/store/reactive-store.js';
+import { joinAbsolute, readPath } from '../../core/resolve/path-resolver.js';
 
 function resolveForRead(
   path: BindingPath,

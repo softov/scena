@@ -3,7 +3,7 @@ import {
   resolveSurfacePresentation,
   isOverlaid,
   type PresentationPolicy,
-} from '../../src/core/surface-presentation.js';
+} from '../../src/core/graph/surface-presentation.js';
 
 // A policy resembling what an app would write. It lives here, not in the
 // library — scena ships the mechanism, the app ships the opinion.

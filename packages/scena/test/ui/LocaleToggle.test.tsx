@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { registerLocale, registerMessages, setLocale, getLocale, clearMessages } from '../../src/i18n/registry.js';
+import { registerLocale, registerMessages, setLocale, getLocale, clearMessages } from '../../src/core/i18n/registry.js';
 import { LocaleToggle } from '../../src/ui/control/LocaleToggle.js';
 
 beforeEach(() => clearMessages());

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { LayoutProps } from '../../types/layout.js';
+import type { LayoutProps } from '../../sdk/layout.js';
 
 // Horizontal inline row. Used for the statusbar. Mount order matches
 // listAt() order; the StatusItem component handles its own side/priority
