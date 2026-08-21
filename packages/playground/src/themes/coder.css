@@ -1,0 +1,89 @@
+/*
+ * Coder — purple nuances, in the Night Owl register.
+ *
+ * Dark is the real one: a deep indigo-violet ground with Night Owl's syntax
+ * palette carried onto the semantic tokens (#c792ea accent, #addb67 success,
+ * #ffcb6b warning, #82aaff info). Light is a day counterpart rather than an
+ * inversion — the same hue family, lifted, with the accent darkened enough to
+ * stay readable on white.
+ *
+ * Overrides the `--oo-rgb-*` channels, so alpha compositing keeps working.
+ */
+[data-theme='coder'][data-theme-mode='dark'] {
+  color-scheme: dark;
+
+  --oo-rgb-canvas: 27 20 41;
+  --oo-rgb-panel: 34 25 51;
+  --oo-rgb-surface: 30 22 45;
+  --oo-rgb-raised: 44 33 66;
+
+  --oo-rgb-titlebar: 23 17 35;
+  --oo-rgb-activitybar: 23 17 35;
+  --oo-rgb-sidebar: var(--oo-rgb-panel);
+  --oo-rgb-statusbar: 23 17 35;
+
+  --oo-rgb-text: 214 222 235;
+  --oo-rgb-muted: 133 126 168;
+  --oo-rgb-subtle: 106 100 138;
+  --oo-rgb-inverse: 27 20 41;
+
+  --oo-rgb-hover: 48 36 71;
+  --oo-rgb-active: 62 46 92;
+  --oo-rgb-selected: 58 43 86;
+
+  --oo-rgb-line: 138 122 186;
+  --oo-rgb-border: 138 122 186;
+  --oo-line-alpha: 0.22;
+  --oo-border-alpha: 0.3;
+
+  --oo-rgb-accent: 199 146 234;
+  --oo-rgb-primary: var(--oo-rgb-accent);
+  --oo-rgb-danger: 239 83 80;
+  --oo-rgb-success: 173 219 103;
+  --oo-rgb-warning: 255 203 107;
+  --oo-rgb-info: 130 170 255;
+
+  --oo-font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', monospace;
+
+  --oo-shadow-sm: 0 1px 2px rgb(9 5 18 / 0.5);
+  --oo-shadow-md: 0 4px 10px rgb(9 5 18 / 0.55);
+  --oo-shadow-lg: 0 12px 28px rgb(9 5 18 / 0.6);
+}
+
+[data-theme='coder'][data-theme-mode='light'] {
+  color-scheme: light;
+
+  --oo-rgb-canvas: 252 250 255;
+  --oo-rgb-panel: 245 241 252;
+  --oo-rgb-surface: 255 255 255;
+  --oo-rgb-raised: 255 255 255;
+
+  --oo-rgb-titlebar: var(--oo-rgb-panel);
+  --oo-rgb-activitybar: var(--oo-rgb-panel);
+  --oo-rgb-sidebar: var(--oo-rgb-panel);
+  --oo-rgb-statusbar: var(--oo-rgb-panel);
+
+  --oo-rgb-text: 44 32 66;
+  --oo-rgb-muted: 122 110 148;
+  --oo-rgb-subtle: 150 140 172;
+  --oo-rgb-inverse: 255 255 255;
+
+  --oo-rgb-hover: 240 234 250;
+  --oo-rgb-active: 231 222 246;
+  --oo-rgb-selected: 236 228 250;
+
+  --oo-rgb-line: 168 148 208;
+  --oo-rgb-border: 168 148 208;
+  --oo-line-alpha: 0.35;
+  --oo-border-alpha: 0.45;
+
+  /* Darkened from #c792ea — the dark accent is unreadable on white. */
+  --oo-rgb-accent: 124 58 190;
+  --oo-rgb-primary: var(--oo-rgb-accent);
+  --oo-rgb-danger: 199 54 51;
+  --oo-rgb-success: 92 140 40;
+  --oo-rgb-warning: 176 122 12;
+  --oo-rgb-info: 48 96 200;
+
+  --oo-font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', monospace;
+}

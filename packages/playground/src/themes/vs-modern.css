@@ -1,0 +1,88 @@
+/*
+ * VS Modern — the current VS Code look (the "Modern" default, not the older
+ * Dark+ / Light+ pair).
+ *
+ * Distinguishing traits worth having in the set: the chrome is *darker* than
+ * the canvas rather than lighter (#181818 panels against a #1f1f1f editor),
+ * and the separators are opaque hairlines rather than washes — so both alpha
+ * tokens sit at 1 and the line colour carries the value directly. That is the
+ * opposite arrangement from `paper`, which is why the two are useful together.
+ */
+[data-theme='vs-modern'][data-theme-mode='dark'] {
+  color-scheme: dark;
+
+  --oo-rgb-canvas: 31 31 31;
+  --oo-rgb-panel: 24 24 24;
+  --oo-rgb-surface: 31 31 31;
+  --oo-rgb-raised: 43 43 43;
+
+  --oo-rgb-titlebar: 24 24 24;
+  --oo-rgb-activitybar: 24 24 24;
+  --oo-rgb-sidebar: 24 24 24;
+  --oo-rgb-statusbar: 24 24 24;
+
+  --oo-rgb-text: 204 204 204;
+  --oo-rgb-muted: 154 154 154;
+  --oo-rgb-subtle: 122 122 122;
+  --oo-rgb-inverse: 31 31 31;
+
+  --oo-rgb-hover: 42 42 42;
+  --oo-rgb-active: 55 55 55;
+  --oo-rgb-selected: 4 57 94;
+
+  /* Opaque hairlines, the way VS Code draws them. */
+  --oo-rgb-line: 45 45 45;
+  --oo-rgb-border: 60 60 60;
+  --oo-line-alpha: 1;
+  --oo-border-alpha: 1;
+
+  --oo-rgb-accent: 0 120 212;
+  --oo-rgb-primary: var(--oo-rgb-accent);
+  --oo-rgb-danger: 244 71 71;
+  --oo-rgb-success: 137 209 133;
+  --oo-rgb-warning: 204 167 0;
+  --oo-rgb-info: 117 190 255;
+
+  --oo-radius-sm: 2px;
+  --oo-radius-md: 4px;
+  --oo-radius-lg: 6px;
+}
+
+[data-theme='vs-modern'][data-theme-mode='light'] {
+  color-scheme: light;
+
+  --oo-rgb-canvas: 255 255 255;
+  --oo-rgb-panel: 248 248 248;
+  --oo-rgb-surface: 255 255 255;
+  --oo-rgb-raised: 255 255 255;
+
+  --oo-rgb-titlebar: 248 248 248;
+  --oo-rgb-activitybar: 248 248 248;
+  --oo-rgb-sidebar: 248 248 248;
+  --oo-rgb-statusbar: 248 248 248;
+
+  --oo-rgb-text: 59 59 59;
+  --oo-rgb-muted: 97 97 97;
+  --oo-rgb-subtle: 128 128 128;
+  --oo-rgb-inverse: 255 255 255;
+
+  --oo-rgb-hover: 240 240 240;
+  --oo-rgb-active: 230 230 230;
+  --oo-rgb-selected: 227 240 254;
+
+  --oo-rgb-line: 237 237 237;
+  --oo-rgb-border: 229 229 229;
+  --oo-line-alpha: 1;
+  --oo-border-alpha: 1;
+
+  --oo-rgb-accent: 0 95 184;
+  --oo-rgb-primary: var(--oo-rgb-accent);
+  --oo-rgb-danger: 205 49 49;
+  --oo-rgb-success: 16 130 54;
+  --oo-rgb-warning: 191 136 0;
+  --oo-rgb-info: 23 116 189;
+
+  --oo-radius-sm: 2px;
+  --oo-radius-md: 4px;
+  --oo-radius-lg: 6px;
+}
