@@ -47,13 +47,28 @@ export function SectionHeader({ title, icon, color, actions = [] }: SectionHeade
           {actions.map((a) => {
             const text = label(a);
             return (
-              <button key={a.command} type="button" title={text} aria-label={text} onClick={() => run(a.command)} style={iconBtn}>
+              <button
+                className="oo-btn oo-btn--icon"
+                data-variant="ghost"
+                key={a.command}
+                type="button"
+                title={text}
+                aria-label={text}
+                onClick={() => run(a.command)}
+                style={iconBtn}>
                 {a.icon ?? text ?? '•'}
               </button>
             );
           })}
           {actions.length ? (
-            <button type="button" title="More actions" aria-label="More actions" onClick={openMenu} style={iconBtn}>
+            <button
+              className="oo-btn oo-btn--icon"
+              data-variant="ghost"
+              type="button"
+              title="More actions"
+              aria-label="More actions"
+              onClick={openMenu}
+              style={iconBtn}>
               ⋯
             </button>
           ) : null}
@@ -92,16 +107,13 @@ const headerStyle: CSSProperties = {
   fontSize: 'var(--oo-font-size-xs)',
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
-  color: 'var(--oo-color-muted)',
   userSelect: 'none',
   minWidth: 0,
   minHeight: 32,
 };
-const iconBtn: CSSProperties = {
+const iconBtn: CSSProperties & { '--button-color'?: string } = {
   background: 'transparent',
   border: 'none',
-  color: 'var(--oo-color-muted)',
-  cursor: 'pointer',
   font: 'inherit',
   fontSize: 'var(--oo-font-size-sm)',
   lineHeight: 1,
