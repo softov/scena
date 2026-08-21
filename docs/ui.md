@@ -30,13 +30,20 @@ registers all of them.
 
 `ButtonBar` is the button that goes in a bar — one component for the title bar
 and the status bar rather than two, because the difference between them is
-presentational and carried by `[data-surface]` in CSS, not by a prop.
+presentational and carried by `[data-surface-role='bar']` in CSS, not by a prop.
+The role is stamped by the shell, so an app's own alert band gets the same
+treatment without CSS anywhere learning its name.
 
 `ThemePicker` and `ThemeModeToggle` are views over `$/ui/theme/id` and
 `$/ui/theme/mode`. They write the store and nothing else; the applying is
 `registerThemeController`'s job (see **Theming** below). That is what lets a
 picker in the title bar and a select in a settings panel agree without knowing
 about each other.
+
+`ThemePicker` renders nothing below two choices. One theme is not a choice, and
+a select with a single option is a control that cannot do anything — so an app
+that ships only the built-in theme can mount it unconditionally and it stays out
+of the way until a second theme is registered.
 
 **`ui/forms`** — `Form` (+ `FormContext`, `useFormContext`), `Field` with
 `FieldLabel` / `FieldHint` / `FieldError`, `FieldGroup`, `FormSection`,
@@ -67,6 +74,21 @@ could not otherwise agree on which one is current. Clicking runs `command` if
 given and then executes `sidebar.activate`. That command is **not** part of
 scena: what activating means — which surface, whether it also reveals — is the
 app's decision.
+
+It carries up to two counts. `badge` sits in the bottom corner and `secondBadge`
+in the top one, so neither moves when the other appears, and each takes its own
+`badgeTone` (`accent` | `info` | `danger` | `warning` | `success` | `muted`).
+Reach for the second only where a section genuinely answers two questions
+somebody acts on differently — how many agents are working now, and how many
+finished without anybody reading them; one is activity, the other a backlog, and
+a sum would name neither. A third would be a chart on a 44-pixel icon.
+
+Zero draws no badge (a rail of zeroes reads as a fault when it means "nothing to
+do"), and a count over 99 is written `99+` because three digits do not fit the
+pill. Both `badgeLabel`s feed the accessible name, which keeps the true number:
+`Live sessions: 412 running, 5 unread`. Colour is the only thing separating the
+two badges on screen, which is no separation at all for a lot of people — the
+sentence is where they are actually told apart.
 
 **`ui/display`** — `Card`, `Divider`, `Text`, `SectionTitle`, `Image`, `Icon`,
 `Alert`, `Badge` (with `BadgeTone`), `Progress`, `Spinner`, `Skeleton`,
