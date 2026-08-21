@@ -72,31 +72,32 @@ breakpoint and `contextMenuSlot` + `contextFor`. Writing that by hand is exactly
 how an app ends up with a fourth copy of a catalog component — worth recording
 as the failure mode, since it happened here while writing this app.
 
-**`DefaultShell` ignores the presentation policy.** It renders from `visible`
-and `size` only, so on a narrow viewport a sidebar keeps taking width from
-`main` instead of lifting over it. The status bar here carries a
-`PresentationProbe` that resolves the policy and reports the mismatch live —
-narrow the window and it reads `small · policy wants floating · shell still
-docked`.
+**`DefaultShell` ignored the presentation policy** — it rendered from `visible`
+and `size` only, so on a narrow viewport a sidebar kept taking width from `main`
+instead of lifting over it. Half the mechanism already shipped:
+`.oo-surface-scrim` was styled in `styles/surface.css` and
+`resolveSurfacePresentation` / `isOverlaid` were exported, but no scena
+component ever rendered a scrim. Only Advisor's hand-written `AppShell` did.
 
-Worse, **half that mechanism already ships**. `.oo-surface-scrim` is styled in
-scena's `styles/surface.css`, and `resolveSurfacePresentation` / `isOverlaid`
-are exported from the root — but no scena component ever renders a scrim. Only
-Advisor's hand-written `AppShell` does. The CSS and the resolver are in the
-package; the shell that would use them is not.
+**Fixed.** The shell now takes a `presentation` policy, resolves it per surface,
+stops reserving width for a surface that no longer takes any, and renders the
+scrim — as a `<button>`, so "tap beside it to close" is also true from a
+keyboard. It also resizes by each surface's own edge instead of placing a
+`ShellSplitter` between them, which is what lets resizing stand down by itself
+once a surface floats and has nothing to drag against.
 
-(Also minor: `DefaultShell` sets `className="oo-shell"` and no stylesheet
+The `PresentationProbe` in the status bar was the complaint; it is now a live
+readout of what the policy resolves to at the current size.
+
+(Still minor: `DefaultShell` sets `className="oo-shell"` and no stylesheet
 defines that class. It lays itself out with inline styles, so nothing is
 broken, but the hook a consumer would expect to style is not there.)
 
-Advisor closes this in `shell/compact.ts` (133 lines plus a 192-line test): a
-drawer behaviour keyed on `isOverlaid(resolveSurfacePresentation(...))` rather
-than on the size class, with three rules — opening a record closes the drawer,
-clicking outside closes it, and only one is open at a time. The only
-Advisor-specific thing in it is the policy, which is already a parameter.
-
-That is the next thing to lift, and it is being left until this app has shown
-what the API should look like from a second consumer's side.
+What this does *not* settle is Advisor's `shell/compact.ts` (133 lines plus a
+192-line test), which adds drawer *policy* on top: opening a record closes the
+drawer, and only one is open at a time. Those are app opinions about two
+competing sidebars, and they are the part that should stay in an app — the
+mechanism they were built on is now in the shell.
 
 ## Layout
 

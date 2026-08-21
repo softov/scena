@@ -1,7 +1,7 @@
 import type { Disposable, Scena } from '@softov/scena/types';
 import { combineDisposables, isOverlaid, resolveSurfacePresentation } from '@softov/scena';
 import type { ModusClass } from '@softov/scena';
-import { useLayout, useStore } from '@softov/scena/react';
+import { useStore } from '@softov/scena/react';
 import { DEMO_PRESENTATION } from './presentation.js';
 
 import './chrome.css';
@@ -17,7 +17,7 @@ import './chrome.css';
  * nothing here implements them.
  *
  * What remains is the two things that genuinely belong to this app: its title,
- * and a probe for a gap that has not been closed yet.
+ * and a live readout of what the presentation policy resolves to.
  */
 
 function AppTitle({ text }: { text?: string }) {
@@ -25,27 +25,21 @@ function AppTitle({ text }: { text?: string }) {
 }
 
 /**
- * The open gap, made visible instead of only written down.
+ * What the policy resolves to at the current size, live.
  *
- * Resolves the presentation this app's policy asks for at the current size
- * class, and reports it next to what the shell is actually doing. Narrow the
- * window: this reads `floating` (or `sheet`) while DefaultShell keeps the
- * sidebar docked and taking width from `main`, because DefaultShell renders
- * from `visible`/`size` and never consults a policy.
- *
- * Advisor closes that gap in shell/compact.ts. Nothing equivalent ships, which
- * is what this app exists to make obvious.
+ * This started as a complaint: DefaultShell rendered from `visible`/`size` and
+ * never consulted a policy, so it read `policy wants floating · shell still
+ * docked` and stayed that way. The shell reads the policy now, so it is a
+ * readout rather than a gap -- kept because a size class you can see is the
+ * fastest way to check the responsive behaviour by hand.
  */
 function PresentationProbe() {
   const modus = useStore<ModusClass>('$/modus/class') ?? 'large';
-  const layout = useLayout();
   const wanted = resolveSurfacePresentation('sidebar:left', modus, DEMO_PRESENTATION);
-  const docked = layout.surfaces['sidebar:left']?.visible ?? true;
-  const mismatch = isOverlaid(wanted) && docked;
   return (
-    <span className="demo-status-item" data-warn={mismatch}>
-      {modus} · policy wants <strong>{wanted}</strong>
-      {mismatch ? ' · shell still docked' : ''}
+    <span className="demo-status-item">
+      {modus} · sidebar <strong>{wanted}</strong>
+      {isOverlaid(wanted) ? ' (over main)' : ''}
     </span>
   );
 }
@@ -88,8 +82,9 @@ export function registerChrome(scena: Scena): Disposable {
       key: 'chrome:presentation',
       resource: { component: 'PresentationProbe' },
     }),
-    // The same ButtonBar the title bar uses; the status bar styles it smaller
-    // and quieter through `.oo-bar--statusbar`, not through a prop.
+    // The same ButtonBar the title bar uses. It is smaller and quieter in both
+    // bars, from `[data-surface-role='bar']` -- the role the shell stamps,
+    // not a prop and not the surface's name.
     scena.surfaces.mount({
       surface: 'statusbar',
       key: 'chrome:notes-count',
