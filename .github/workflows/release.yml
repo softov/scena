@@ -10,6 +10,13 @@ permissions:
   # no PAT to create or rotate — as long as the package scope (@softov) matches
   # the repository owner, which GitHub Packages requires.
   packages: write
+  # The npmjs publish, via trusted publishing. `npm publish` exchanges this
+  # short-lived OIDC token for a publish credential, so there is no npm token
+  # anywhere — not in a secret, not to rotate, and nothing to leak. npm trusts
+  # this repository and this workflow *filename*, which is registered on the
+  # package's Trusted Publisher settings: renaming this file breaks publishing
+  # until the registration is updated to match.
+  id-token: write
 
 jobs:
   publish:
@@ -51,26 +58,33 @@ jobs:
       # included, so `pnpm add @softov/scena` only works with nothing configured
       # if the package is here.
       #
-      # `setup-node` is re-run rather than configured once, because it writes a
-      # single `//<host>/:_authToken` line — one registry per invocation, and
-      # these two need different credentials.
+      # Trusted publishing (OIDC), not a token. The account requires 2FA for
+      # publishing, which is right, and a classic Publish token is challenged
+      # for a one-time password it cannot answer from CI — every tagged release
+      # died on `EOTP` at this step. An Automation token would have skipped the
+      # challenge, but npm is retiring that: 2FA-bypass tokens lose direct
+      # publish in early 2027. This is where it was going to end up anyway.
       #
-      # No `--registry` flag: publishConfig.registry already names npmjs, so a
-      # publish run by hand from packages/scena goes to the same place as this.
+      # No `setup-node` with a registry-url here, deliberately. It writes an
+      # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` line, and an empty
+      # token is worse than no token: it is an authorization attempt that fails
+      # instead of the OIDC exchange that would have worked. publishConfig
+      # already names the registry, so nothing has to.
+      #
       # `--access public` is in publishConfig too — scoped packages default to
       # `restricted`, and restricted needs a paid plan, so without it the
       # publish fails rather than quietly going private.
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
-          scope: '@softov'
+
+      # Node 22 ships npm 10, and OIDC publishing needs 11.5.1+. Safe to take
+      # the newest: npm 12's breaking changes are all install-time defaults
+      # (lifecycle scripts, git and remote dependencies), and nothing here
+      # installs with npm — pnpm does that, three steps up.
+      - name: An npm new enough to speak OIDC
+        run: npm install -g npm@latest
 
       - name: Publish to npm
         run: npm publish
         working-directory: packages/scena
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # ── GitHub Packages ──────────────────────────────────────────────────
       # `--registry` is explicit here and required: a command-line registry is
@@ -78,8 +92,10 @@ jobs:
       # npmjs. Without the flag this step publishes to npm a second time and
       # fails on the duplicate version.
       #
-      # No `--provenance` anywhere: that is an npmjs attestation and GitHub
-      # Packages rejects it, and the same `npm publish` serves both.
+      # No `--provenance` flag anywhere. npmjs gets provenance for free now —
+      # trusted publishing generates it, which is half the reason to want it —
+      # and GitHub Packages rejects the attestation, so it must not be asked
+      # for on this second, separate `npm publish`.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
