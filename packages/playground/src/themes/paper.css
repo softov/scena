@@ -1,0 +1,92 @@
+/*
+ * Paper — borderless.
+ *
+ * The point of this one is `--oo-line-alpha` / `--oo-border-alpha` set to 0:
+ * every rule that draws a separator resolves to a transparent colour, so the
+ * whole catalog has to hold together on surface contrast and spacing alone.
+ * That is the test — anything that only reads as a component because it has a
+ * box around it will look broken here, and should.
+ *
+ * Overrides the `--oo-rgb-*` channels rather than the resolved `--oo-color-*`,
+ * so alpha compositing (hover washes, alert tints, scrollbars) keeps working.
+ */
+[data-theme='paper'][data-theme-mode='light'] {
+  color-scheme: light;
+
+  --oo-rgb-canvas: 253 252 248;
+  --oo-rgb-panel: 248 246 240;
+  --oo-rgb-surface: 255 254 251;
+  --oo-rgb-raised: 255 255 255;
+
+  --oo-rgb-titlebar: var(--oo-rgb-canvas);
+  --oo-rgb-activitybar: var(--oo-rgb-panel);
+  --oo-rgb-sidebar: var(--oo-rgb-panel);
+  --oo-rgb-statusbar: var(--oo-rgb-canvas);
+
+  --oo-rgb-text: 42 40 36;
+  --oo-rgb-muted: 122 118 110;
+  --oo-rgb-subtle: 158 154 146;
+  --oo-rgb-inverse: 253 252 248;
+
+  --oo-rgb-hover: 240 237 230;
+  --oo-rgb-active: 232 228 219;
+  --oo-rgb-selected: 236 232 221;
+
+  /* Borderless. Separation comes from surface contrast, not from lines. */
+  --oo-rgb-line: 42 40 36;
+  --oo-rgb-border: 42 40 36;
+  --oo-line-alpha: 0;
+  --oo-border-alpha: 0;
+
+  /* Fountain-pen ink, not a UI blue. */
+  --oo-rgb-accent: 88 96 132;
+  --oo-rgb-primary: var(--oo-rgb-accent);
+  --oo-rgb-danger: 168 62 54;
+  --oo-rgb-success: 78 122 72;
+  --oo-rgb-warning: 168 122 38;
+  --oo-rgb-info: var(--oo-rgb-accent);
+
+  /* Paper does not float. */
+  --oo-shadow-sm: none;
+  --oo-shadow-md: 0 1px 3px rgb(42 40 36 / 0.07);
+  --oo-shadow-lg: 0 4px 16px rgb(42 40 36 / 0.09);
+}
+
+[data-theme='paper'][data-theme-mode='dark'] {
+  color-scheme: dark;
+
+  --oo-rgb-canvas: 26 24 22;
+  --oo-rgb-panel: 32 30 27;
+  --oo-rgb-surface: 29 27 24;
+  --oo-rgb-raised: 38 36 32;
+
+  --oo-rgb-titlebar: var(--oo-rgb-canvas);
+  --oo-rgb-activitybar: var(--oo-rgb-panel);
+  --oo-rgb-sidebar: var(--oo-rgb-panel);
+  --oo-rgb-statusbar: var(--oo-rgb-canvas);
+
+  --oo-rgb-text: 232 228 219;
+  --oo-rgb-muted: 150 144 134;
+  --oo-rgb-subtle: 118 113 104;
+  --oo-rgb-inverse: 26 24 22;
+
+  --oo-rgb-hover: 42 39 35;
+  --oo-rgb-active: 52 48 43;
+  --oo-rgb-selected: 48 44 39;
+
+  --oo-rgb-line: 232 228 219;
+  --oo-rgb-border: 232 228 219;
+  --oo-line-alpha: 0;
+  --oo-border-alpha: 0;
+
+  --oo-rgb-accent: 198 184 150;
+  --oo-rgb-primary: var(--oo-rgb-accent);
+  --oo-rgb-danger: 214 108 98;
+  --oo-rgb-success: 142 178 132;
+  --oo-rgb-warning: 214 172 96;
+  --oo-rgb-info: var(--oo-rgb-accent);
+
+  --oo-shadow-sm: none;
+  --oo-shadow-md: 0 1px 3px rgb(0 0 0 / 0.35);
+  --oo-shadow-lg: 0 4px 16px rgb(0 0 0 / 0.45);
+}
