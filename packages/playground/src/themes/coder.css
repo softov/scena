@@ -51,6 +51,14 @@
 
   --oo-font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', monospace;
 
+  /* Violet thumb on the dark ground, going to the accent on hover -- the one
+   * place the purple is allowed to be the loudest thing on screen. */
+  --oo-scrollbar-width: 14px;
+  --oo-scrollbar-track-color: rgb(9 6 15 / 0.5);
+  --oo-scrollbar-border-width: 3px;
+  --oo-scrollbar-thumb-color: rgb(132 114 182 / 0.45);
+  --oo-scrollbar-thumb-hover: rgb(199 146 234 / 0.75);
+
   --oo-shadow-sm: 0 1px 2px rgb(4 2 9 / 0.6);
   --oo-shadow-md: 0 4px 10px rgb(4 2 9 / 0.65);
   --oo-shadow-lg: 0 12px 28px rgb(4 2 9 / 0.7);
@@ -90,6 +98,12 @@
   --oo-rgb-success: 92 140 40;
   --oo-rgb-warning: 176 122 12;
   --oo-rgb-info: 48 96 200;
+
+  --oo-scrollbar-width: 14px;
+  --oo-scrollbar-track-color: transparent;
+  --oo-scrollbar-border-width: 3px;
+  --oo-scrollbar-thumb-color: rgb(162 141 204 / 0.5);
+  --oo-scrollbar-thumb-hover: rgb(124 58 190 / 0.7);
 
   --oo-font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', monospace;
 }

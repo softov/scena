@@ -46,6 +46,14 @@
   --oo-rgb-warning: 168 122 38;
   --oo-rgb-info: var(--oo-rgb-accent);
 
+  /* Barely there: a borderless theme that draws a hard scrollbar down its
+   * edge has put back the line it just removed. */
+  --oo-scrollbar-width: 11px;
+  --oo-scrollbar-track-color: transparent;
+  --oo-scrollbar-border-width: 3px;
+  --oo-scrollbar-thumb-color: rgb(42 40 36 / 0.16);
+  --oo-scrollbar-thumb-hover: rgb(42 40 36 / 0.3);
+
   /* Paper does not float. */
   --oo-shadow-sm: none;
   --oo-shadow-md: 0 1px 3px rgb(42 40 36 / 0.07);
@@ -85,6 +93,12 @@
   --oo-rgb-success: 142 178 132;
   --oo-rgb-warning: 214 172 96;
   --oo-rgb-info: var(--oo-rgb-accent);
+
+  --oo-scrollbar-width: 11px;
+  --oo-scrollbar-track-color: transparent;
+  --oo-scrollbar-border-width: 3px;
+  --oo-scrollbar-thumb-color: rgb(232 228 219 / 0.16);
+  --oo-scrollbar-thumb-hover: rgb(232 228 219 / 0.32);
 
   --oo-shadow-sm: none;
   --oo-shadow-md: 0 1px 3px rgb(0 0 0 / 0.35);

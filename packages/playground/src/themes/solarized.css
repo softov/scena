@@ -30,11 +30,11 @@
   --oo-sidebar-right-fg: #586e75;
   
   /* Scrollbar */
-  --scrollbar-width:    15px;
-  --scrollbar-track-color: transparent;
-  --scrollbar-thumb-color: #dbd5c1;
-  --scrollbar-thumb-border: #dbd5c1;
-  --scrollbar-thumb-hover: #586e75;
+  --oo-scrollbar-width:    15px;
+  --oo-scrollbar-track-color: transparent;
+  --oo-scrollbar-thumb-color: #dbd5c1;
+  --oo-scrollbar-border-color: #dbd5c1;
+  --oo-scrollbar-thumb-hover: #586e75;
 }
 
 [data-theme='solarized'][data-theme-mode='dark'] {
@@ -62,15 +62,15 @@
   --oo-sidebar-right-bg: #073642;
   --oo-sidebar-right-fg: #93a1a1;
 
-  --scrollbar-track-color: transparent;
-  --scrollbar-thumb-color: var(--oo-color-border);
-  --scrollbar-thumb-border: var(--oo-color-border);
-  --scrollbar-thumb-hover: var(--oo-color-active);
+  --oo-scrollbar-track-color: transparent;
+  --oo-scrollbar-thumb-color: var(--oo-color-border);
+  --oo-scrollbar-border-color: var(--oo-color-border);
+  --oo-scrollbar-thumb-hover: var(--oo-color-active);
   
   /* Scrollbar */
-  --scrollbar-width:    15px;
-  --scrollbar-track-color: transparent;
-  --scrollbar-thumb-color: #073642;
-  --scrollbar-thumb-border: #073642;
-  --scrollbar-thumb-hover: #586e75;
+  --oo-scrollbar-width:    15px;
+  --oo-scrollbar-track-color: transparent;
+  --oo-scrollbar-thumb-color: #073642;
+  --oo-scrollbar-border-color: #073642;
+  --oo-scrollbar-thumb-hover: #586e75;
 } 
