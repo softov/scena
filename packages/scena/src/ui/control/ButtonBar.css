@@ -38,17 +38,24 @@
 
 .oo-button-bar__value { font-weight: 600; }
 
-/* The title bar / status bar difference is context, not a prop: SurfaceArea
- * stamps `data-surface` on the surface root, so the status bar can style the
- * same component more quietly without the caller choosing a variant.
+/* In a bar, quieter and smaller -- keyed on the ROLE the shell stamped, not on
+ * a surface name, so an app's own `alert:top` gets the same treatment without
+ * scena having heard of it.
  *
- * Two classes here, so this beats `.oo-bar__slot button` in bar.css (one class
- * + one type) rather than tying on specificity and losing to source order. */
-[data-surface='statusbar'] .oo-button-bar {
+ * It deliberately does NOT distinguish the title bar from the status bar. That
+ * difference is real in most editors, but it is an app's opinion about its own
+ * two bars, and an app can express it in one rule keyed on `data-surface`,
+ * which it is free to do because it knows its own surface names. scena styling
+ * the kind, apps styling the identity, is the line.
+ *
+ * The attribute plus the class beats `.oo-bar__slot button` in bar.css (one
+ * class + one type) rather than tying on specificity and losing to source
+ * order. */
+[data-surface-role='bar'] .oo-button-bar {
   height: var(--oo-button-bar-height-sm, 20px);
   color: var(--oo-color-muted);
 }
 
-[data-surface='statusbar'] .oo-button-bar[data-interactive='true']:hover {
+[data-surface-role='bar'] .oo-button-bar[data-interactive='true']:hover {
   color: var(--oo-color-text);
 }

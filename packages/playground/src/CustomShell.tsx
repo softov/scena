@@ -54,17 +54,24 @@ export default function CustomShell() {
       className="oo-shell"
       style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}
     >
-      {titlebarVisible ? <SurfaceArea surface="titlebar" /> : null}
+      {titlebarVisible ? <SurfaceArea surface="titlebar" role="bar" edge="block-end" /> : null}
       {/* `position: relative` so overlaid surfaces position against the shell
           body rather than the viewport. */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden', position: 'relative' }}>
         {activityVisible ? (
-          <SurfaceArea surface="activitybar" presentation={activityPresentation} />
+          <SurfaceArea
+            surface="activitybar"
+            role="rail"
+            edge="inline-end"
+            presentation={activityPresentation}
+          />
         ) : null}
         {sidebarLeftVisible ? (
           <>
             <SurfaceArea
               surface="sidebar:left"
+              role="panel"
+              edge="inline-end"
               presentation={leftPresentation}
               style={leftFloats ? undefined : { width: sidebarLeftWidth, flex: '0 0 auto', overflow: 'hidden' }}
             />
@@ -73,7 +80,7 @@ export default function CustomShell() {
             )}
           </>
         ) : null}
-        <SurfaceArea surface="main" style={{ flex: 1, minWidth: 0, minHeight: 0, overflow: 'hidden' }} />
+        <SurfaceArea surface="main" role="main" style={{ flex: 1, minWidth: 0, minHeight: 0, overflow: 'hidden' }} />
         {sidebarRightVisible ? (
           <>
             {rightFloats ? null : (
@@ -81,6 +88,8 @@ export default function CustomShell() {
             )}
             <SurfaceArea
               surface="sidebar:right"
+              role="panel"
+              edge="inline-start"
               presentation={rightPresentation}
               style={rightFloats ? undefined : { width: sidebarRightWidth, flex: '0 0 auto', overflow: 'hidden' }}
             />
@@ -88,7 +97,7 @@ export default function CustomShell() {
         ) : null}
         {scrimVisible ? <div className="oo-surface-scrim" /> : null}
       </div>
-      {statusVisible ? <SurfaceArea surface="statusbar" /> : null}
+      {statusVisible ? <SurfaceArea surface="statusbar" role="bar" edge="block-start" /> : null}
     </div>
   );
 }

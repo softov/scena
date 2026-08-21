@@ -9,8 +9,10 @@ import {
 import type {
   LayoutDefinition,
   LayoutProps,
+  SurfaceEdge,
   SurfaceLayoutState,
   SurfacePresentation,
+  SurfaceRole,
 } from '../sdk/layout.js';
 import type { SurfaceName, ResolvedMount } from '../sdk/mount-surface.js';
 import { useScena } from './ScenaProvider.js';
@@ -55,6 +57,18 @@ export interface SurfaceAreaProps {
   // surface. Omitted, the surface is not resizable by itself and the shell is
   // free to put a splitter next to it as before.
   resize?: SurfaceResizeSpec;
+  // Which edge of itself this surface closes on, and what kind of region it is.
+  //
+  // The shell supplies both, because only the shell knows its arrangement.
+  // They are what lets scena's CSS style a surface it has never heard of: a
+  // rule keyed on `.oo-surface--sidebar-left` works for nine names, one keyed
+  // on `[data-surface-edge='inline-end']` works for anything a shell places.
+  //
+  // Omitted, nothing is stamped and no role/edge rule matches — which is the
+  // right default, since a shell that has not said where a surface sits should
+  // not have scena guessing.
+  edge?: SurfaceEdge;
+  role?: SurfaceRole;
 }
 
 export function SurfaceArea({
@@ -64,6 +78,8 @@ export function SurfaceArea({
   className,
   presentation = 'docked',
   resize,
+  edge,
+  role,
 }: SurfaceAreaProps) {
   const scena = useScena();
   const layoutState = useLayout();
@@ -124,6 +140,8 @@ export function SurfaceArea({
     <div
       data-surface={surface}
       data-presentation={presentation}
+      data-surface-edge={edge}
+      data-surface-role={role}
       className={[
         'oo-surface',
         `oo-surface--${surface.replace(':', '-')}`,

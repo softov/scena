@@ -63,13 +63,20 @@ describe('surface separators', () => {
     expect(surfaceCss).toMatch(/var\(--oo-surface-border-width,\s*0px\)/);
   });
 
-  it('every edge faces `main`, and overlaid surfaces draw none', () => {
-    // Left-hand chrome closes on its end edge, right-hand chrome on its start
-    // edge; a border on the wrong side would draw against the window frame.
-    expect(surfaceCss).toMatch(/\.oo-surface--sidebar-left\s*\{\s*border-inline-end/);
-    expect(surfaceCss).toMatch(/\.oo-surface--sidebar-right\s*\{\s*border-inline-start/);
-    expect(surfaceCss).toMatch(/\.oo-surface--titlebar\s*\{\s*border-block-end/);
-    // Lifted out of the flow, so a border would be a line in open space.
+  // Keyed on the edge the shell stamped rather than on the surface's name, so
+  // an app-defined surface gets a separator too. See surface-stamping.test.tsx.
+  it('draws on whichever edge was stamped', () => {
+    expect(surfaceCss).toMatch(
+      /\[data-surface-edge='inline-end'\]\s*\{\s*\n?\s*border-inline-end/,
+    );
+    expect(surfaceCss).toMatch(
+      /\[data-surface-edge='block-start'\]\s*\{\s*\n?\s*border-block-start/,
+    );
+  });
+
+  it('overlaid surfaces draw none', () => {
+    // Lifted out of the flow with a shadow, so a border on the edge they no
+    // longer touch would be a line in open space.
     expect(surfaceCss).toMatch(/data-presentation='(floating|sheet)'\][\s\S]{0,80}\{\s*border: 0;/);
   });
 });

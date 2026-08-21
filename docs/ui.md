@@ -176,9 +176,33 @@ every existing app's chrome. A theme opts in on the root:
 }
 ```
 
-Each surface draws on the edge facing `main`, using logical properties so the
-chrome flips under `dir="rtl"`. Overlaid surfaces (`floating`, `sheet`) draw
-none — they are out of the flow and carry a shadow instead.
+Which edge a surface draws on comes from the **shell**, not from its name. A
+shell stamps `edge` and `role` on each `SurfaceArea`:
+
+```tsx
+<SurfaceArea surface="alert:top"     role="bar"   edge="block-end" />
+<SurfaceArea surface="sidebar:left"  role="panel" edge="inline-end" />
+<SurfaceArea surface="main"          role="main" />
+```
+
+which become `data-surface-edge` and `data-surface-role`, and scena's CSS
+matches those. That is what lets an app-defined surface be styled at all: a
+rule keyed on `.oo-surface--sidebar-left` works for the nine names scena ships
+and silently skips anything else, while one keyed on the edge works for
+whatever a shell places. Edges are logical, so chrome flips under `dir="rtl"`
+without the shell restating it.
+
+`role` is for styling that is about the kind rather than the identity —
+`ButtonBar` is small and quiet inside any `role="bar"`, whether that is the
+title bar, the status bar, or an app's own alert band.
+
+**scena's CSS matches roles and edges; an app's CSS may match names.** An app
+knows its own surfaces, so a rule keyed on `[data-surface='statusbar']` is
+perfectly good in an app stylesheet — it is only inside the library that a name
+is a guess.
+
+Overlaid surfaces (`floating`, `sheet`) draw no separator — they are out of the
+flow and carry a shadow instead.
 
 Note that `surface.css` consumes these as `var(--oo-surface-border-width, 0px)`
 rather than declaring a default on `.oo-surface`. That is deliberate: a custom

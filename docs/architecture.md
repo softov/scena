@@ -161,6 +161,12 @@ A **shell** is the frame around the surfaces. It receives `scena`, the active
 layout, and a `renderSurface(name)` function; where it puts the results is the
 whole of what a shell decides.
 
+Because it is the only thing that knows that arrangement, a shell also stamps
+each surface with the edge it closes on and the kind of region it is —
+`<SurfaceArea surface="alert:top" role="bar" edge="block-end" />`. scena's CSS
+keys on those rather than on surface names, which is what lets it style a
+surface it has never heard of.
+
 A **session snapshot** is the mounts, the surface states and the persisted
 context, captured together. Restoring one is how a reload comes back to the
 same three tabs open in the same order.
