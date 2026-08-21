@@ -1,0 +1,24 @@
+.oo-theme-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+  font-size: var(--oo-font-size-xs);
+}
+
+.oo-theme-picker__label { color: var(--oo-color-muted); }
+
+.oo-theme-picker__select {
+  height: 22px;
+  padding: 0 var(--oo-spacing-xs);
+  border: 1px solid var(--oo-input-border);
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-input-bg);
+  color: var(--oo-input-fg);
+  font: inherit;
+  font-size: var(--oo-font-size-xs);
+}
+
+.oo-theme-picker__select:focus-visible {
+  outline: 1px solid var(--oo-color-accent);
+  outline-offset: -1px;
+}

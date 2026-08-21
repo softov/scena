@@ -130,3 +130,13 @@ export function resolveVariableFontSize(name: string): string {
   if (SIZE_SET.has(name)) return `--oo-font-size-${name}`;
   return `--${name}`;
 }
+
+// ── Theme as store state ─────────────────────────────────────────────────
+// Re-exported here so an app has one import for everything theme-related.
+export {
+  THEME_ID_PATH,
+  THEME_MODE_PATH,
+  resolveThemeMode,
+  registerThemeController,
+} from './controller.js';
+export type { ThemeModeChoice, ThemeControllerOptions } from './controller.js';

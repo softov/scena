@@ -155,6 +155,8 @@ export { List } from './data/index.js';
 export { Tabs } from './navigation/index.js';
 export { Link, resolveLinkHref } from './navigation/index.js';
 export type { LinkProps, LinkKind } from './navigation/index.js';
+export { ActivityBarItem } from './navigation/index.js';
+export type { ActivityBarItemProps, ActivityBadgeTone } from './navigation/index.js';
 export {
   Button,
   ReloadButton,
@@ -165,8 +167,17 @@ export {
   DateTimeInput,
   Checks,
   LocaleToggle,
+  ButtonBar,
+  ThemePicker,
+  ThemeModeToggle,
 } from './control/index.js';
 export type { LocaleToggleProps, LocaleToggleDisplay, ReloadButtonProps } from './control/index.js';
+export type {
+  ButtonBarProps,
+  ButtonBarTone,
+  ThemePickerProps,
+  ThemeModeToggleProps,
+} from './control/index.js';
 export { Row, Column } from './layout/index.js';
 export { Grid } from './layout/index.js';
 export type { GridProps } from './layout/index.js';

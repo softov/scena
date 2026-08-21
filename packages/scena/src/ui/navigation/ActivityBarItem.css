@@ -1,0 +1,62 @@
+.oo-activity-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--oo-activity-item-size, 44px);
+  height: var(--oo-activity-item-size, 44px);
+  padding: 0;
+  border: none;
+  /* The active marker is a border that is always present and usually
+   * transparent, so nothing shifts by 2px when it appears. */
+  border-inline-start: 2px solid transparent;
+  border-radius: 0;
+  background: var(--oo-activitybar-bg, transparent);
+  color: var(--oo-activitybar-fg);
+  font: inherit;
+  font-size: var(--oo-activity-item-icon-size, 18px);
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.oo-activity-item:hover {
+  color: var(--oo-activitybar-fg-hover);
+  background: var(--oo-activitybar-bg-hover);
+}
+
+.oo-activity-item:focus-visible {
+  outline: 2px solid var(--oo-color-accent);
+  outline-offset: -2px;
+}
+
+.oo-activity-item[data-active='true'] {
+  color: var(--oo-activitybar-fg-active);
+  background: var(--oo-activitybar-bg-active);
+  border-inline-start-color: var(--oo-color-accent);
+}
+
+/* The rail layout stacks these; `bottom` pushes an entry to the far end. */
+.oo-activity-item[data-pos='bottom'] {
+  margin-block-start: auto;
+}
+
+.oo-activity-item__badge {
+  position: absolute;
+  inset-inline-end: 3px;
+  inset-block-end: 3px;
+  min-width: 15px;
+  padding: 0 3px;
+  border-radius: var(--oo-radius-full);
+  background: var(--oo-color-accent);
+  color: var(--oo-color-inverse);
+  font-size: 10px;
+  line-height: 15px;
+  text-align: center;
+}
+
+.oo-activity-item__badge[data-tone='danger']  { background: var(--oo-color-danger); }
+.oo-activity-item__badge[data-tone='warning'] { background: var(--oo-color-warning); }
+.oo-activity-item__badge[data-tone='success'] { background: var(--oo-color-success); }
+.oo-activity-item__badge[data-tone='muted']   { background: var(--oo-color-muted); }
