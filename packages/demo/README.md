@@ -45,16 +45,24 @@ referenced it as though it shipped with scena.
 **Now it does.** `ui/navigation/ActivityBarItem` is the union of what each copy
 had grown: badge with a tone and a `badgeLabel`, `pos` for bottom anchoring,
 `sectionPath` for a rail that reflects a surface other than the left sidebar.
-This app deleted its copy and mounts the builtin. Advisor and the playground
-still carry theirs — the registry overwrites silently, so an app that wants its
-own keeps it.
+This app deleted its copy and mounts the builtin. So has Advisor, which is
+where the two-badge version came from — the promoted component grew
+`secondBadge` rather than Advisor keeping a fork of it. The playground still
+carries its own: the registry overwrites silently, so an app that wants its own
+keeps it, and knowing that is not the same as relying on it.
 
 The same pass promoted three more: **`ButtonBar`** (the button that goes in a
 bar — one component for the title bar and the status bar, the difference carried
-by `[data-surface]` in CSS rather than by a prop), **`ThemePicker`** and
-**`ThemeModeToggle`**, along with **`registerThemeController`**, which owns
-`applyTheme`, storage and the OS-preference listener so the two widgets can be
-pure views over `$/ui/theme/id` and `$/ui/theme/mode`.
+by the shell-stamped `[data-surface-role='bar']` in CSS rather than by a prop),
+**`ThemePicker`** and **`ThemeModeToggle`**, along with
+**`registerThemeController`**, which owns `applyTheme`, storage and the
+OS-preference listener so the two widgets can be pure views over
+`$/ui/theme/id` and `$/ui/theme/mode`.
+
+`themes.ts` registers a second family for that picker to offer, because
+`ThemePicker` renders nothing below two choices — one theme is not a choice. It
+is registered as inline tokens rather than as a stylesheet, which is the source
+kind the playground's four `?url` CSS themes do not cover.
 
 **`sidebar.activate` is still written three times, and should be.** Here,
 `register-boot.ts` in the playground, `shell/commands.ts` in Advisor. scena's
@@ -107,7 +115,9 @@ src/
   App.tsx            ScenaRoot + DefaultShell
   register-app.ts    everything that goes into a registry
   presentation.ts    this app's PresentationPolicy
-  chrome.tsx         ActivityBarItem, StatusItem, AppTitle, PresentationProbe
+  themes.ts          a second theme family, so ThemePicker has a choice to offer
+  chrome.tsx         AppTitle and PresentationProbe — what is left once scena
+                     ships the rest
   resources/
     notes/           explorer + detail over an in-memory provider
     tags/            a second section, so the activity bar has something to

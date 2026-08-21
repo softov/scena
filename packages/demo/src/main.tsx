@@ -10,6 +10,10 @@ import '@softov/scena/styles/surface.css';
 
 import { applyTheme, resolveThemeMode, type ThemeModeChoice } from '@softov/scena/styles';
 import './app.css';
+// Side-effect import, and it has to be above the applyTheme call below: a
+// stored theme id that is not registered yet applies nothing, so somebody who
+// last chose `sepia` would get a flash of `default` on every reload.
+import './themes.js';
 import App from './App.js';
 import { THEME_ID_KEY, THEME_MODE_KEY } from './theme-keys.js';
 
