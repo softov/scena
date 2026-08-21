@@ -189,6 +189,16 @@ behind a command that reveals its surface first.
 **Reaching into `core/` for a type.** If a contract is only expressible by
 importing a runtime module, the contract has a hole. Fix `sdk/`.
 
+**Declaring your surfaces with `initialLayout`.** It restores saved state and
+merges, so it can change one of scena's nine defaults but never remove one — an
+app with no sidebar still ends up carrying `sidebar:left` in layout state, in
+the store, and in whatever `layoutStorage` persists. `surfaceDefaults` is the
+one that replaces, and it is what says *these are my surfaces*.
+
+**Sweeping surfaces with a list of names.** A surface is whatever an app mounts
+to, so any list written down goes stale the moment somebody adds one. Ask
+`surfaces.listSurfaces()`.
+
 ## Theming
 
 Everything is a CSS custom property, and the two themes set the same names:

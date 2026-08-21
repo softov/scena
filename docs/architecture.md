@@ -126,6 +126,24 @@ list of names written into scena cannot know what an app defined — the session
 snapshot iterated one for a while, and dropped mounts on app-defined surfaces
 with no error.
 
+An app declares its own set with `surfaceDefaults`, which **replaces** scena's
+nine rather than merging over them:
+
+```ts
+createScena({
+  surfaceDefaults: {
+    ...DEFAULT_SURFACE_LAYOUTS,             // or omit, to start from nothing
+    'alert:top': { visible: false, layout: 'bar' },
+  },
+})
+```
+
+That is a different question from `initialLayout`, which restores saved state
+and merges. Conflating them meant an app with no sidebar could change
+`sidebar:left` but never remove it — so it carried the entry in layout state,
+wrote `$/layout/surfaces/sidebar:left/*` into the store, and persisted it
+through `LayoutStorage` forever.
+
 A **mount** is one component in one surface, under a key, with:
 
 - a `MountTarget` — an inline node, or a binding whose value is a node

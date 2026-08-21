@@ -47,6 +47,7 @@ export const createScena: CreateScena = (
     events,
     store,
     initial: opts.initialLayout,
+    surfaceDefaults: opts.surfaceDefaults,
     storage: opts.layoutStorage,
   });
 
