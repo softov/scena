@@ -1,9 +1,12 @@
 // Cut a release of @softov/scena.
 //
-// The publish itself happens in CI, on the tag (.github/workflows/release.yml).
+// The publish itself happens in CI, on the tag (.github/workflows/release.yml),
+// to npmjs and then to GitHub Packages. npmjs is the one consumers resolve
+// from, because GitHub Packages demands an auth header on every read.
+//
 // This does everything that has to be true before that tag exists, because a
-// tag is the one step with no undo: GitHub Packages refuses to overwrite a
-// version, and deleting one needs admin.
+// tag is the one step with no undo: neither registry lets a version be
+// overwritten, and unpublishing is not something to plan around.
 //
 //   node scripts/publish.mjs patch          1.2.3 -> 1.2.4
 //   node scripts/publish.mjs minor
