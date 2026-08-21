@@ -1,7 +1,11 @@
-/* Bar layout: three slots (left | center | right) used by titlebar +
- * statusbar. Per-surface chrome (height, border-bottom vs border-top, bg)
- * lives on `.oo-surface--titlebar` / `.oo-surface--statusbar` so the
- * same bar layout can render in either bar. */
+/* Bar layout: three slots (left | center | right), used by any surface a shell
+ * gives `role="bar"` -- the title bar and the status bar, and an app's own
+ * alert band just as well.
+ *
+ * Per-surface chrome (height, background) is the shell's or the app's, keyed on
+ * `[data-surface-role='bar']` for the kind or `[data-surface]` for one specific
+ * bar. The separator is handled by `[data-surface-edge]` in surface.css, which
+ * is why nothing here draws one. */
 .oo-layout--bar {
   display: flex;
   align-items: center;

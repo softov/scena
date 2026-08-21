@@ -29,35 +29,35 @@
  *
  *   --oo-surface-border-width: 1px;
  *
+ * Keyed on the EDGE the shell stamped, not on the surface's name. A rule
+ * per name works for the nine scena ships and silently skips whatever an app
+ * defined; a shell that places `alert:top` and says `edge="block-end"` gets a
+ * separator for free.
+ *
  * The defaults are `var()` fallbacks rather than declarations on `.oo-surface`,
  * and that is load-bearing: a custom property set ON the element beats the same
  * property inherited from `<html>`, so declaring `--oo-surface-border-width: 0`
  * here would silently override every theme that tried to turn borders on.
- *
- * Each surface draws on the edge facing `main`. Logical properties, so the
- * chrome flips correctly under `dir="rtl"`.
  */
-.oo-surface--activitybar,
-.oo-surface--sidebar-left {
+.oo-surface[data-surface-edge='inline-end'] {
   border-inline-end:
     var(--oo-surface-border-width, 0px) solid
     var(--oo-surface-border, var(--oo-color-border));
 }
 
-.oo-surface--sidebar-right {
+.oo-surface[data-surface-edge='inline-start'] {
   border-inline-start:
     var(--oo-surface-border-width, 0px) solid
     var(--oo-surface-border, var(--oo-color-border));
 }
 
-.oo-surface--titlebar {
+.oo-surface[data-surface-edge='block-end'] {
   border-block-end:
     var(--oo-surface-border-width, 0px) solid
     var(--oo-surface-border, var(--oo-color-border));
 }
 
-.oo-surface--statusbar,
-.oo-surface--panel-bottom {
+.oo-surface[data-surface-edge='block-start'] {
   border-block-start:
     var(--oo-surface-border-width, 0px) solid
     var(--oo-surface-border, var(--oo-color-border));
@@ -81,11 +81,26 @@
   background: var(--oo-color-surface, var(--oo-color-canvas));
 }
 
-.oo-surface--sidebar-left[data-presentation='floating'] {
+/* A floating surface anchors OPPOSITE the edge it closes on: one that closes
+ * on its inline-end lifts out of the start side of the viewport. */
+.oo-surface[data-surface-edge='inline-end'][data-presentation='floating'] {
+  inset-inline-start: 0;
+}
+
+.oo-surface[data-surface-edge='inline-start'][data-presentation='floating'] {
+  inset-inline-end: 0;
+}
+
+/* Fallback for shells that place these two without stamping an edge -- the
+ * stamping is newer than they are, and a floating sidebar with no anchor sits
+ * wherever its static position left it, which is a visible break rather than
+ * a missing nicety. Physical properties on purpose: these two names encode a
+ * physical side, so honouring them under `dir="rtl"` would be a lie. */
+.oo-surface--sidebar-left[data-presentation='floating']:not([data-surface-edge]) {
   left: 0;
 }
 
-.oo-surface--sidebar-right[data-presentation='floating'] {
+.oo-surface--sidebar-right[data-presentation='floating']:not([data-surface-edge]) {
   right: 0;
 }
 

@@ -61,6 +61,33 @@ export interface TabPanelSplit {
 // phone session must not teach a desktop that the sidebar floats.
 export type SurfacePresentation = 'docked' | 'floating' | 'sheet' | 'bar';
 
+/**
+ * Which edge of itself a surface closes on — the one facing `main`.
+ *
+ * Stamped by the shell, because only the shell knows its own arrangement: the
+ * same surface is `inline-end` in one app and `inline-start` in another, and a
+ * surface scena has never heard of has no name to look up.
+ *
+ * Logical rather than physical, so chrome flips under `dir="rtl"` without the
+ * shell restating it.
+ *
+ * This exists so scena's own CSS can stop matching surface NAMES. Rules keyed
+ * on `.oo-surface--sidebar-left` work only for the nine and silently skip
+ * whatever an app defined; rules keyed on `[data-surface-edge]` work for
+ * anything the shell places.
+ */
+export type SurfaceEdge = 'inline-start' | 'inline-end' | 'block-start' | 'block-end';
+
+/**
+ * What kind of region a surface is, for styling that is about the kind rather
+ * than the identity — a bar's buttons are small and quiet whether that bar is
+ * the title bar, the status bar, or an app's own `alert:top`.
+ *
+ * Also stamped by the shell. scena's CSS matches this; an APP's CSS is free to
+ * match `data-surface` by name, because an app does know its own surfaces.
+ */
+export type SurfaceRole = 'bar' | 'rail' | 'panel' | 'main' | 'overlay';
+
 export interface SurfaceLayoutState {
   visible: boolean;
   size?: number;

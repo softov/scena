@@ -30,16 +30,22 @@ export function DefaultShell() {
         overflow: 'hidden',
       }}
     >
-      {titlebarVisible ? <SurfaceArea surface="titlebar" layout="bar" /> : null}
+      {titlebarVisible ? (
+        <SurfaceArea surface="titlebar" layout="bar" role="bar" edge="block-end" />
+      ) : null}
 
       <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-        {activitybarVisible ? <SurfaceArea surface="activitybar" layout="rail" /> : null}
+        {activitybarVisible ? (
+          <SurfaceArea surface="activitybar" layout="rail" role="rail" edge="inline-end" />
+        ) : null}
 
         {sidebarLeftVisible ? (
           <>
             <SurfaceArea
               surface="sidebar:left"
               layout="stack"
+              role="panel"
+              edge="inline-end"
               style={{ width: sidebarLeftWidth, flex: '0 0 auto', overflow: 'hidden' }}
             />
             <ShellSplitter surface="sidebar:left" orientation="vertical" min={120} max={600} />
@@ -50,6 +56,7 @@ export function DefaultShell() {
           <SurfaceArea
             surface="main"
             layout="tab"
+            role="main"
             style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
           />
           {panelBottomVisible ? (
@@ -64,6 +71,8 @@ export function DefaultShell() {
               <SurfaceArea
                 surface="panel:bottom"
                 layout="tab"
+                role="panel"
+                edge="block-start"
                 style={{
                   height: panelBottomHeight,
                   flex: '0 0 auto',
@@ -86,17 +95,22 @@ export function DefaultShell() {
             <SurfaceArea
               surface="sidebar:right"
               layout="stack"
+              role="panel"
+              edge="inline-start"
               style={{ width: sidebarRightWidth, flex: '0 0 auto', overflow: 'hidden' }}
             />
           </>
         ) : null}
       </div>
 
-      {statusbarVisible ? <SurfaceArea surface="statusbar" layout="bar" /> : null}
+      {statusbarVisible ? (
+        <SurfaceArea surface="statusbar" layout="bar" role="bar" edge="block-start" />
+      ) : null}
 
       <SurfaceArea
         surface="overlay"
         layout="floating"
+        role="overlay"
         style={{
           position: 'fixed',
           inset: 0,

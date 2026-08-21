@@ -76,7 +76,9 @@ docs/                   the documents above, plus layout prototypes
   `surfaces.listSurfaces()`; a hardcoded list of names silently skips whatever
   the app defined, which is how the session snapshot used to drop mounts. An
   app declares its own set with `surfaceDefaults` (replaces), which is a
-  different question from `initialLayout` (restores, merges).
+  different question from `initialLayout` (restores, merges). scena's own CSS
+  keys on the `role`/`edge` a shell stamps, never on a surface name — app CSS
+  may use names, because an app knows its own surfaces.
 - **Registries are late-binding.** Components, commands, converters, layouts
   and shells are resolved by name at mount time, never imported by the graph.
   That is what lets a page be data, and it is why a missing registration is a
