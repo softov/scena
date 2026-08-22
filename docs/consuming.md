@@ -199,6 +199,25 @@ one that replaces, and it is what says *these are my surfaces*.
 to, so any list written down goes stale the moment somebody adds one. Ask
 `surfaces.listSurfaces()`.
 
+**Testing against a linked scena and shipping against an installed one.**
+Vitest inlines a linked dependency and externalises one installed from a
+registry. scena's components import their own CSS, so with a `link:` override
+vite transforms it and everything passes; without one, Node is handed the file
+raw and the suite dies on `Unknown file extension ".css"` — in whichever test
+first imports a component, which is rarely the one you changed. Name scena in
+`test.server.deps.inline` so both resolutions behave the same:
+
+```ts
+test: {
+  environment: 'jsdom',
+  server: { deps: { inline: ['@softov/scena'] } },
+}
+```
+
+More generally: a link is a development convenience, not the shape you ship. If
+you keep one, turn it off and run the suite before you tag anything — Advisor
+found this exact break the first time it did, months after the link went in.
+
 ## Theming
 
 Everything is a CSS custom property, and the two themes set the same names:
