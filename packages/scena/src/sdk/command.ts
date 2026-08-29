@@ -85,7 +85,8 @@ export interface ExecuteOpts {
   host?: HostCtx;
 }
 
-export interface Command<TArgs = unknown> {
+/** Everything a command has regardless of where it runs. */
+interface CommandBase {
   id: string;
   title: string | ((ctx?: CommandContext) => string);
   description?: string | ((ctx?: CommandContext) => string);
@@ -121,12 +122,38 @@ export interface Command<TArgs = unknown> {
   acceptsQuery?: boolean;
   submenu?: () => Promise<Command[]>;
   args?: ArgsSchema;
-  // 'client'  - run() executes locally (default when run is defined).
-  // 'remote'  - sends command:execute over socket (default when run is absent).
-  // 'either'  - run() locally if defined, else remote.
-  dispatch?: 'client' | 'remote' | 'either';
-  run?: (ctx: CommandContext, args?: TArgs) => unknown | Promise<unknown>;
 }
+
+/**
+ * A command: either something to run here, or something to send.
+ *
+ * A union rather than two optional fields, because `run` and `dispatch` were
+ * never independent. `executeFrom` ends with a throw for a command that has
+ * no local `run` and did not ask to be remote - a runtime error for a state
+ * the type permitted, reached by registering `{ id, title }` and invoking it.
+ * Written this way that command does not compile, and the throw is
+ * unreachable from typed code.
+ *
+ * `run` cannot simply be required. A remote command legitimately has no local
+ * handler, and `'either'` is a local handler with a remote fallback. So the
+ * rule is not "every command runs" - it is "a command that does not say it is
+ * remote has to say what it does".
+ */
+export type Command<TArgs = unknown> = CommandBase & (
+  | {
+      // 'client' runs here; 'either' runs here and falls back to the socket.
+      // Absent means 'client', which is what a command carrying a handler
+      // meant before this was a union.
+      dispatch?: 'client' | 'either';
+      run: (ctx: CommandContext, args?: TArgs) => unknown | Promise<unknown>;
+    }
+  | {
+      // Sent over the socket. There is nothing to run here, and saying so is
+      // what makes the absence deliberate rather than forgotten.
+      dispatch: 'remote';
+      run?: never;
+    }
+);
 
 export interface CommandListFilter {
   category?: string;

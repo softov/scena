@@ -35,8 +35,10 @@ export function createCommandRegistry(deps: Deps): CommandRegistry {
   }
 
   function dispatchModeOf(cmd: Command): 'client' | 'remote' | 'either' {
-    if (cmd.dispatch) return cmd.dispatch;
-    return cmd.run ? 'client' : 'remote';
+    // An absent `dispatch` means the union's first arm, which carries a `run`.
+    // This used to ask whether the handler existed and answer 'remote' when it
+    // did not - inferring intent from an omission that the type now forbids.
+    return cmd.dispatch ?? 'client';
   }
 
   function contextFor(source: CommandSource, opts?: ExecuteOpts): CommandContext {
@@ -90,6 +92,10 @@ export function createCommandRegistry(deps: Deps): CommandRegistry {
     const mode = dispatchModeOf(cmd);
     if (mode === 'remote') return runRemote(id, normalizedArgs);
     if (mode === 'either' && !cmd.run) return runRemote(id, normalizedArgs);
+    // Unreachable from typed code: `Command` is a union, and the only arm that
+    // omits `run` is the one that says `dispatch: 'remote'`, which returned
+    // above. Kept because not every caller is typed - a manifest is data, and
+    // so is anything arriving from a socket or from plain JavaScript.
     if (!cmd.run) throw new Error(`Command "${id}" has no local 'run'`);
     return cmd.run(contextFor(source, { ...opts, source }), normalizedArgs);
   }

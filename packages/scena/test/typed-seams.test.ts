@@ -78,6 +78,22 @@ function accepted(): void {
   });
 }
 
+/** Registrations that must compile. Never invoked. */
+function registrable(): void {
+  // The ordinary command: something to run, here.
+  scena.commands.register({ id: 'a.local', title: 'Local', run: () => {} });
+
+  // A handler that also falls back to the socket.
+  scena.commands.register({
+    id: 'a.either', title: 'Either', dispatch: 'either', run: () => {},
+  });
+
+  // Nothing to run here, and it says so. This is the only way to register a
+  // command with no handler, which is what makes the absence deliberate
+  // rather than forgotten.
+  scena.commands.register({ id: 'a.remote', title: 'Remote', dispatch: 'remote' });
+}
+
 /** Calls that must not compile. Never invoked. */
 function rejected(): void {
   // The `093050a` bug exactly: the caller says `hostId`, the handler reads
@@ -99,13 +115,27 @@ function rejected(): void {
     // @ts-expect-error - 'hostId' is not declared on 'Test.Panel'
     resource: { component: 'Test.Panel', resourceId: 'a', hostId: 'code-server' },
   });
+
+  // A command that does nothing. It registered, and threw the moment anybody
+  // invoked it - `executeFrom` ends in a guard written for exactly this.
+  // @ts-expect-error - no 'run', and it did not say it was remote
+  scena.commands.register({ id: 'a.nothing', title: 'Nothing' });
+
+  // Claiming to run here while carrying nothing to run.
+  // @ts-expect-error - dispatch 'client' requires a handler
+  scena.commands.register({ id: 'a.lying', title: 'Lying', dispatch: 'client' });
+
+  // The directive sits on the statement, not on `run`: the whole object fails
+  // to match either arm of the union, so that is where the error lands.
+  // @ts-expect-error - a remote command has nothing to run here
+  scena.commands.register({ id: 'a.x', title: 'X', dispatch: 'remote', run: () => {} });
 }
 
 describe('the typed seams', () => {
   it('states its assertions to the compiler, not to vitest', () => {
-    // Both are dead code by design. Naming them here keeps them from reading
+    // All three are dead code by design. Naming them here keeps them from reading
     // as an oversight, and keeps a linter from removing what the build needs.
-    expect([accepted, rejected].every((fn) => typeof fn === 'function')).toBe(true);
+    expect([accepted, registrable, rejected].every((fn) => typeof fn === 'function')).toBe(true);
   });
 
   it('hands the handler the arguments the caller sent', async () => {
