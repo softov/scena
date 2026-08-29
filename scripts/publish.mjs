@@ -140,9 +140,16 @@ run('pnpm', ['build']);
 // `npm notice` lines and puts only the tarball name on stdout - so reading
 // stdout for filenames finds none of them and every check "fails". With --json
 // the manifest is on stdout, and the paths are exact rather than substrings.
-const packed = JSON.parse(
+// npm 12 reports one object keyed by package name; every npm before it
+// reported a one-element array. Both are read, because which one arrives
+// depends on the machine cutting the release rather than on anything here.
+const report = JSON.parse(
   run('npm', ['pack', '--dry-run', '--json'], { capture: true, cwd: pkgRoot }),
-)[0];
+);
+const packed = Array.isArray(report) ? report[0] : Object.values(report)[0];
+if (packed === undefined) {
+  fail('npm pack --dry-run --json described no package - cannot check the tarball');
+}
 const paths = packed.files.map((file) => file.path);
 
 for (const required of ['LICENSE', 'README.md']) {
