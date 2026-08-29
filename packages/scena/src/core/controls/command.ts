@@ -173,7 +173,11 @@ export function createCommandRegistry(deps: Deps): CommandRegistry {
     listEnabled(filter) {
       return list({ ...filter, enabled: true });
     },
-    execute(id, args, opts) {
+    // Annotated rather than inferred: `execute` is overloaded on the
+    // interface, and an overloaded member gives an implementing literal no
+    // contextual type to read its parameters from. This is the widest of the
+    // two signatures, which is what an implementation has to be.
+    execute(id: string, args?: unknown, opts?: ExecuteOpts) {
       return executeFrom(opts?.source ?? 'programmatic', id, args, opts);
     },
     executeFrom,

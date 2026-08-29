@@ -21,6 +21,43 @@ export type ArgType =
 
 export type ArgsSchema = Record<string, ArgType>;
 
+/**
+ * What each command takes, keyed by the command's id.
+ *
+ * Empty here, and deliberately so: scena registers no commands of its own, and
+ * a list written in this file could not know what an app added. Whoever
+ * registers a command augments this instead -
+ *
+ *   declare module '@softov/scena/sdk' {
+ *     interface CommandArgs {
+ *       'sessions.open': { uri?: string; host?: string };
+ *     }
+ *   }
+ *
+ * - and from then on `execute` and `run` are checked against the declaration
+ * rather than against `unknown`. An id nobody has declared keeps the untyped
+ * overload and behaves exactly as it did, so this costs nothing to ignore.
+ *
+ * The declaration exists because `execute(id, args?: unknown)` puts the caller
+ * and the handler in different files with nothing between them: a call sending
+ * `hostId` to a handler reading `host` compiled, ran, and silently did
+ * nothing.
+ */
+export interface CommandArgs {}
+
+/** The ids somebody has declared arguments for. `never` until one is. */
+export type KnownCommand = keyof CommandArgs & string;
+
+/**
+ * `[args?]` when every declared argument is optional, `[args]` when one is not.
+ *
+ * A command whose arguments are all optional is callable with none - which is
+ * the ordinary case, since most read their fallback from the store - and one
+ * that needs an argument should not compile without it.
+ */
+export type CommandArgsFor<K extends KnownCommand> =
+  {} extends CommandArgs[K] ? [args?: CommandArgs[K]] : [args: CommandArgs[K]];
+
 export interface CommandContext {
   scena: Scena;
   store: ReactiveStore;
@@ -99,6 +136,10 @@ export interface CommandListFilter {
 }
 
 export interface CommandRegistry {
+  // A declared id types its own `run` handler, so `args` arrives as the
+  // declaration rather than as `unknown` and the handler needs no cast. An
+  // undeclared one takes the second overload and is what it always was.
+  register<K extends KnownCommand>(cmd: Command<CommandArgs[K]> & { id: K }): Disposable;
   register<TArgs>(cmd: Command<TArgs>): Disposable;
   unregister(id: string): void;
   get(id: string): Command | undefined;
@@ -107,11 +148,28 @@ export interface CommandRegistry {
   // execute(id, args?, opts?). `args` is the command's argument object (single
   // object, not spread). `opts` carries source / dataContext / host for picker
   // dispatch.
-  execute(id: string, args?: unknown, opts?: ExecuteOpts): Promise<unknown>;
-  executeFrom(
+  //
+  // One signature, branching on whether the id was declared - not two
+  // overloads. Overloads would be worse than nothing here: a call that failed
+  // the declared signature would simply fall through to the untyped one and
+  // compile anyway, which is the exact silence this is meant to break.
+  //
+  // A declared id checks its argument object against the declaration. That
+  // type has no index signature, so an object literal gets excess-property
+  // checking and a misspelled key is an error rather than a value nobody
+  // reads. An undeclared id resolves to `[args?: unknown, ...]`, which is
+  // what the signature has always been.
+  execute<K extends string>(
+    id: K,
+    ...rest: K extends KnownCommand
+      ? [...CommandArgsFor<K>, opts?: ExecuteOpts]
+      : [args?: unknown, opts?: ExecuteOpts]
+  ): Promise<unknown>;
+  executeFrom<K extends string>(
     source: CommandSource,
-    id: string,
-    args?: unknown,
-    opts?: Omit<ExecuteOpts, 'source'>,
+    id: K,
+    ...rest: K extends KnownCommand
+      ? [...CommandArgsFor<K>, opts?: Omit<ExecuteOpts, 'source'>]
+      : [args?: unknown, opts?: Omit<ExecuteOpts, 'source'>]
   ): Promise<unknown>;
 }
