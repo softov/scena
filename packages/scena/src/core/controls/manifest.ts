@@ -116,8 +116,14 @@ export function createManifestAPI(deps: Deps): ManifestAPI {
             keywords: cmd.keywords,
             slots: cmd.slots,
             args: cmd.args,
-            dispatch: cmd.dispatch,
-            run: undefined,
+            // A manifest declares a command; it never carries a handler. The
+            // `run` it can name is a module specifier, and nothing resolves
+            // one - registration passed `run: undefined` unconditionally. So
+            // what is registered here is remote, which is what it has always
+            // been in practice: 'either' already fell back to the socket, and
+            // 'client' reached `executeFrom`'s throw the moment anybody
+            // invoked it.
+            dispatch: 'remote',
           }),
         );
       }
