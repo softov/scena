@@ -43,6 +43,8 @@ export type ArgsSchema = Record<string, ArgType>;
  * `hostId` to a handler reading `host` compiled, ran, and silently did
  * nothing.
  */
+// Empty by design - it is a merge target, and every augmentation adds a key.
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CommandArgs {}
 
 /** The ids somebody has declared arguments for. `never` until one is. */
@@ -56,6 +58,9 @@ export type KnownCommand = keyof CommandArgs & string;
  * that needs an argument should not compile without it.
  */
 export type CommandArgsFor<K extends KnownCommand> =
+  // `{} extends T` is the test for "every property is optional": only a type
+  // with nothing required is satisfied by an object literal with nothing in it.
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   {} extends CommandArgs[K] ? [args?: CommandArgs[K]] : [args: CommandArgs[K]];
 
 export interface CommandContext {
