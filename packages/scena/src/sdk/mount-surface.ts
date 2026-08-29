@@ -1,5 +1,5 @@
 import type { Disposable } from './disposable.js';
-import type { ComponentNode, DataBinding } from './component-graph.js';
+import type { CheckedNode, ComponentNode, DataBinding } from './component-graph.js';
 import type { WhenClause } from './when.js';
 import type { ResourceColor } from './colors.js';
 import type { Label } from './label.js';
@@ -72,11 +72,11 @@ export interface MountAction {
   when?: WhenClause;
 }
 
-export interface MountDeclaration {
+export interface MountDeclaration<TResource extends MountTarget = MountTarget> {
   surface: SurfaceName;
   key: string;
   when?: WhenClause;
-  resource: MountTarget;
+  resource: TResource;
   props?: MountDisplay;
   policy?: MountPolicy;
   // Absolute data-context root for `/...` relative paths inside this mount's
@@ -104,11 +104,16 @@ export interface MountHandle {
 }
 
 export interface MountSurfaceRegistry {
-  mount(decl: MountDeclaration): Disposable;
-  open(opts: {
+  // `T & CheckedNode<T>` rather than plain `MountTarget`: T is inferred from
+  // the resource that was written, and then checked against what its
+  // component declared. A component nobody declared props for makes
+  // `CheckedNode<T>` equal to T, which is no constraint at all - so this is
+  // additive and every existing mount still compiles.
+  mount<T extends MountTarget>(decl: MountDeclaration<T & CheckedNode<T>>): Disposable;
+  open<T extends MountTarget>(opts: {
     surface: SurfaceName;
     key: string;
-    resource: MountTarget;
+    resource: T & CheckedNode<T>;
     props?: MountDisplay;
     policy?: MountPolicy;
     dataContext?: `$/${string}`;

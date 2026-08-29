@@ -104,6 +104,60 @@ export type ComponentNode = {
 // A page IS its root ComponentNode. No separate {root, nodes} flat map.
 export type PageState = ComponentNode;
 
+/**
+ * What each component reads off its own node, keyed by the component's name.
+ *
+ * The same arrangement as `CommandArgs`, for the same reason and with the same
+ * emptiness here: scena renders whatever an app registered and cannot know the
+ * props of components it has never seen. An app augments it -
+ *
+ *   declare module '@softov/scena/sdk' {
+ *     interface ComponentProps {
+ *       'Advisor.SessionPanel': { resourceId?: string; host?: string };
+ *     }
+ *   }
+ *
+ * Declare a prop optional unless the component genuinely cannot render
+ * without it. A placeholder mount that supplies nothing is a normal thing to
+ * write, and what actually goes wrong is not an absent prop - it is a prop
+ * spelled a way the component does not read, which is carried through the tree
+ * and dropped in silence.
+ */
+export interface ComponentProps {}
+
+/** The components somebody has declared props for. `never` until one is. */
+export type KnownComponent = keyof ComponentProps & string;
+
+/** The keys a node carries for the runtime rather than for the component. */
+type NodeIntrinsics = 'id' | 'component' | '$meta' | 'child' | 'children';
+
+/**
+ * A node checked against its component's declaration, if it has one.
+ *
+ * `ComponentNode` ends in `[prop: string]: unknown`, which is what makes a
+ * mount data rather than a call - and which switches TypeScript's
+ * excess-property check off, because every key is a known key. So the check
+ * has to be built rather than inherited: every prop the node carries that the
+ * component does not declare is mapped to `never`, and a value assigned to
+ * `never` is an error naming that key.
+ *
+ * A component with no declaration, and anything that is not a component node,
+ * pass through untouched.
+ */
+export type CheckedNode<T> =
+  T extends { component: infer C }
+    ? C extends KnownComponent
+      ? ComponentProps[C]
+        & { component: C; id?: NodeId; $meta?: NodeMeta }
+        & {
+            [K in Exclude<
+              keyof T,
+              NodeIntrinsics | keyof ComponentProps[C]
+            >]: never;
+          }
+      : T
+    : T;
+
 export function isComponentNode(v: unknown): v is ComponentNode {
   return (
     typeof v === 'object' &&
