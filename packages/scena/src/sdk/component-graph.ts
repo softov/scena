@@ -123,6 +123,8 @@ export type PageState = ComponentNode;
  * spelled a way the component does not read, which is carried through the tree
  * and dropped in silence.
  */
+// Empty by design - it is a merge target, and every augmentation adds a key.
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ComponentProps {}
 
 /** The components somebody has declared props for. `never` until one is. */
