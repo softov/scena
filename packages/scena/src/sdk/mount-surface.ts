@@ -1,5 +1,11 @@
 import type { Disposable } from './disposable.js';
-import type { CheckedNode, ComponentNode, DataBinding } from './component-graph.js';
+import type {
+  CheckedNode,
+  ComponentNode,
+  ComponentProps,
+  DataBinding,
+  OpenedComponent,
+} from './component-graph.js';
 import type { WhenClause } from './when.js';
 import type { ResourceColor } from './colors.js';
 import type { Label } from './label.js';
@@ -118,7 +124,26 @@ export interface MountSurfaceRegistry {
     policy?: MountPolicy;
     dataContext?: `$/${string}`;
   }): MountHandle;
-  openResource(kind: string, args?: OpenResourceArgs): MountHandle | null;
+  /*
+   * `extraProps` is what actually becomes the mounted component's props -
+   * `openResource` spreads it into the node beside `resourceId` and nothing
+   * else - and it was `Record<string, unknown>`, so a misspelled key was
+   * carried into the tree and dropped in silence.
+   *
+   * When the kind has been indexed in `ResourceOpeners` and its component's
+   * props declared in `ComponentProps`, it is checked against those. Neither
+   * declared, and this is the signature it has always had. `resourceId` is
+   * omitted because the call names it in its own field, and two ways to set
+   * one thing is how they come to disagree.
+   */
+  openResource<K extends string>(
+    kind: K,
+    args?: [OpenedComponent<K>] extends [never]
+      ? OpenResourceArgs
+      : Omit<OpenResourceArgs, 'extraProps'> & {
+          extraProps?: Omit<ComponentProps[OpenedComponent<K>], 'resourceId'>;
+        },
+  ): MountHandle | null;
   close(key: string, opts?: { reason?: string }): void;
   focus(key: string): void;
   listAt(surface: SurfaceName): ResolvedMount[];
