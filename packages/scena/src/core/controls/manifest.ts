@@ -270,7 +270,6 @@ export function createManifestAPI(deps: Deps): ManifestAPI {
               when: cmd.when,
               args: cmd.args,
               dispatch: cmd.dispatch,
-              run: cmd.run,
             })),
             keybindings: c.keybindings,
             contextKeys: c.contextKeys,

@@ -130,6 +130,39 @@ export interface ComponentProps {}
 /** The components somebody has declared props for. `never` until one is. */
 export type KnownComponent = keyof ComponentProps & string;
 
+/**
+ * Which component answers for which resource kind.
+ *
+ * An index, and deliberately not a second props declaration. `openResource`
+ * takes a kind and `findOpeners` resolves it to a component at runtime; the
+ * compiler cannot follow that, so it needs to be told the same thing once.
+ * What it is told is *who opens what* - the props themselves stay in
+ * `ComponentProps`, where a `mount` already reads them.
+ *
+ *   declare module '@softov/scena/sdk' {
+ *     interface ComponentProps { 'App.TicketPanel': { ref?: Ref } }
+ *     interface ResourceOpeners { ticket: 'App.TicketPanel' }
+ *   }
+ *
+ * The alternative was a props map keyed by kind. It was rejected because two
+ * declarations of one panel's props can disagree, and the one that is wrong
+ * goes stale in silence - which is the fault this whole mechanism exists to
+ * prevent, rebuilt one level up.
+ *
+ * A kind nobody has indexed, and a kind whose component nobody has declared
+ * props for, both fall through to the untyped shape.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ResourceOpeners {}
+
+/** The component that opens a kind, when both halves have been declared. */
+export type OpenedComponent<K extends string> =
+  K extends keyof ResourceOpeners
+    ? ResourceOpeners[K] extends KnownComponent
+      ? ResourceOpeners[K]
+      : never
+    : never;
+
 /** The keys a node carries for the runtime rather than for the component. */
 type NodeIntrinsics = 'id' | 'component' | '$meta' | 'child' | 'children';
 

@@ -34,8 +34,12 @@ export interface ManifestCommand {
   slots?: string[];
   when?: string;
   args?: ArgsSchema;
+  // No `run`. A manifest declares a command; it never carries a handler.
+  // There used to be a `run?: string` here, a module specifier, and nothing
+  // ever resolved one - registration passed `run: undefined` unconditionally,
+  // so a manifest command has always been remote. A field that reads like a
+  // feature and does nothing is worse than an absent one.
   dispatch?: 'client' | 'remote' | 'either';
-  run?: string;
 }
 
 export interface ManifestKeybinding {
@@ -109,8 +113,12 @@ export interface RuntimeManifestCommand {
   slots?: string[];
   when?: string;
   args?: ArgsSchema;
+  // No `run`. A manifest declares a command; it never carries a handler.
+  // There used to be a `run?: string` here, a module specifier, and nothing
+  // ever resolved one - registration passed `run: undefined` unconditionally,
+  // so a manifest command has always been remote. A field that reads like a
+  // feature and does nothing is worse than an absent one.
   dispatch?: 'client' | 'remote' | 'either';
-  run?: string;
 }
 
 export interface RuntimeManifestJSON {

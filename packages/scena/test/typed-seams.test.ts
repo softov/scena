@@ -31,6 +31,11 @@ declare module '../src/sdk/component-graph.js' {
   interface ComponentProps {
     'Test.Panel': { resourceId?: string; host?: string };
   }
+  // Which component answers for a kind. An index, so the props stay declared
+  // once, above.
+  interface ResourceOpeners {
+    'test-record': 'Test.Panel';
+  }
 }
 
 const scena = createScena();
@@ -94,6 +99,23 @@ function registrable(): void {
   scena.commands.register({ id: 'a.remote', title: 'Remote', dispatch: 'remote' });
 }
 
+/** Opens that must compile. Never invoked. */
+function opens(): void {
+  scena.openResource('test-record', {
+    resourceId: 'r1',
+    extraProps: { host: 'code-server' },
+  });
+
+  // Nothing to add beyond the id, which is most opens.
+  scena.openResource('test-record', { resourceId: 'r1' });
+
+  // No entry in ResourceOpeners, so this keeps the shape it always had.
+  scena.openResource('some-app-record', {
+    resourceId: 'r1',
+    extraProps: { whatever: true },
+  });
+}
+
 /** Calls that must not compile. Never invoked. */
 function rejected(): void {
   // The `093050a` bug exactly: the caller says `hostId`, the handler reads
@@ -129,13 +151,31 @@ function rejected(): void {
   // to match either arm of the union, so that is where the error lands.
   // @ts-expect-error - a remote command has nothing to run here
   scena.commands.register({ id: 'a.x', title: 'X', dispatch: 'remote', run: () => {} });
+
+  scena.openResource('test-record', {
+    resourceId: 'r1',
+    // The whole point. An *unindexed* kind takes `Record<string, unknown>` and
+    // would accept this happily - so this directive firing is the proof that
+    // the index and the props declaration are both being read, not merely that
+    // a wrong key is refused somewhere.
+    // @ts-expect-error - the panel reads `host`; `hostId` is nobody's key
+    extraProps: { hostId: 'code-server' },
+  });
+
+  scena.openResource('test-record', {
+    resourceId: 'r1',
+    // `resourceId` is named by the call's own field. Two ways to set one thing
+    // is how they come to disagree.
+    // @ts-expect-error - resourceId does not go in extraProps
+    extraProps: { resourceId: 'other' },
+  });
 }
 
 describe('the typed seams', () => {
   it('states its assertions to the compiler, not to vitest', () => {
-    // All three are dead code by design. Naming them here keeps them from reading
+    // All four are dead code by design. Naming them here keeps them from reading
     // as an oversight, and keeps a linter from removing what the build needs.
-    expect([accepted, registrable, rejected].every((fn) => typeof fn === 'function')).toBe(true);
+    expect([accepted, registrable, opens, rejected].every((fn) => typeof fn === 'function')).toBe(true);
   });
 
   it('hands the handler the arguments the caller sent', async () => {
