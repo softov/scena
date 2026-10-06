@@ -30,7 +30,7 @@ export function Spinner({
       role="status"
       aria-live="polite"
       aria-label={label ?? 'Loading'}
-      className={['oo-r-wrap', className].filter(Boolean).join(' ')}
+      className={['oo-spinner-wrap', className].filter(Boolean).join(' ')}
       style={wrapperStyle}
     >
       <span className="oo-spinner" aria-hidden />
