@@ -8,7 +8,7 @@
   padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
   border-bottom: 1px solid var(--oo-color-border);
   background: var(--oo-color-surface);
-  color: var(--oo-color-fg);
+  color: inherit;
   font-size: var(--oo-font-size-sm);
   flex: 0 0 auto;
   min-height: var(--oo-toolbar-height, 32px);

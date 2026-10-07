@@ -39,6 +39,7 @@ export default defineConfig({
       '@softov/scena/ui/campus': resolve(src, 'ui/campus/index.ts'),
       '@softov/scena/ui': resolve(src, 'ui/index.ts'),
       '@softov/scena/styles': resolve(src, 'styles'),
+      '@softov/scena/themes': resolve(src, 'themes/index.ts'),
       '@softov/scena/porta/examples': resolve(src, 'porta/providers/examples/index.ts'),
       '@softov/scena/porta': resolve(src, 'porta/index.ts'),
       '@softov/scena': resolve(src, 'index.ts'),

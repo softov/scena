@@ -1,5 +1,5 @@
 .oo-markdown {
-  color: var(--oo-color-fg);
+  color: inherit;
   font-size: var(--oo-font-size-md);
   line-height: 1.6;
 }

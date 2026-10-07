@@ -67,6 +67,10 @@
       "default": "./dist/styles/index.js"
     },
     "./styles/*": "./dist/styles/*",
+    "./themes": {
+      "types": "./dist/themes/index.d.ts",
+      "default": "./dist/themes/index.js"
+    },
     "./runtime": {
       "types": "./dist/runtime/index.d.ts",
       "default": "./dist/runtime/index.js"

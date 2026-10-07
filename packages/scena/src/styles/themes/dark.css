@@ -25,6 +25,8 @@
   /* --oo-rgb-border: 148 163 184; */
   --oo-rgb-border: 98 113 134;
 
+  --oo-rgb-primary: var(--oo-rgb-accent);
+
   --oo-line-alpha: 0.18;
   --oo-border-alpha: 0.22;
 }

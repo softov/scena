@@ -97,7 +97,8 @@
    * Intent / brand
    * ---------------------------------------- */
   --oo-rgb-accent: 78 201 176;
-  --oo-rgb-primary: var(--oo-rgb-accent);
+  /* Darker than the accent, so white reads on it and it reads on white. */
+  --oo-rgb-primary: 12 112 97;
   --oo-rgb-danger: 204 0 0;
   --oo-rgb-success: 0 170 0;
   --oo-rgb-warning: 204 136 0;

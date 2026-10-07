@@ -19,7 +19,7 @@
   --textarea-border-width: var(--input-border-width);
 
   --button-background: none;
-  --button-background-hover: rgb(var(--oo-rgb-primary) / 0.88);
+  --button-background-hover: rgb(from var(--oo-color-primary) r g b / 0.88);
   --button-background-active: var(--oo-color-active);
   --button-color: inherit;
   --button-color-hover: var(--oo-color-hover);
@@ -104,17 +104,17 @@ button[data-variant="primary"] {
   --button-color: var(--oo-color-primary);
   --button-border: var(--oo-color-primary);
   --button-color-hover: var(--oo-color-surface);
-  --button-background-hover: rgb(var(--oo-rgb-primary) / 0.88);
-  --button-background-active: rgb(var(--oo-rgb-primary) / 0.76);
+  --button-background-hover: rgb(from var(--oo-color-primary) r g b / 0.88);
+  --button-background-active: rgb(from var(--oo-color-primary) r g b / 0.76);
 }
 
-button [data-variant="secondary"] {
+button[data-variant="secondary"] {
   --button-background: none;
   --button-color: var(--oo-color-text);
   --button-border: var(--oo-color-border);
   --button-color-hover: var(--oo-color-surface);
-  --button-background-hover: rgb(var(--oo-rgb-text) / 0.8);
-  --button-background-active: rgb(var(--oo-rgb-text) / 0.76);
+  --button-background-hover: rgb(from var(--oo-color-text) r g b / 0.8);
+  --button-background-active: rgb(from var(--oo-color-text) r g b / 0.76);
 }
 
 button[data-variant="danger"] {
@@ -122,8 +122,8 @@ button[data-variant="danger"] {
   --button-color: var(--oo-color-danger);
   --button-border: var(--oo-color-danger);
   --button-color-hover: var(--oo-color-surface);
-  --button-background-hover: rgb(var(--oo-rgb-danger) / 0.88);
-  --button-background-active: rgb(var(--oo-rgb-danger) / 0.76);
+  --button-background-hover: rgb(from var(--oo-color-danger) r g b / 0.88);
+  --button-background-active: rgb(from var(--oo-color-danger) r g b / 0.76);
 }
 
 button[data-variant="ghost"] {
@@ -178,7 +178,7 @@ select {
   box-sizing: border-box;
   padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
   background: var(--oo-color-canvas);
-  color: var(--oo-color-fg);
+  color: inherit;
   border: 1px solid var(--oo-color-border);
   border-radius: var(--oo-radius-sm);
 }

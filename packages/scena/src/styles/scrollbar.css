@@ -1,14 +1,14 @@
 :root {
   --oo-scrollbar-width: 15px;
-  --oo-scrollbar-track-color: rgb(var(--oo-rgb-surface) / 0.25);
+  --oo-scrollbar-track-color: rgb(from var(--oo-color-surface) r g b / 0.25);
   /* --oo-scrollbar-track-color: transparent; */
   --oo-scrollbar-border-color: transparent;
   /* --oo-scrollbar-border-color: rgb(var(--oo-rgb-surface)); */
   --oo-scrollbar-border-width: 3px;
   --oo-scrollbar-thumb-radius: 15px;
-  --oo-scrollbar-thumb-color: rgb(var(--oo-rgb-border) / 0.35);
+  --oo-scrollbar-thumb-color: rgb(from var(--oo-color-border) r g b / 0.35);
   /* --oo-scrollbar-thumb-color: none; */
-  --oo-scrollbar-thumb-hover: rgb(var(--oo-rgb-border) / 0.5);
+  --oo-scrollbar-thumb-hover: rgb(from var(--oo-color-border) r g b / 0.5);
   /* --oo-scrollbar-thumb-hover: rgb(var(--oo-rgb-accent)); */
 }
 

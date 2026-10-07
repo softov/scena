@@ -82,11 +82,9 @@ function ensureCssLink(href: string): void {
   injectedHrefs.add(href);
 }
 
-// Built-in `default` family. The CSS already ships in
-// `./themes/light.css` and `./themes/dark.css` (bundled by the app entry),
-// so the variant sources only need to be present for discovery — the
-// real styling lives in those files keyed on
-// [data-theme="default"][data-theme-mode="…"].
+// Built-in `default` family. The CSS already ships in `./themes/tokens.css`
+// (light, on :root) and `./themes/dark.css` (bundled by the app entry), so
+// the variant sources only need to be present for discovery.
 registerTheme({
   id: 'default',
   label: 'Default',

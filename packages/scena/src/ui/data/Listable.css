@@ -6,7 +6,7 @@
   outline: none;
   user-select: none;
   font-size: var(--oo-font-size-sm);
-  color: var(--oo-color-fg);
+  color: inherit;
 
   /*
    * A size container, so a column can reposition its cells from a stylesheet
@@ -115,10 +115,10 @@
   cursor: pointer;
 }
 .oo-listable__head-cell[data-sortable='true']:hover {
-  color: var(--oo-color-fg);
+  color: inherit;
 }
 .oo-listable__head-cell[data-sorted] {
-  color: var(--oo-color-fg);
+  color: inherit;
 }
 
 .oo-listable__head-label {
@@ -204,7 +204,7 @@
   flex: 1 1 auto;
   min-width: 0;
   font-size: var(--oo-font-size-sm);
-  color: var(--oo-color-fg);
+  color: inherit;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

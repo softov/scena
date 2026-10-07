@@ -9,7 +9,7 @@
 }
 .oo-modal__card {
   background: var(--oo-color-canvas);
-  color: var(--oo-color-fg);
+  color: inherit;
   border: 1px solid var(--oo-color-border);
   border-radius: var(--oo-radius-sm);
   padding: var(--oo-spacing-md);

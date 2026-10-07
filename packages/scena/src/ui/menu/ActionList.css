@@ -18,7 +18,7 @@
   border-radius: var(--oo-radius-md, 8px);
   box-shadow: var(--oo-shadow-lg, 0 12px 28px rgba(0, 0, 0, 0.26));
   overflow: hidden;
-  color: var(--oo-color-fg);
+  color: inherit;
   font-size: var(--oo-font-size-sm);
 }
 
@@ -69,7 +69,7 @@
 
 .oo-action-list__back:hover {
   background: var(--oo-color-active);
-  color: var(--oo-color-fg);
+  color: inherit;
 }
 
 .oo-action-list__body {

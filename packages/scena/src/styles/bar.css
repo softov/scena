@@ -95,7 +95,7 @@
 
 .tab-bar__tab[data-active="true"] {
   color: var(--oo-color-text);
-  background: var(--oo-color-bg);
+  background: var(--oo-color-canvas);
   border-bottom: 2px solid var(--oo-color-accent);
   margin-bottom: -1px;
 }

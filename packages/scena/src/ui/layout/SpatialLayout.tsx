@@ -677,7 +677,7 @@ function ZoomPercentInput({ value, onCommit }: ZoomPercentInputProps) {
         border: '1px solid var(--oo-color-border)',
         borderRadius: 'var(--oo-radius-sm, 4px)',
         background: 'var(--oo-color-canvas)',
-        color: 'var(--oo-color-fg)',
+        color: 'inherit',
       }}
     />
   );

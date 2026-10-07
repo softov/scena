@@ -10,7 +10,7 @@
   min-height: 0;
   width: 100%;
   background: var(--oo-color-canvas);
-  color: var(--oo-color-fg);
+  color: inherit;
 }
 .porta-limen__top    { grid-area: top; }
 .porta-limen__bottom { grid-area: bottom; }

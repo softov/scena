@@ -65,7 +65,7 @@ export function Modal({
         onClick={(e) => e.stopPropagation()}
         style={{
           background: 'var(--oo-color-canvas, #fff)',
-          color: 'var(--oo-color-fg, inherit)',
+          color: 'inherit',
           border: '1px solid var(--oo-color-border)',
           borderRadius: 'var(--oo-radius-sm, 4px)',
           padding: 16,

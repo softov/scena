@@ -6,7 +6,7 @@
   outline: none;
   user-select: none;
   font-size: var(--oo-font-size-sm);
-  color: var(--oo-color-fg);
+  color: inherit;
 }
 .oo-tree:focus-visible {
   outline: 1px solid var(--oo-color-accent);

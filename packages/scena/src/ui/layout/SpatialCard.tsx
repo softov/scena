@@ -37,7 +37,7 @@ export function SpatialCard({ selected, data }: CampusNodeRenderProps) {
           padding: 'var(--oo-spacing-xs) var(--oo-spacing-sm)',
           borderBottom: '1px solid var(--oo-color-border)',
           fontSize: 'var(--oo-font-size-xs)',
-          color: selected ? 'var(--oo-color-fg)' : 'var(--oo-color-muted)',
+          color: selected ? 'inherit' : 'var(--oo-color-muted)',
           background: selected ? 'var(--oo-color-active)' : 'var(--oo-color-surface)',
           display: 'flex',
           justifyContent: 'space-between',

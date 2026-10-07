@@ -1,7 +1,10 @@
-import type { ThemeDefinition } from '@softov/scena/styles';
+import type { ThemeDefinition } from '../styles/index.js';
 
-// Sunset — registered as a pure tokens-object theme. Exercises the
-// `{ kind: 'tokens' }` branch of applyTheme (no CSS file shipped).
+/**
+ * Sunset: warm oranges. It sets resolved `--oo-color-*` tokens and no
+ * channels, so it is the theme that shows a component reading a channel
+ * instead of the colour it derives.
+ */
 export const sunsetTheme: ThemeDefinition = {
   id: 'sunset',
   label: 'Sunset',

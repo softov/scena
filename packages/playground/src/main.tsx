@@ -6,7 +6,7 @@ import '@softov/scena/styles/base.css';
 import '@softov/scena/styles/bar.css';
 import '@softov/scena/styles/scrollbar.css';
 import { applyTheme, type ThemeMode } from '@softov/scena/styles';
-import { registerDevThemes } from './themes/index.js';
+import { registerBuiltinThemes } from '@softov/scena/themes';
 import './styles.css';
 // import './body.css';
 
@@ -56,7 +56,7 @@ function RootApp() {
   );
 }
 
-registerDevThemes();
+registerBuiltinThemes();
 
 const THEME_ID_KEY = 'scena-dev.theme-id';
 const THEME_MODE_KEY = 'scena-dev.theme-mode';

@@ -3,7 +3,7 @@
   align-items: center;
   gap: 4px;
   font-size: var(--oo-font-size-sm);
-  color: var(--oo-color-fg);
+  color: inherit;
 }
 .oo-breadcrumb__sep {
   color: var(--oo-color-muted);
@@ -25,6 +25,6 @@
   color: var(--oo-color-muted);
 }
 .oo-breadcrumb__item[data-current='true'] {
-  color: var(--oo-color-fg);
+  color: inherit;
   font-weight: 500;
 }

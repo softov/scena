@@ -40,7 +40,7 @@ const wrap: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: 8,
-  borderTop: '1px solid rgb(var(--oo-rgb-danger) / 0.3)',
+  borderTop: '1px solid rgb(from var(--oo-color-danger) r g b / 0.3)',
   paddingTop: 'var(--oo-spacing-md, 16px)',
   paddingBottom: 'var(--oo-spacing-md, 16px)',
   paddingLeft: 'var(--oo-spacing-md, 16px)',
