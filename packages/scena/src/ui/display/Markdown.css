@@ -2,22 +2,53 @@
   color: inherit;
   font-size: var(--oo-font-size-md);
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
+.oo-markdown > :first-child { margin-top: 0; }
+.oo-markdown > :last-child { margin-bottom: 0; }
 .oo-markdown h1 { font-size: 22px; margin: 12px 0 6px; font-weight: 700; }
 .oo-markdown h2 { font-size: 18px; margin: 16px 0 6px; font-weight: 600; }
 .oo-markdown h3 { font-size: 15px; margin: 12px 0 4px; font-weight: 600; }
+.oo-markdown h4,
+.oo-markdown h5,
+.oo-markdown h6 { font-size: 1em; margin: 10px 0 4px; font-weight: 600; }
+.oo-markdown h6 { color: var(--oo-color-muted); }
 .oo-markdown p { margin: 6px 0 10px; }
-.oo-markdown ul {
+.oo-markdown ul,
+.oo-markdown ol {
   margin: 6px 0 10px;
   padding-left: 22px;
 }
 .oo-markdown li { margin-bottom: 3px; }
+.oo-markdown li > ul,
+.oo-markdown li > ol { margin: 3px 0 0; }
+.oo-markdown li > p { margin: 3px 0; }
+.oo-markdown li[data-task] { list-style: none; }
+.oo-markdown__task { margin: 0 6px 0 -18px; vertical-align: middle; }
 .oo-markdown a { color: var(--oo-color-accent); text-decoration: none; }
 .oo-markdown a:hover { text-decoration: underline; }
+.oo-markdown a[data-kind='local'] {
+  font-family: var(--oo-font-mono);
+  font-size: 0.92em;
+}
+.oo-markdown del { color: var(--oo-color-muted); }
+.oo-markdown img { max-width: 100%; }
+.oo-markdown hr {
+  border: 0;
+  border-top: 1px solid var(--oo-color-border);
+  margin: 12px 0;
+}
+.oo-markdown blockquote {
+  margin: 6px 0 10px;
+  padding: 2px 0 2px 12px;
+  border-left: 3px solid var(--oo-color-border);
+  color: var(--oo-color-muted);
+}
 .oo-markdown code {
   font-family: var(--oo-font-mono);
   font-size: 0.92em;
   padding: 1px 5px;
+  color: var(--oo-color-accent);
   background: var(--oo-color-active);
   border-radius: 3px;
 }
@@ -32,7 +63,48 @@
   margin: 6px 0 10px;
 }
 .oo-markdown pre code {
+  color: inherit;
   background: transparent;
   padding: 0;
   font-size: inherit;
 }
+.oo-markdown__table {
+  overflow-x: auto;
+  margin: 6px 0 10px;
+}
+.oo-markdown table {
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+.oo-markdown th,
+.oo-markdown td {
+  padding: 4px 10px;
+  border: 1px solid var(--oo-color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.oo-markdown th {
+  font-weight: 600;
+  background: var(--oo-color-active);
+}
+.oo-markdown__ref {
+  color: var(--oo-color-accent);
+  cursor: help;
+  padding: 0 1px;
+}
+.oo-markdown__notes {
+  margin: 12px 0 0;
+  padding: 8px 0 0 22px;
+  border-top: 1px solid var(--oo-color-border);
+  font-size: 0.9em;
+  color: var(--oo-color-muted);
+}
+
+/* Code tokens, mixed toward the text colour so they read in light and dark. */
+.oo-markdown .oo-tok-comment { color: var(--oo-color-muted); font-style: italic; }
+.oo-markdown .oo-tok-string { color: color-mix(in srgb, var(--oo-color-green) 75%, var(--oo-color-text)); }
+.oo-markdown .oo-tok-number { color: color-mix(in srgb, var(--oo-color-orange) 75%, var(--oo-color-text)); }
+.oo-markdown .oo-tok-keyword { color: color-mix(in srgb, var(--oo-color-violet) 75%, var(--oo-color-text)); }
+.oo-markdown .oo-tok-add { color: var(--oo-color-success); }
+.oo-markdown .oo-tok-del { color: var(--oo-color-danger); }
+.oo-markdown .oo-tok-meta { color: var(--oo-color-info); }
