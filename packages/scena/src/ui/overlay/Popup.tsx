@@ -46,17 +46,28 @@ export function Popup({
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ left: x, top: y });
 
-  // Clamp to viewport once we know our own bounding box.
+  // Clamp to the viewport, and again whenever the popup or the window changes
+  // size: a menu whose rows load after mount grows past the edge otherwise.
   useLayoutEffect(() => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
+    const el = ref.current;
+    if (!el) return;
     const margin = 4;
-    const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
-    const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
-    setPos({
-      left: Math.max(margin, Math.min(x, maxX)),
-      top: Math.max(margin, Math.min(y, maxY)),
-    });
+    const clamp = () => {
+      const rect = el.getBoundingClientRect();
+      const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
+      const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
+      const left = Math.max(margin, Math.min(x, maxX));
+      const top = Math.max(margin, Math.min(y, maxY));
+      setPos((cur) => (cur.left === left && cur.top === top ? cur : { left, top }));
+    };
+    clamp();
+    window.addEventListener('resize', clamp);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(clamp);
+    observer?.observe(el);
+    return () => {
+      window.removeEventListener('resize', clamp);
+      observer?.disconnect();
+    };
   }, [x, y]);
 
   // Outside-click close. We defer adding the listener one tick so the click
@@ -100,6 +111,8 @@ export function Popup({
         left: pos.left,
         top: pos.top,
         zIndex: 9999,
+        maxHeight: 'calc(100vh - 8px)',
+        overflowY: 'auto',
         ...style,
       }}
       // Stop clicks from bubbling into the outside-click listener.
