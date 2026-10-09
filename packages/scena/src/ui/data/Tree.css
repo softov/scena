@@ -49,11 +49,11 @@
   position: relative;
 }
 .oo-tree__row:hover {
-  color: var(--oo-color-surface);
+  color: var(--oo-color-text);
   background: var(--oo-color-active);
 }
 .oo-tree__row[data-selected='true'] {
-  color: var(--oo-color-surface);
+  color: var(--oo-color-text);
   background: var(--oo-color-active);
   box-shadow: inset 2px 0 0 var(--oo-color-accent);
 }

@@ -57,6 +57,8 @@ export type PickerAction =
   | {
       title: string;
       description?: string;
+      // Shown on hover only, for words too long to sit in the row.
+      tooltip?: string;
       icon?: string;
       color?: ResourceColor;
       // Chat typed-prefix shown on the left of the row (e.g. '/agent').

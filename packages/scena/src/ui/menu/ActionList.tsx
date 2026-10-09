@@ -25,6 +25,7 @@ interface Row {
   key: string;
   title: string;
   description?: string;
+  tooltip?: string;
   icon?: string;
   color?: string;
   // Chat typed-prefix (e.g. '/agent', '@persona') — what the user types into
@@ -181,6 +182,7 @@ export function ActionList({
         key: `act:${i}:${a.title}`,
         title: a.title,
         description: a.description,
+        tooltip: a.tooltip,
         icon: a.icon,
         color: a.color,
         shortcut: a.shortcut,
@@ -439,6 +441,7 @@ export function ActionList({
         key={row.key}
         className="oo-action-list__row"
         type="button"
+        title={row.tooltip}
         disabled={row.disabled}
         data-cmd-group={row.group}
         data-cmd-category={row.category}
