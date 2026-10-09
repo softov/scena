@@ -16,7 +16,12 @@ import { TabTitle } from './TabPanelLayout.js';
 // Right-click on a tab opens slot `tab:context`. The [...] trailing button
 // opens slot `tab-group:context`. Right-click on the strip empty area opens
 // slot `surface:context`. The `view/title` slot still renders as inline
-// action buttons next to the strip for the active mount.
+// action buttons next to the strip for the active mount. The `surface/title`
+// slot renders as buttons on every strip, empty or not, each shown where its
+// `when` holds with `$/surface/name` set to the strip's surface and
+// `$/tab/key` / `$/tab/component` to its active tab; a command with an icon
+// shows the icon alone. A click sets `$/surface/name` and `$/tab/key` in the
+// store, as the tab menu does, before the command runs.
 
 const DRAG_MIME = 'application/x-scena-tab-index';
 
@@ -49,6 +54,23 @@ export function TabLayout({
   const titleEntries = active
     ? scena.commands.list({ slot: 'view/title', enabled: true })
     : [];
+  // This surface's own buttons, shown on an empty strip too. A command's
+  // `when` reads `$/surface/name` to keep to the surfaces it belongs on, and
+  // `$/tab/key` / `$/tab/component` to keep to the active tab's kind.
+  const activeComponent = active?.component.component;
+  const stripContext = {
+    '$/surface/name': surface,
+    '$/tab/key': active?.key,
+    '$/tab/component': typeof activeComponent === 'string' ? activeComponent : undefined,
+  };
+  const surfaceEntries = scena.commands
+    .list({ slot: 'surface/title' })
+    .filter((cmd) => cmd.when === undefined || scena.when.evaluate(cmd.when, stripContext));
+  const runStrip = (id: string): void => {
+    scena.store.set('$/surface/name', surface);
+    scena.store.set('$/tab/key', active?.key);
+    void scena.commands.execute(id);
+  };
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
   // Per-tab context menu state. The capability paths injected via
@@ -195,6 +217,19 @@ export function TabLayout({
               >
                 {cmd.icon ? `${cmd.icon} ` : ''}
                 {String(label)}
+              </button>
+            );
+          })}
+          {surfaceEntries.map((cmd) => {
+            const label = String(typeof cmd.title === 'function' ? cmd.title() : cmd.title);
+            return (
+              <button
+                key={cmd.id}
+                onClick={() => runStrip(cmd.id)}
+                title={label}
+                aria-label={label}
+              >
+                {cmd.icon ?? label}
               </button>
             );
           })}
