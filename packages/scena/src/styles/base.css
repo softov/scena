@@ -163,6 +163,10 @@ button[data-disabled="true"] {
 
 button:hover {
   background: var(--button-background-hover);
+}
+
+/* Only a variant pairs a text colour with its hover background; a plain button keeps its own. */
+button[data-variant]:hover {
   color: var(--button-color-hover);
 }
 
