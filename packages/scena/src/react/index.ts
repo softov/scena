@@ -1,5 +1,7 @@
 export { Scena } from './Scena.js';
 export { ScenaProvider, useScena } from './ScenaProvider.js';
+// The ring a surface shows while its component loads.
+export { SurfaceLoading } from './SurfaceLoading.js';
 export { DefaultShell } from './DefaultShell.js';
 export { ViewMount, MountWrapper } from './ViewMount.js';
 export { ShellSplitter } from './ShellSplitter.js';

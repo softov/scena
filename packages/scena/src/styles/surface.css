@@ -63,6 +63,82 @@
     var(--oo-surface-border, var(--oo-color-border));
 }
 
+/*
+ * Surface colours, by role.
+ *
+ * Unset by default: a surface is transparent and its headers paint
+ * `--oo-color-surface`, as before. A theme that sets one of these paints that
+ * role's surfaces with it, and their headers too, by giving the surface its
+ * own `--oo-color-surface`. The fallback is `--oo-color-surface-root`, the
+ * root's value, because naming `--oo-color-surface` there would be a cycle.
+ *
+ *   --oo-surface-bar-bg     the title and status bars
+ *   --oo-surface-panel-bg   sidebars, the bottom panel, and the activity bar
+ *   --oo-surface-main-bg    the main area
+ */
+.oo-surface[data-surface-role='bar'] {
+  --oo-color-surface: var(--oo-surface-bar-bg, var(--oo-color-surface-root));
+  background: var(--oo-surface-bar-bg, transparent);
+}
+
+.oo-surface[data-surface-role='panel'],
+.oo-surface[data-surface-role='rail'] {
+  --oo-color-surface: var(--oo-surface-panel-bg, var(--oo-color-surface-root));
+  background: var(--oo-surface-panel-bg, transparent);
+}
+
+.oo-surface[data-surface-role='main'] {
+  --oo-color-surface: var(--oo-surface-main-bg, var(--oo-color-surface-root));
+  background: var(--oo-surface-main-bg, transparent);
+}
+
+/*
+ * Boxes in a frame.
+ *
+ * OFF by default, like the separators. A theme that sets these floats the
+ * docked surfaces between the bars as boxes on the canvas, the way VS Code
+ * 1.141 draws its parts:
+ *
+ *   --oo-shell-gap: 4px;          between boxes, and at the inline edges
+ *   --oo-surface-box-width: 1px;  each box's line, in --oo-surface-border
+ *   --oo-surface-radius: 6px;     each box's corners
+ *
+ * The line is an inset outline, not a border: an outline adds no size and
+ * leaves the edge separators above untouched for the themes that use them. A
+ * positioned child paints over an outline, so the box pads its content by the
+ * line's width and clips it to the rounded edge.
+ */
+.oo-shell__body {
+  gap: var(--oo-shell-gap, 0px);
+  padding-inline: var(--oo-shell-gap, 0px);
+}
+
+.oo-shell__center {
+  gap: var(--oo-shell-gap, 0px);
+}
+
+.oo-shell__body > .oo-surface[data-presentation='docked'],
+.oo-shell__center > .oo-surface[data-presentation='docked'] {
+  border-radius: var(--oo-surface-radius, 0px);
+  outline: var(--oo-surface-box-width, 0px) solid var(--oo-surface-border, var(--oo-color-border));
+  outline-offset: calc(-1 * var(--oo-surface-box-width, 0px));
+  padding: var(--oo-surface-box-width, 0px);
+  overflow: clip;
+}
+
+/* A rail and the panel docked after it are one box, split by one line: the
+ * panel closes the gap and lays its line over the rail's. */
+.oo-shell__body > .oo-surface[data-surface-role='rail']:has(+ .oo-surface[data-surface-role='panel'][data-presentation='docked']) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.oo-shell__body > .oo-surface[data-surface-role='rail'] + .oo-surface[data-surface-role='panel'][data-presentation='docked'] {
+  margin-inline-start: calc(-1 * var(--oo-shell-gap, 0px) - var(--oo-surface-box-width, 0px));
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
 /* An overlaid surface is lifted out of the flow with its own shadow, so a
  * border on the edge it no longer touches would draw a line into open space. */
 .oo-surface[data-presentation='floating'],
@@ -155,10 +231,10 @@
  * grip is a pseudo-element on the surface itself, so it takes no part in flex
  * and cannot end up on the wrong side of a conditionally-rendered neighbour.
  *
- * The hit zone is 10px and the visible line is 1px. That gap is the point: a
- * 1px target is unhittable and a 10px line is a gutter, so the two are
- * separated - the gradient paints one pixel of the band and leaves the rest
- * transparent.
+ * The hit zone is 10px and the visible line is --oo-resize-line (3px). That
+ * gap is the point: a thin target is hard to hit and a 10px line is a gutter,
+ * so the two are separated - the gradient paints the line's width of the band
+ * and leaves the rest transparent.
  *
  * Only present on a docked surface. Floating, sheet and bar have no dock
  * boundary to drag, and `useSurfaceResize` stops emitting `data-resize` for
@@ -190,8 +266,8 @@
   cursor: ew-resize;
   background: linear-gradient(
     to right,
-    transparent 9px,
-    var(--oo-color-accent) 9px
+    transparent calc(10px - var(--oo-resize-line, 3px)),
+    var(--oo-color-accent) calc(10px - var(--oo-resize-line, 3px))
   );
 }
 
@@ -203,8 +279,8 @@
   cursor: ew-resize;
   background: linear-gradient(
     to right,
-    var(--oo-color-accent) 1px,
-    transparent 1px
+    var(--oo-color-accent) var(--oo-resize-line, 3px),
+    transparent var(--oo-resize-line, 3px)
   );
 }
 
@@ -216,8 +292,8 @@
   cursor: ns-resize;
   background: linear-gradient(
     to bottom,
-    var(--oo-color-accent) 1px,
-    transparent 1px
+    var(--oo-color-accent) var(--oo-resize-line, 3px),
+    transparent var(--oo-resize-line, 3px)
   );
 }
 
@@ -229,8 +305,8 @@
   cursor: ns-resize;
   background: linear-gradient(
     to bottom,
-    transparent 9px,
-    var(--oo-color-accent) 9px
+    transparent calc(10px - var(--oo-resize-line, 3px)),
+    var(--oo-color-accent) calc(10px - var(--oo-resize-line, 3px))
   );
 }
 
@@ -242,4 +318,34 @@
 
 .oo-surface[data-resize][data-resize-state='active']::after {
   opacity: 1;
+}
+
+/*
+ * A surface whose component is still loading. The ring fills nothing: it sits
+ * centred in whatever space the surface has, from a bar to the main area.
+ */
+.oo-surface-loading {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.oo-surface-loading > span {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--oo-color-border);
+  border-top-color: var(--oo-color-accent);
+  border-radius: 50%;
+  animation: oo-surface-spin 0.8s linear infinite;
+}
+/* An overlay covers the window and shows nothing until it opens: no ring. */
+[data-surface-role='overlay'] .oo-surface-loading { display: none; }
+@keyframes oo-surface-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .oo-surface-loading > span { animation-duration: 2.4s; }
 }

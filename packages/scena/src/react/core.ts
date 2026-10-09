@@ -5,6 +5,8 @@
 // once the shell actually renders (post-login / on first surface).
 export { Scena } from './Scena.js';
 export { ScenaProvider, useScena } from './ScenaProvider.js';
+// The ring a surface shows while its component loads.
+export { SurfaceLoading } from './SurfaceLoading.js';
 // i18n hook + <Translate> (alias <T>) — narrow entry (registry-only).
 export { useI18n } from './hooks/useI18n.js';
 export type { UseI18nResult } from './hooks/useI18n.js';

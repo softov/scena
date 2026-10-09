@@ -111,6 +111,9 @@
   --oo-color-panel: rgb(var(--oo-rgb-panel));
   --oo-color-surface: rgb(var(--oo-rgb-surface));
   --oo-color-raised: rgb(var(--oo-rgb-raised));
+  /* The surface colour as the root resolves it. A surface that sets its own
+   * --oo-color-surface (surface.css, by role) falls back to this. */
+  --oo-color-surface-root: var(--oo-color-surface);
 
   --oo-color-titlebar: rgb(var(--oo-rgb-titlebar));
   --oo-color-activitybar: rgb(var(--oo-rgb-activitybar));

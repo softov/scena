@@ -80,3 +80,22 @@ describe('surface separators', () => {
     expect(surfaceCss).toMatch(/data-presentation='(floating|sheet)'\][\s\S]{0,80}\{\s*border: 0;/);
   });
 });
+
+describe('surface boxes and role colours', () => {
+  const OPT_IN = ['--oo-shell-gap', '--oo-surface-box-width', '--oo-surface-radius', '--oo-surface-bar-bg', '--oo-surface-panel-bg', '--oo-surface-main-bg'];
+
+  // The same trap as the separators: a declaration in surface.css would beat
+  // the theme's value on the root, so these are only ever read, with a fallback.
+  it('surface.css reads the tokens and never declares them', () => {
+    const rules = surfaceCss.replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const token of OPT_IN) {
+      expect(rules, token).not.toMatch(new RegExp(`${token}\\s*:`));
+      expect(rules, token).toMatch(new RegExp(`var\\(${token},`));
+    }
+  });
+
+  it('a role colour falls back to the global surface colour, not to itself', () => {
+    expect(surfaceCss).toMatch(/--oo-color-surface:\s*var\(--oo-surface-panel-bg,\s*var\(--oo-color-surface-root\)\)/);
+    expect(surfaceCss).not.toMatch(/--oo-color-surface:\s*var\([^;]*var\(--oo-color-surface\)/);
+  });
+});

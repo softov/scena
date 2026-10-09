@@ -3,6 +3,7 @@ import type { Scena as ScenaInstance } from '../sdk/scena.js';
 import type { CreateScenaOptions } from '../sdk/scena.js';
 import { createScena } from '../core/scena.js';
 import { ScenaProvider } from './ScenaProvider.js';
+import { SurfaceLoading } from './SurfaceLoading.js';
 // import { DefaultShell } from './DefaultShell.js';
 const DefaultShell = lazy(() => import('./DefaultShell.js').then(module => ({ default: module.DefaultShell })));
 
@@ -33,7 +34,7 @@ export function Scena({ options, onRender, children }: ScenaComponentProps) {
   return (
     <ScenaProvider scena={scenaRef.current}>
       {children ?? (
-        <Suspense fallback={<div>Loading...</div>} >
+        <Suspense fallback={<SurfaceLoading />} >
           <DefaultShell />
         </Suspense>
       )}

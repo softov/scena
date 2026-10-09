@@ -1,22 +1,42 @@
+/*
+ * The line between two splits. It draws 1px, but the grip reaches
+ * --oo-divisor-grip past each side, and on hover or drag the line thickens to
+ * --oo-resize-line, as a surface's resize band does.
+ */
 .oo-divisor {
   flex: 0 0 auto;
   background: var(--oo-color-border);
   user-select: none;
   touch-action: none;
-
   height: 100%;
-  transition: background 0.15s;
   position: relative;
-
-  flex-basis: auto;
-  flex-grow: 0;
-  flex-shrink: 0;
-  touch-action: none;
-
+  z-index: 5;
 }
 
-.oo-divisor:hover {
+.oo-divisor::before,
+.oo-divisor::after {
+  content: '';
+  position: absolute;
+}
+
+.oo-divisor::after {
   background: var(--oo-color-accent);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.oo-divisor:hover::after {
+  opacity: 0.55;
+}
+
+.oo-divisor:active::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oo-divisor::after {
+    transition: none;
+  }
 }
 
 .oo-divisor__row {
@@ -24,7 +44,29 @@
   cursor: ew-resize;
 }
 
+.oo-divisor__row::before {
+  inset: 0 calc(-1 * var(--oo-divisor-grip, 4px));
+}
+
+.oo-divisor__row::after {
+  top: 0;
+  bottom: 0;
+  left: calc((1px - var(--oo-resize-line, 3px)) / 2);
+  width: var(--oo-resize-line, 3px);
+}
+
 .oo-divisor__col {
   height: 1px;
   cursor: ns-resize;
+}
+
+.oo-divisor__col::before {
+  inset: calc(-1 * var(--oo-divisor-grip, 4px)) 0;
+}
+
+.oo-divisor__col::after {
+  left: 0;
+  right: 0;
+  top: calc((1px - var(--oo-resize-line, 3px)) / 2);
+  height: var(--oo-resize-line, 3px);
 }

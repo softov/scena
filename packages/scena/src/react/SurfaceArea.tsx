@@ -20,6 +20,7 @@ import { useLayout } from './hooks/useLayout.js';
 import { useMounts } from './hooks/useMounts.js';
 import { MountWrapper, ViewMount } from './ViewMount.js';
 import { useSurfaceResize, type SurfaceResizeSpec } from './useSurfaceResize.js';
+import { SurfaceLoading } from './SurfaceLoading.js';
 
 function renderOneMount(mount: ResolvedMount): ReactNode {
   return (
@@ -158,7 +159,7 @@ export function SurfaceArea({
           // inside Suspense so the first use of a strategy can load its chunk.
           const Layout = layoutDef.component as ComponentType<LayoutProps>;
           return (
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<SurfaceLoading />}>
               <Layout {...layoutProps} />
             </Suspense>
           );

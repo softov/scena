@@ -2,18 +2,17 @@ import type { ThemeDefinition } from '../styles/index.js';
 
 /**
  * VS Modern — the current VS Code look (the "Modern" default, not the older
- * Dark+ / Light+ pair).
+ * Dark+ / Light+ pair), as VS Code 1.141 draws it.
  *
- * Distinguishing traits worth having in the set: the chrome is *darker* than
- * the canvas rather than lighter (#181818 panels against a #1f1f1f editor),
- * and every region is separated by an opaque hairline rather than by a wash.
+ * The parts float as boxes in a frame: the bars and the gaps are the frame,
+ * and each docked surface between them is a box with a 1px line and rounded
+ * corners, 4px apart and 4px in from the window's sides. The activity bar and
+ * the sidebar share one box. In dark, the frame and the main area are #1f1f1f
+ * and the panels #181818; in light, the frame and the panels are #f8f8f8 and
+ * the main area white.
  *
- * That second trait is why this theme sets `--oo-surface-border-width`. scena
- * draws no separator between surfaces by default — a shell that separates its
- * regions by background alone is a legitimate design, and `paper` is exactly
- * that — so the rules exist in styles/surface.css and a theme opts in. This is
- * the theme that wants them; `paper` is the one that must not have them, which
- * is why the two are useful to have side by side.
+ * The boxes replace the edge separators, so `--oo-surface-border-width` is 0
+ * and `--oo-surface-box-width` draws the line instead.
  */
 export const vsModernTheme: ThemeDefinition = {
   id: 'vs-modern',
@@ -22,7 +21,7 @@ export const vsModernTheme: ThemeDefinition = {
     light: {
       kind: 'tokens',
       tokens: {
-        '--oo-rgb-canvas': '255 255 255',
+        '--oo-rgb-canvas': '248 248 248',
         '--oo-rgb-panel': '248 248 248',
         '--oo-rgb-surface': '255 255 255',
         '--oo-rgb-raised': '255 255 255',
@@ -41,8 +40,14 @@ export const vsModernTheme: ThemeDefinition = {
         '--oo-rgb-border': '229 229 229',
         '--oo-line-alpha': '1',
         '--oo-border-alpha': '1',
-        '--oo-surface-border-width': '1px',
+        '--oo-surface-border-width': '0px',
         '--oo-surface-border': 'rgb(229 229 229)',
+        '--oo-surface-bar-bg': 'rgb(248 248 248)',
+        '--oo-surface-panel-bg': 'rgb(248 248 248)',
+        '--oo-surface-main-bg': 'rgb(255 255 255)',
+        '--oo-shell-gap': '4px',
+        '--oo-surface-box-width': '1px',
+        '--oo-surface-radius': '6px',
         '--oo-rgb-accent': '0 95 184',
         '--oo-rgb-primary': 'var(--oo-rgb-accent)',
         '--oo-rgb-danger': '205 49 49',
@@ -67,10 +72,10 @@ export const vsModernTheme: ThemeDefinition = {
         '--oo-rgb-panel': '24 24 24',
         '--oo-rgb-surface': '31 31 31',
         '--oo-rgb-raised': '43 43 43',
-        '--oo-rgb-titlebar': '24 24 24',
+        '--oo-rgb-titlebar': '31 31 31',
         '--oo-rgb-activitybar': '24 24 24',
         '--oo-rgb-sidebar': '24 24 24',
-        '--oo-rgb-statusbar': '24 24 24',
+        '--oo-rgb-statusbar': '31 31 31',
         '--oo-rgb-text': '204 204 204',
         '--oo-rgb-muted': '154 154 154',
         '--oo-rgb-subtle': '122 122 122',
@@ -82,8 +87,14 @@ export const vsModernTheme: ThemeDefinition = {
         '--oo-rgb-border': '60 60 60',
         '--oo-line-alpha': '1',
         '--oo-border-alpha': '1',
-        '--oo-surface-border-width': '1px',
-        '--oo-surface-border': 'rgb(43 43 43)',
+        '--oo-surface-border-width': '0px',
+        '--oo-surface-border': 'rgb(37 37 38)',
+        '--oo-surface-bar-bg': 'rgb(31 31 31)',
+        '--oo-surface-panel-bg': 'rgb(24 24 24)',
+        '--oo-surface-main-bg': 'rgb(31 31 31)',
+        '--oo-shell-gap': '4px',
+        '--oo-surface-box-width': '1px',
+        '--oo-surface-radius': '6px',
         '--oo-rgb-accent': '0 120 212',
         '--oo-rgb-primary': 'var(--oo-rgb-accent)',
         '--oo-rgb-danger': '244 71 71',

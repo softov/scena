@@ -132,6 +132,7 @@ export function DefaultShell({ presentation, dismissOnScrim = true }: DefaultShe
           body rather than the viewport, and the scrim covers this region
           rather than the bars above and below it. */}
       <div
+        className="oo-shell__body"
         style={{
           display: 'flex',
           flex: 1,
@@ -166,7 +167,7 @@ export function DefaultShell({ presentation, dismissOnScrim = true }: DefaultShe
           />
         ) : null}
 
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        <div className="oo-shell__center" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           <SurfaceArea
             surface="main"
             layout="tab"

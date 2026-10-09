@@ -6,6 +6,7 @@ import type { Session } from './provider.js';
 const LoginForm = lazy(() => import('../ui/forms/LoginForm.js').then(module => ({ default: module.LoginForm })));
 import { hasScope } from './match.js';
 import './Limen.css';
+import { SurfaceLoading } from '../react/SurfaceLoading.js';
 
 // Full-page wall. When the current session lacks `permission`, replaces the
 // whole subtree with a centered `<LoginForm>` (or `fallback`), surrounded
@@ -63,7 +64,7 @@ export function Limen({
         <div className="porta-limen__panel">
           <div className="porta-limen__title">{title}</div>
           {subtitle ? <div className="porta-limen__subtitle">{subtitle}</div> : null}
-          {fallback ?? <Suspense fallback={<div>Loading...</div>}><LoginForm /></Suspense>}
+          {fallback ?? <Suspense fallback={<SurfaceLoading />}><LoginForm /></Suspense>}
         </div>
       </div>
       {right  ? <div className="porta-limen__right">{right}</div>   : null}
