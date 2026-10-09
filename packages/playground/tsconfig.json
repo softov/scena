@@ -14,6 +14,7 @@
       "@softov/scena/sdk": ["../scena/src/sdk/index.ts"],
       "@softov/scena/types": ["../scena/src/sdk/index.ts"],
       "@softov/scena/core": ["../scena/src/core/index.ts"],
+      "@softov/scena/themes": ["../scena/src/themes/index.ts"],
       "@softov/scena/react/core": ["../scena/src/react/core.ts"],
       "@softov/scena/react": ["../scena/src/react/index.ts"],
       "@softov/scena/ui/builtins": ["../scena/src/ui/register.ts"],
