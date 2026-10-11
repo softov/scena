@@ -206,11 +206,13 @@ export function registerShowcase(scena: Scena, _subs: Disposable[]): void {
     title: 'Open showcase panel',
     args: { name: 'string', title: 'string?' },
     run: (ctx, args) => {
-      const { name } = args as { name: string; title?: string };
+      const { name, title } = args as { name: string; title?: string };
       ctx.surfaces.open({
         surface: 'main',
         key: name,
         resource: { component: name },
+        // The tab and the card name the page, not its component id.
+        ...(title === undefined ? {} : { props: { title } }),
       });
     },
   });
