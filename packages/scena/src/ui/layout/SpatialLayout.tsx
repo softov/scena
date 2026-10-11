@@ -166,9 +166,13 @@ export function SpatialLayout({
     });
   }
 
+  // The card a click here activated, so the effect below does not move the view under the pointer.
+  const clickedRef = useRef<string | undefined>(undefined);
+
   function select(key: string | undefined): void {
     if (spatialRef.current.selectedKey === key) return;
     applySpatial({ selectedKey: key });
+    clickedRef.current = key;
     if (key) onActivate(key);
   }
 
@@ -235,6 +239,21 @@ export function SpatialLayout({
     centerOnCard,
     resetBoundsForCard,
   };
+
+  // A mount made active from outside the campus (opened, or focused again by a
+  // command) is selected and brought into view, as a tab layout shows its active tab.
+  const activeKey = state.activeContainerKey;
+  const present = activeKey !== undefined && mounts.some((m) => m.key === activeKey);
+  useEffect(() => {
+    if (activeKey === undefined || !present) return;
+    if (clickedRef.current === activeKey) {
+      clickedRef.current = undefined;
+      return;
+    }
+    if (spatialRef.current.selectedKey !== activeKey) applySpatial({ selectedKey: activeKey });
+    handlersRef.current.centerOnCard(activeKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeKey, present]);
 
   useEffect(() => {
     const subs = [

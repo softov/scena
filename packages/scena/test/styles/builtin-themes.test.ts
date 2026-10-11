@@ -63,7 +63,8 @@ describe('scena reads resolved colours, not themed channels', () => {
   it('no stylesheet or component reads a themed channel', () => {
     const found: string[] = [];
     for (const file of files(src)) {
-      const name = relative(src, file);
+      // With `/` on Windows too, where `relative` answers with `\`, so the sets above match.
+      const name = relative(src, file).replaceAll('\\', '/');
       if (DEFINES.has(name) || CARRIES_CHANNELS.has(name)) continue;
       const text = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
       for (const match of text.matchAll(/var\(--oo-rgb-([a-z]+)/g)) {
