@@ -67,4 +67,4 @@ The [repository](https://github.com/softov/scena) has the architecture, the guid
 
 ## License
 
-MIT
+MIT © Softov

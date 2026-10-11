@@ -124,4 +124,4 @@ Agents and their humans: read [`AGENTS.md`](AGENTS.md) for the conventions.
 
 ## License
 
-[MIT](LICENSE)
+MIT © Softov - see [LICENSE](LICENSE)
