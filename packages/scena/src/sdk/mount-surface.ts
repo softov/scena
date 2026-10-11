@@ -144,7 +144,21 @@ export interface MountSurfaceRegistry {
           extraProps?: Omit<ComponentProps[OpenedComponent<K>], 'resourceId'>;
         },
   ): MountHandle | null;
+  // Closes at once. This is the close for code: nothing is asked.
   close(key: string, opts?: { reason?: string }): void;
+  /*
+   * The close a person starts: the tab's x, the card menu, Esc. A mount with
+   * pending work declares it with `guardClose`. When a guard gives a reason,
+   * the close waits for an answer (`closeAsked`, then `answerClose`).
+   * Without a reason, it is `close`.
+   */
+  requestClose(key: string, opts?: { reason?: string }): void;
+  // `guard` returns why closing now loses work, or null when nothing is lost.
+  guardClose(key: string, guard: () => string | null): Disposable;
+  // The close that waits for an answer, or null.
+  closeAsked(): CloseAsk | null;
+  // true closes the asked mount, false keeps it open.
+  answerClose(close: boolean): void;
   focus(key: string): void;
   listAt(surface: SurfaceName): ResolvedMount[];
   // Surfaces that currently hold a visible mount, ordered by first mount.
@@ -152,6 +166,13 @@ export interface MountSurfaceRegistry {
   // own surfaces, so a hardcoded list skips whatever it predates.
   listSurfaces(): SurfaceName[];
   move(opts: { key: string; toSurface: SurfaceName; fromSurface?: SurfaceName }): void;
+}
+
+// A close that waits for an answer: the mount, and what closing it loses.
+export interface CloseAsk {
+  key: string;
+  title?: Label;
+  reason: string;
 }
 
 export interface OpenResourceOptions {

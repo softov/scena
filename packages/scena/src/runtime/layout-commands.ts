@@ -150,7 +150,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
         const key = ctxTab(ctx);
         if (!key) return;
         ctx.store.set(joinAbs(ctx.dataContext, '/lastClosed'), String(key));
-        ctx.surfaces.close(key);
+        ctx.surfaces.requestClose(key);
         ctx.host?.closeMenu();
       },
     }),
@@ -169,7 +169,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
         if (!key) return;
         const keys = tabsInLeafOrSurface(ctx, leafId);
         const pinned = pinnedKeys(ctx);
-        for (const k of keys) if (k !== key && !pinned.has(k)) ctx.surfaces.close(k);
+        for (const k of keys) if (k !== key && !pinned.has(k)) ctx.surfaces.requestClose(k);
         ctx.host?.closeMenu();
       },
     }),
@@ -190,7 +190,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
         const pinned = pinnedKeys(ctx);
         for (let i = idx + 1; i < keys.length; i++) {
           const k = keys[i];
-          if (k && !pinned.has(k)) ctx.surfaces.close(k);
+          if (k && !pinned.has(k)) ctx.surfaces.requestClose(k);
         }
         ctx.host?.closeMenu();
       },
@@ -210,7 +210,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
         const pinned = pinnedKeys(ctx);
         for (let i = 0; i < idx; i++) {
           const k = keys[i];
-          if (k && !pinned.has(k)) ctx.surfaces.close(k);
+          if (k && !pinned.has(k)) ctx.surfaces.requestClose(k);
         }
         ctx.host?.closeMenu();
       },
@@ -319,7 +319,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
         const leafId = ctxGroup(ctx);
         const keys = tabsInLeafOrSurface(ctx, leafId);
         const pinned = pinnedKeys(ctx);
-        for (const k of keys) if (!pinned.has(k)) ctx.surfaces.close(k);
+        for (const k of keys) if (!pinned.has(k)) ctx.surfaces.requestClose(k);
         ctx.host?.closeMenu();
       },
     }),
@@ -372,7 +372,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
     //     const activeKey = state?.activeContainerKey;
     //     const keys = tabsInLeafOrSurface(ctx, leafId);
     //     const pinned = pinnedKeys(ctx);
-    //     for (const k of keys) if (k !== activeKey && !pinned.has(k)) ctx.surfaces.close(k);
+    //     for (const k of keys) if (k !== activeKey && !pinned.has(k)) ctx.surfaces.requestClose(k);
     //     ctx.host?.closeMenu();
     //   },
     // }),
@@ -398,7 +398,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
           if (leaf.id === leafId) continue;
           for (const k of leaf.tabs) if (!keep.has(k) && !pinned.has(k)) others.push(k);
         }
-        for (const k of others) ctx.surfaces.close(k);
+        for (const k of others) ctx.surfaces.requestClose(k);
         // Drop all other leaves from the tree. Pinned tabs in those leaves
         // were skipped above and remain in the registry — they'll get
         // re-homed into the surviving target leaf by TabPanelLayout's
@@ -423,7 +423,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
         const target = findLeaf(tree, leafId);
         if (!target) return;
         const pinned = pinnedKeys(ctx);
-        for (const k of target.tabs) if (!pinned.has(k)) ctx.surfaces.close(k);
+        for (const k of target.tabs) if (!pinned.has(k)) ctx.surfaces.requestClose(k);
         const next = mapLeaves(tree, (l) => (l.id === leafId ? null : l));
         setTabPanelTree(ctx, next);
         ctx.host?.closeMenu();
@@ -445,7 +445,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
         const surface = ctxSurface(ctx);
         const mounts = ctx.scena.surfaces.listAt(surface);
         const pinned = pinnedKeys(ctx);
-        for (const m of mounts) if (!pinned.has(m.key)) ctx.surfaces.close(m.key);
+        for (const m of mounts) if (!pinned.has(m.key)) ctx.surfaces.requestClose(m.key);
         ctx.host?.closeMenu();
       },
     }),

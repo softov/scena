@@ -115,7 +115,7 @@ export function SurfaceArea({
     setState: setSurfaceState,
     renderMount: renderOneMount,
     onActivate: (key) => scena.surfaces.focus(key),
-    onClose: (key, opts) => scena.surfaces.close(key, opts),
+    onClose: (key, opts) => scena.surfaces.requestClose(key, opts),
     onReorder: (fromIndex, toIndex) => {
       const persistedOrder = surfaceState.split?.order ?? [];
       const orderSet = new Set(persistedOrder);

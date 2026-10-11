@@ -80,6 +80,11 @@ const ZOOM_STEP = 1.1;
 // CampusView node registry. Spatial mounts all render as the `card` type.
 const CARD_NODE_TYPES: CampusNodeTypes = { card: SpatialCard };
 
+// Where Esc belongs to what has the focus, not to the card: text, a choice
+// that is open, a menu.
+const ESC_KEEPS =
+  'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="combobox"], [role="listbox"], [role="menu"], [role="dialog"], [role="alertdialog"]';
+
 export function SpatialLayout({
   surface,
   mounts,
@@ -255,6 +260,31 @@ export function SpatialLayout({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeKey, present]);
 
+  // Esc closes the selected card, as a person asks for it: a card with
+  // pending work asks first. Only when the focus is on the page or in this
+  // layout, and not in a field, an editor or a menu, where Esc means
+  // something else. On `window`, so a menu's own Esc on `document` runs first
+  // and marks the key as used.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    function onKey(e: KeyboardEvent): void {
+      if (e.key !== 'Escape' || e.defaultPrevented || e.repeat) return;
+      if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+      const key = spatialRef.current.selectedKey;
+      if (key === undefined) return;
+      const target = e.target instanceof Element ? e.target : null;
+      const onPage = target === null || target === document.body;
+      if (!onPage && !rootRef.current?.contains(target)) return;
+      if (target?.closest(ESC_KEEPS)) return;
+      e.preventDefault();
+      closeRef.current(key);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   useEffect(() => {
     const subs = [
       scena.commands.register({
@@ -405,6 +435,7 @@ export function SpatialLayout({
 
   return (
     <div
+      ref={rootRef}
       className="oo-layout oo-layout--spatial"
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >

@@ -349,3 +349,43 @@
 @media (prefers-reduced-motion: reduce) {
   .oo-surface-loading > span { animation-duration: 2.4s; }
 }
+
+/*
+ * The question a guarded close asks (react/CloseConfirm.tsx). A native modal
+ * <dialog>: the browser puts it over everything, so no z-index here.
+ */
+.oo-close-confirm {
+  width: min(400px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-surface-radius, 8px);
+  background: var(--oo-color-surface);
+  color: var(--oo-color-text);
+  box-shadow: var(--oo-surface-overlay-shadow, 0 8px 24px rgb(0 0 0 / 0.3));
+}
+.oo-close-confirm::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+.oo-close-confirm__title {
+  margin: 0 0 8px;
+  font-size: 1em;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.oo-close-confirm__reason {
+  margin: 0 0 16px;
+  opacity: 0.8;
+}
+.oo-close-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.oo-close-confirm__actions > button {
+  padding: 4px 14px;
+  border-radius: var(--oo-radius-sm, 4px);
+}
+.oo-close-confirm__actions > button:focus-visible {
+  outline: 2px solid var(--oo-color-accent);
+  outline-offset: 2px;
+}

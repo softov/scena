@@ -96,7 +96,10 @@ export function Popup({
   useEffect(() => {
     if (!closeOnEscape || !onClose) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose?.();
+      if (e.key !== 'Escape') return;
+      // Used: a layout that closes on Esc leaves it to the menu.
+      e.preventDefault();
+      onClose?.();
     }
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);

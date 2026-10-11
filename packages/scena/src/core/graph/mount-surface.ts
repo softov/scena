@@ -3,6 +3,7 @@ import type { ComponentNode } from '../../sdk/component-graph.js';
 import { isDataBinding } from '../../sdk/component-graph.js';
 import type { EventBus } from '../../sdk/events.js';
 import type {
+  CloseAsk,
   MountDeclaration,
   MountDisplay,
   MountHandle,
@@ -42,6 +43,11 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
   const { events, when, store, components } = deps;
   const mountsByKey = new Map<string, InternalMount>();
   const visibleByKey = new Set<string>();
+  // Per mount, what closing it now would lose. Cleared when it closes.
+  const guardsByKey = new Map<string, Set<() => string | null>>();
+  // Closes that wait for an answer, asked one at a time: "Close others" over
+  // two edited tabs asks twice.
+  const asking: (CloseAsk & { opts?: { reason?: string } })[] = [];
 
   function resolveTarget(t: MountTarget): ComponentNode {
     if (isDataBinding(t)) {
@@ -113,6 +119,8 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
           internal.targetSub?.dispose();
           if (visibleByKey.has(decl.key)) setVisible(decl.key, internal, false);
           mountsByKey.delete(decl.key);
+          guardsByKey.delete(decl.key);
+          dropAsk(decl.key);
           clearMountLocal(store, decl.key);
         }
       }),
@@ -205,6 +213,8 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
   function close(key: string, opts?: { reason?: string }): void {
     const mount = mountsByKey.get(key);
     if (!mount) return;
+    guardsByKey.delete(key);
+    dropAsk(key);
     mount.targetSub?.dispose();
     if (visibleByKey.has(key)) {
       visibleByKey.delete(key);
@@ -212,6 +222,62 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
     }
     mountsByKey.delete(key);
     clearMountLocal(store, key);
+  }
+
+  function announceAsk(): void {
+    events.emit('scena:mount:close-asked', closeAsked());
+    const head = asking[0];
+    if (head) focus(head.key);
+  }
+
+  function dropAsk(key: string): void {
+    const at = asking.findIndex((one) => one.key === key);
+    if (at === -1) return;
+    asking.splice(at, 1);
+    if (at === 0) announceAsk();
+  }
+
+  function guardClose(key: string, guard: () => string | null): Disposable {
+    let guards = guardsByKey.get(key);
+    if (!guards) {
+      guards = new Set();
+      guardsByKey.set(key, guards);
+    }
+    guards.add(guard);
+    return disposableFrom(() => {
+      const current = guardsByKey.get(key);
+      current?.delete(guard);
+      if (current?.size === 0) guardsByKey.delete(key);
+    });
+  }
+
+  function requestClose(key: string, opts?: { reason?: string }): void {
+    const mount = mountsByKey.get(key);
+    if (!mount) return;
+    let reason: string | null = null;
+    for (const guard of guardsByKey.get(key) ?? []) {
+      reason = guard();
+      if (reason !== null) break;
+    }
+    if (reason === null) {
+      close(key, opts);
+      return;
+    }
+    if (asking.some((one) => one.key === key)) return;
+    asking.push({ key, title: mount.props?.title, reason, opts });
+    if (asking.length === 1) announceAsk();
+  }
+
+  function closeAsked(): CloseAsk | null {
+    const head = asking[0];
+    return head === undefined ? null : { key: head.key, title: head.title, reason: head.reason };
+  }
+
+  function answerClose(yes: boolean): void {
+    const head = asking[0];
+    if (head === undefined) return;
+    if (yes) close(head.key, head.opts);
+    else dropAsk(head.key);
   }
 
   function focus(key: string): void {
@@ -269,5 +335,18 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
     }
   }
 
-  return { mount, open, openResource, close, focus, listAt, listSurfaces, move };
+  return {
+    mount,
+    open,
+    openResource,
+    close,
+    requestClose,
+    guardClose,
+    closeAsked,
+    answerClose,
+    focus,
+    listAt,
+    listSurfaces,
+    move,
+  };
 }

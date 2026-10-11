@@ -1,6 +1,6 @@
 import type { Disposable } from './disposable.js';
 import type { ComponentNode, PropValue, BindingPath } from './component-graph.js';
-import type { SurfaceName } from './mount-surface.js';
+import type { CloseAsk, SurfaceName } from './mount-surface.js';
 import type { ScenaLayout } from './layout.js';
 
 export type ScenaSystemEvent =
@@ -8,6 +8,7 @@ export type ScenaSystemEvent =
   | 'scena:mount:closed'
   | 'scena:mount:focused'
   | 'scena:mount:blurred'
+  | 'scena:mount:close-asked'
   | 'scena:registry:changed'
   | 'scena:store:changed'
   | 'scena:menu:changed'
@@ -26,6 +27,8 @@ export interface ScenaEventMap {
   'scena:mount:closed': { key: string; reason?: string };
   'scena:mount:focused': { key: string; surface: SurfaceName };
   'scena:mount:blurred': { key: string; surface: SurfaceName };
+  // A close waits for an answer, or (null) no longer does.
+  'scena:mount:close-asked': CloseAsk | null;
   'scena:registry:changed': {
     registry:
       | 'components'

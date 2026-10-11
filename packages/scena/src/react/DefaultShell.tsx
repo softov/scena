@@ -7,6 +7,7 @@ import { useScena } from './ScenaProvider.js';
 import { useLayout } from './hooks/useLayout.js';
 import { useStore } from './hooks/useStore.js';
 import { SurfaceArea } from './SurfaceArea.js';
+import { CloseConfirm } from './CloseConfirm.js';
 
 export interface DefaultShellProps {
   /**
@@ -246,6 +247,8 @@ export function DefaultShell({ presentation, dismissOnScrim = true }: DefaultShe
           zIndex: 1000,
         }}
       />
+
+      <CloseConfirm />
     </div>
   );
 }

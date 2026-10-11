@@ -3,6 +3,8 @@ export { ScenaProvider, useScena } from './ScenaProvider.js';
 // The ring a surface shows while its component loads.
 export { SurfaceLoading } from './SurfaceLoading.js';
 export { DefaultShell } from './DefaultShell.js';
+// The question a guarded close asks. DefaultShell renders one; a shell of its own renders it once too.
+export { CloseConfirm } from './CloseConfirm.js';
 export { ViewMount, MountWrapper } from './ViewMount.js';
 export { ShellSplitter } from './ShellSplitter.js';
 export { SurfaceArea } from './SurfaceArea.js';
@@ -31,4 +33,6 @@ export type { TranslateProps } from './Translate.js';
 export { useCommand } from './hooks/useCommand.js';
 export { useLayout } from './hooks/useLayout.js';
 export { useMounts } from './hooks/useMounts.js';
+// A mount declares its pending work, so a close a person starts asks first.
+export { useCloseGuard } from './hooks/useCloseGuard.js';
 export { useSurfacePresentation } from './hooks/useSurfacePresentation.js';
