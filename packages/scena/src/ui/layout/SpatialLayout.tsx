@@ -18,6 +18,8 @@ import type { CampusNodeTypes } from '../campus/CampusView.js';
 import { CampusMappa } from '../campus/CampusMappa.js';
 import type { CampusController, CampusMappaNode, CampusNode } from '../campus/types.js';
 import { SpatialCard, type SpatialCardData } from './SpatialCard.js';
+import { useMountTitle } from './MountTitle.js';
+import type { ResolvedMount } from '../../sdk/mount-surface.js';
 import { Toolbar } from '../navigation/Toolbar.js';
 
 // Free-form positioning with three arrangement strategies:
@@ -511,6 +513,7 @@ export function SpatialLayout({
 
       {selectedKey ? (
         <SelectionFooter
+          mount={mounts.find((m) => m.key === selectedKey)}
           selectedKey={selectedKey}
           onCenter={() => centerOnCard(selectedKey)}
           onReset={() => resetBoundsForCard(selectedKey)}
@@ -565,6 +568,7 @@ export function SpatialLayout({
 // Floating selection footer. Appears at bottom-center when a card is
 // selected. Transparent translucent background; rounded pill of buttons.
 interface SelectionFooterProps {
+  mount: ResolvedMount | undefined;
   selectedKey: string;
   onCenter: () => void;
   onReset: () => void;
@@ -573,12 +577,15 @@ interface SelectionFooterProps {
 }
 
 function SelectionFooter({
+  mount,
   selectedKey,
   onCenter,
   onReset,
   onClose,
   onDeselect,
 }: SelectionFooterProps) {
+  // The card's own title, as its header shows it; the key only when it has none.
+  const title = useMountTitle(mount, selectedKey);
   return (
     <div
       className="oo-spatial-footer"
@@ -608,16 +615,15 @@ function SelectionFooter({
       <span
         style={{
           padding: '0 8px',
-          color: 'rgba(255, 255, 255, 0.65)',
-          fontFamily: 'var(--oo-font-mono)',
-          maxWidth: 180,
+          color: 'rgba(255, 255, 255, 0.8)',
+          maxWidth: 220,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
         }}
-        title={selectedKey}
+        title={title}
       >
-        {selectedKey}
+        {title}
       </span>
       <FooterButton icon="◎" label="Center on this card" onClick={onCenter} />
       <FooterButton icon="↺" label="Reset bounds" onClick={onReset} />

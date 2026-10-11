@@ -19,10 +19,11 @@
   --textarea-border-width: var(--input-border-width);
 
   --button-background: none;
-  --button-background-hover: rgb(from var(--oo-color-primary) r g b / 0.88);
+  /* A plain button tints on hover; a variant (primary, danger, ...) fills with its own colour. */
+  --button-background-hover: var(--oo-color-hover);
   --button-background-active: var(--oo-color-active);
   --button-color: inherit;
-  --button-color-hover: var(--oo-color-hover);
+  --button-color-hover: var(--oo-color-text);
   --button-border: var(--oo-color-border);
   --button-border-width: 1px;
   --button-border-radius: 0;
@@ -185,6 +186,63 @@ select {
   color: inherit;
   border: 1px solid var(--oo-color-border);
   border-radius: var(--oo-radius-sm);
+}
+
+/*
+ * Where the browser lets a page draw a select's menu (appearance: base-select),
+ * the menu is a scena popup: the theme's popup colours, the hovered line tinted,
+ * the chosen line bold. Elsewhere the OS draws it, as before. A list box
+ * (`multiple`, `size`) is not a menu and keeps the native look.
+ */
+@supports (appearance: base-select) {
+  select:not([multiple]):not([size]),
+  select:not([multiple]):not([size])::picker(select) {
+    appearance: base-select;
+  }
+
+  select:not([multiple]):not([size]) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--oo-spacing-xs);
+  }
+
+  select:not([multiple]):not([size])::picker-icon {
+    font-size: 0.75em;
+    opacity: 0.7;
+  }
+
+  select:not([multiple]):not([size])::picker(select) {
+    margin-block: 4px;
+    padding: 4px;
+    min-width: anchor-size(width);
+    border: 1px solid var(--oo-popup-border);
+    border-radius: 8px;
+    background: var(--oo-popup-bg);
+    color: var(--oo-popup-fg);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
+  }
+
+  select:not([multiple]):not([size]) option {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: var(--oo-font-size-sm);
+    color: inherit;
+    background: transparent;
+  }
+
+  select:not([multiple]):not([size]) option:hover,
+  select:not([multiple]):not([size]) option:focus-visible {
+    background: var(--oo-color-hover);
+    outline: none;
+  }
+
+  select:not([multiple]):not([size]) option:checked {
+    font-weight: 600;
+  }
+
+  select:not([multiple]):not([size]) option::checkmark {
+    color: var(--oo-color-accent);
+  }
 }
 
 input {

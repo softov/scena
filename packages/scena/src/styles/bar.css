@@ -32,6 +32,36 @@
   color: var(--oo-color-active);
 }
 
+/* A select in a bar (the theme picker, a layout picker) is muted as the bar's
+   other controls, and looks the same hovered, focused and open. */
+.oo-bar__slot select {
+  color: var(--oo-color-muted);
+  background: none;
+  border-color: transparent;
+  font-size: var(--oo-font-size-xs);
+  padding-block: 0;
+}
+
+.oo-bar__slot select:hover,
+.oo-bar__slot select:focus {
+  color: var(--oo-color-text);
+  background: var(--oo-color-hover);
+  border-color: var(--oo-color-border);
+  outline: none;
+}
+
+/* Alone: a browser that does not know `:open` drops the whole rule it is in. */
+.oo-bar__slot select:open {
+  color: var(--oo-color-text);
+  background: var(--oo-color-hover);
+  border-color: var(--oo-color-border);
+}
+
+.oo-bar__slot select:focus-visible {
+  outline: 1px solid var(--oo-color-accent);
+  outline-offset: -1px;
+}
+
 .oo-bar__slot--left {
   justify-content: flex-start;
   flex: 0 0 auto;
@@ -68,16 +98,13 @@
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
+  /* Tabs that do not fit scroll with the wheel (TabLayout, TabPanelLayout);
+     a bar of scrollbar under them only takes height. */
+  scrollbar-width: none;
 }
 
 .tab-bar__strip::-webkit-scrollbar {
-  height: 6px;
-}
-
-.tab-bar__strip::-webkit-scrollbar-thumb {
-  background: var(--oo-color-border);
-  border-radius: 3px;
+  display: none;
 }
 
 .tab-bar__tab {
