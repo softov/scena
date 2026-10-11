@@ -53,6 +53,14 @@ The barrels load every component.
 
 ![ahpw showing scena's own source and README side by side](https://raw.githubusercontent.com/softov/scena/main/docs/screenshots/ahpw.png)
 
+A page with pending work asks before it closes, in every layout.
+
+![ahpw asks before it closes a new session with an unsent message](https://raw.githubusercontent.com/softov/scena/main/docs/screenshots/ahpw-close-split.png)
+
+Themes restyle the whole app. This is ahpw in the built-in `forest` theme, dark mode.
+
+![ahpw in the forest theme, dark mode](https://raw.githubusercontent.com/softov/scena/main/docs/screenshots/ahpw-forest-dark.png)
+
 ## Documentation
 
 The [repository](https://github.com/softov/scena) has the architecture, the guide for consumers, and the component catalog.

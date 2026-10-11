@@ -54,6 +54,18 @@ Every view in it is a scena page.
 
 ![ahpw showing scena's own source and README side by side](docs/screenshots/ahpw.png)
 
+A page with pending work asks before it closes.
+The same question shows in every layout.
+
+| Split layout | Spatial layout, closed with Esc |
+| --- | --- |
+| ![ahpw asks before it closes a new session with an unsent message](docs/screenshots/ahpw-close-split.png) | ![The same question over a card on the spatial canvas](docs/screenshots/ahpw-close-spatial.png) |
+
+Themes restyle the whole app, not only scena's own parts.
+This is ahpw in the built-in `forest` theme, dark mode.
+
+![ahpw in the forest theme, dark mode](docs/screenshots/ahpw-forest-dark.png)
+
 Do you build on scena? Open a pull request to add your project here.
 
 ## Install
