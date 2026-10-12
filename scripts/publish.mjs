@@ -34,17 +34,19 @@ const push = args.includes('--push');
 const request = args.find((arg) => !arg.startsWith('--'));
 
 function run(command, commandArgs, options = {}) {
-  // A shell is needed for pnpm and npm on Windows - they are `.cmd` shims,
-  // which execFileSync cannot exec directly - and must NOT be used for
-  // anything else, because a shell re-splits every argument on whitespace.
+  // pnpm and npm on Windows are `.cmd` shims, which execFileSync cannot exec
+  // directly, so they go through cmd.exe. Named, rather than `shell: true`:
+  // Node deprecates passing arguments with that (DEP0190), and a shell must
+  // not see anything else, because it re-splits every argument on whitespace.
   // `git commit -m "release: @softov/scena v0.1.1"` then arrives as four words,
-  // and git reads the last two as pathspecs.
-  const shell = process.platform === 'win32' && (command === 'pnpm' || command === 'npm');
-  return execFileSync(command, commandArgs, {
+  // and git reads the last two as pathspecs. Only single-word arguments go to
+  // the shims.
+  const shim = process.platform === 'win32' && (command === 'pnpm' || command === 'npm');
+  const [file, fileArgs] = shim ? [process.env.ComSpec ?? 'cmd.exe', ['/d', '/c', command, ...commandArgs]] : [command, commandArgs];
+  return execFileSync(file, fileArgs, {
     cwd: options.cwd ?? repoRoot,
     stdio: options.capture === true ? ['ignore', 'pipe', 'pipe'] : 'inherit',
     encoding: 'utf8',
-    shell,
   });
 }
 
