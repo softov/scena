@@ -346,6 +346,14 @@ function safeHref(url: string): string | null {
   return /^(https?|mailto|file|vscode|ahp[a-z-]*)$/i.test(scheme[1]!) ? u : null;
 }
 
+/**
+ * A web link opens outside the page, and shows where it goes on hover, as
+ * VS Code's markdown preview does: where the link text differs from the URL,
+ * the URL is not on the screen otherwise, and an app's webview has no status
+ * bar to show it.
+ */
+const WEB_LINK = (href: string) => ({ target: '_blank', rel: 'noreferrer noopener', title: href });
+
 /** `data-kind` on a link: web for http(s) and mail, local for paths and other schemes. */
 const linkKind = (href: string): 'web' | 'local' => (/^(https?|mailto):/i.test(href) ? 'web' : 'local');
 
@@ -455,7 +463,7 @@ function inline(s: string, ctx: Ctx): ReactNode[] {
           } else {
             const kind = linkKind(href);
             push(
-              <a href={href} data-kind={kind} {...(kind === 'web' ? { target: '_blank', rel: 'noreferrer noopener' } : {})}>
+              <a href={href} data-kind={kind} {...(kind === 'web' ? WEB_LINK(href) : {})}>
                 {inline(label, ctx)}
               </a>,
             );
@@ -470,7 +478,7 @@ function inline(s: string, ctx: Ctx): ReactNode[] {
     if (ch === '<') {
       const m = /^<((?:https?|mailto):[^\s<>]+)>/i.exec(s.slice(i));
       if (m) {
-        push(<a href={m[1]} data-kind="web" target="_blank" rel="noreferrer noopener">{m[1]}</a>);
+        push(<a href={m[1]} data-kind="web" {...WEB_LINK(m[1])}>{m[1]}</a>);
         i += m[0].length;
         continue;
       }
@@ -480,7 +488,7 @@ function inline(s: string, ctx: Ctx): ReactNode[] {
     if ((ch === 'h' || ch === 'H') && (i === 0 || !WORD.test(s[i - 1]!))) {
       const m = /^https?:\/\/[^\s<>]*[^\s<>.,;:!?'")\]*_~]/i.exec(s.slice(i));
       if (m) {
-        push(<a href={m[0]} data-kind="web" target="_blank" rel="noreferrer noopener">{m[0]}</a>);
+        push(<a href={m[0]} data-kind="web" {...WEB_LINK(m[0])}>{m[0]}</a>);
         i += m[0].length;
         continue;
       }

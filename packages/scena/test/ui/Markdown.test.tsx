@@ -11,6 +11,18 @@ describe('Markdown', () => {
     expect(md('x').classList.contains('oo-markdown')).toBe(true);
   });
 
+  it('shows where a web link goes on hover, and opens it outside the page', () => {
+    const root = md('An [Agent Host Protocol](https://github.com/microsoft/agent-host-protocol) server, <https://ahpio.com> and https://example.com/x.');
+    const links = Array.from(root.querySelectorAll('a'));
+    expect(links.map((a) => a.getAttribute('title'))).toEqual(['https://github.com/microsoft/agent-host-protocol', 'https://ahpio.com', 'https://example.com/x']);
+    expect(links.every((a) => a.target === '_blank')).toBe(true);
+  });
+
+  it('leaves a local link without a hover URL', () => {
+    const link = md('[the guide](docs/guide.md)').querySelector('a')!;
+    expect(link.hasAttribute('title')).toBe(false);
+  });
+
   it('renders a table with its alignment', () => {
     const root = md('| Name | Count |\n| :--- | ---: |\n| a | 1 |\n| `b|c` | 2 |');
     expect(root.querySelectorAll('th')).toHaveLength(2);
