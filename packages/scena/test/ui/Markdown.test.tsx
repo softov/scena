@@ -23,6 +23,13 @@ describe('Markdown', () => {
     expect(link.hasAttribute('title')).toBe(false);
   });
 
+  it('draws an image with the src as written, or through the host when it gives `image`', () => {
+    expect(md('![logo](docs/logo.png)').querySelector('img')?.getAttribute('src')).toBe('docs/logo.png');
+    const drawn = render(<Markdown text="![logo](docs/logo.png)" image={(src, alt) => <span data-src={src}>{alt}</span>} />).container;
+    expect(drawn.querySelector('img')).toBeNull();
+    expect(drawn.querySelector('[data-src]')?.getAttribute('data-src')).toBe('docs/logo.png');
+  });
+
   it('renders a table with its alignment', () => {
     const root = md('| Name | Count |\n| :--- | ---: |\n| a | 1 |\n| `b|c` | 2 |');
     expect(root.querySelectorAll('th')).toHaveLength(2);

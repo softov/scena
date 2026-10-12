@@ -16,13 +16,20 @@ export interface MarkdownProps {
   text?: string;
   style?: CSSProperties;
   className?: string;
+  /**
+   * Draws an image, `![alt](src)`, given its src as written. Without it, an
+   * `<img>` with that src, which the browser reads against the page's URL: a
+   * host showing a file from elsewhere (a README next to its `docs/`) passes
+   * one that reads the image from where the file is.
+   */
+  image?: (src: string, alt: string) => ReactNode;
 }
 
-export function Markdown({ text = '', style, className }: MarkdownProps) {
+export function Markdown({ text = '', style, className, image }: MarkdownProps) {
   const notes = new Map<string, string>();
   const blocks = parseBlocks(text.split(/\r?\n/), notes);
   const order: string[] = [];
-  const ctx: Ctx = { notes, order };
+  const ctx: Ctx = { notes, order, image };
   const body = blocks.map((b, i) => renderBlock(b, i, ctx));
   return (
     <div
@@ -61,6 +68,7 @@ type Block =
 interface Ctx {
   notes: Map<string, string>;
   order: string[];
+  image?: (src: string, alt: string) => ReactNode;
 }
 
 const HEADING = /^ {0,3}(#{1,6})\s+(.*?)(?:\s+#+)?\s*$/;
@@ -457,7 +465,7 @@ function inline(s: string, ctx: Ctx): ReactNode[] {
           const target = s.slice(close + 2, urlEnd).trim().replace(/\s+"[^"]*"$/, '').replace(/^<(.*)>$/, '$1');
           const href = safeHref(target);
           if (image) {
-            push(href === null ? label : <img src={href} alt={label} />);
+            push(href === null ? label : ctx.image ? ctx.image(href, label) : <img src={href} alt={label} />);
           } else if (href === null) {
             push(inline(label, ctx));
           } else {
