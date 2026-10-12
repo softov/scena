@@ -107,17 +107,30 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
     () => getActiveToken(input, prefixes, caretIndex),
     [input, prefixes, caretIndex],
   );
-  const menuVisible = tokenInfo !== null;
+  // The token Esc dismissed, as `start:token`. Esc closes the list and leaves
+  // the text alone, as VS Code's suggest widget does; the list stays closed
+  // until the token changes, so typing on brings it back.
+  const [dismissed, setDismissed] = useState<string | null>(null);
+  const tokenKey = tokenInfo === null ? null : `${tokenInfo.start}:${tokenInfo.token}`;
+  const menuVisible = tokenInfo !== null && tokenKey !== dismissed;
+
+  // The host's provider, read through a ref: an inline arrow is a new function
+  // each render, and as a dependency of the root frame it re-ran the effect
+  // below, which set the stack, which rendered again - a loop.
+  const providerRef = useRef(mentionProvider);
+  providerRef.current = mentionProvider;
+  const hasProvider = mentionProvider !== undefined;
+  const provider = useCallback((h: HostCtx) => providerRef.current?.(h) ?? [], []);
 
   // Root frame for the current token's prefix.
   const rootSpecFor = useCallback(
     (query: string): ListSpec =>
       tokenInfo?.prefix === '@'
-        ? mentionProvider
-          ? { provider: mentionProvider, footerHints: true, rich: true }
+        ? hasProvider
+          ? { provider, footerHints: true, rich: true }
           : { query: { slot: mentionSlot, q: query }, footerHints: true, rich: true }
         : { query: { slot: slashSlot, q: query }, footerHints: true, rich: true },
-    [tokenInfo?.prefix, mentionProvider, mentionSlot, slashSlot],
+    [tokenInfo?.prefix, hasProvider, provider, mentionSlot, slashSlot],
   );
 
   // When the active token changes, decide what the root frame should be.
@@ -125,7 +138,7 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
   // - '@' token → mentionProvider (if any), else mention slot
   // - no token → empty stack
   useEffect(() => {
-    if (!tokenInfo) {
+    if (!tokenInfo || !menuVisible) {
       if (stackRef.current.length > 0) setStack([]);
       return;
     }
@@ -153,7 +166,7 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
     }
     // provider/items frames: left as-is; their provider re-runs on its own
     // when host.query (the post-sentinel filter text) changes.
-  }, [tokenInfo, rootSpecFor]);
+  }, [tokenInfo, menuVisible, rootSpecFor]);
 
   // Sentinel of the visible submenu (if it declared one) and the post-sentinel
   // filter text. For '/model=gemi' with sentinel '/model', filterQuery='gemi'
@@ -220,7 +233,8 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
       if (!menuVisible) return false;
       if (e.key === 'Escape') {
         e.preventDefault();
-        host.closeMenu();
+        setDismissed(tokenKey);
+        setStack([]);
         return true;
       }
       if (e.key === 'ArrowLeft' && onBack) {
@@ -243,7 +257,7 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
       }
       return false;
     },
-    [menuVisible, host, onBack, tokenInfo],
+    [menuVisible, onBack, tokenInfo, tokenKey],
   );
 
   // openCommand: composer buttons converge with typing. Rewrites the input
@@ -258,6 +272,8 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
   const openCommand = useCallback((commandId: string): number | null => {
     const cmd = scena.commands.get(commandId);
     if (!cmd) return null;
+    // A button asks for the list outright, over an Esc on the same token.
+    setDismissed(null);
     const sc = canonicalShortcut(cmd.shortcut);
     let newCaret: number | null = null;
     if (sc) {
