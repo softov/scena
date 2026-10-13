@@ -15,6 +15,7 @@ import type {
   SurfaceRole,
 } from '../sdk/layout.js';
 import type { SurfaceName, ResolvedMount } from '../sdk/mount-surface.js';
+import type { ComponentNode } from '../sdk/component-graph.js';
 import { useScena } from './ScenaProvider.js';
 import { useLayout } from './hooks/useLayout.js';
 import { useMounts } from './hooks/useMounts.js';
@@ -27,6 +28,31 @@ function renderOneMount(mount: ResolvedMount): ReactNode {
     <MountWrapper mountKey={mount.key} dataContext={mount.dataContext}>
       <div className="oo-mount" data-mount-key={mount.key}>
         <ViewMount node={mount.component} />
+      </div>
+    </MountWrapper>
+  );
+}
+
+// The empty view `surfaces.setEmpty` gave this surface, kept current.
+function useEmptyNode(surface: SurfaceName): ComponentNode | undefined {
+  const scena = useScena();
+  const [node, setNode] = useState(() => scena.surfaces.emptyAt(surface));
+  useEffect(() => {
+    setNode(scena.surfaces.emptyAt(surface));
+    const sub = scena.events.on('scena:surface:empty-changed', (payload) => {
+      if ((payload as { surface: SurfaceName }).surface === surface) setNode(scena.surfaces.emptyAt(surface));
+    });
+    return () => sub.dispose();
+  }, [scena, surface]);
+  return node;
+}
+
+// An empty view is no mount, so it has a key of its own for what reads one.
+function renderEmptyNode(surface: SurfaceName, node: ComponentNode): ReactNode {
+  return (
+    <MountWrapper mountKey={`empty:${surface}`}>
+      <div className="oo-surface-empty" data-surface={surface}>
+        <ViewMount node={node} />
       </div>
     </MountWrapper>
   );
@@ -85,6 +111,7 @@ export function SurfaceArea({
   const scena = useScena();
   const layoutState = useLayout();
   const mounts = useMounts(surface);
+  const emptyNode = useEmptyNode(surface);
   const resizeBinding = useSurfaceResize(surface, presentation, resize);
   const surfaceState: SurfaceLayoutState =
     layoutState.surfaces[surface] ?? { visible: true };
@@ -114,6 +141,7 @@ export function SurfaceArea({
     presentation,
     setState: setSurfaceState,
     renderMount: renderOneMount,
+    renderEmpty: () => (emptyNode === undefined ? null : renderEmptyNode(surface, emptyNode)),
     onActivate: (key) => scena.surfaces.focus(key),
     onClose: (key, opts) => scena.surfaces.requestClose(key, opts),
     onReorder: (fromIndex, toIndex) => {

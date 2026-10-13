@@ -24,6 +24,7 @@ export function StackLayout({
   state,
   setState,
   renderMount,
+  renderEmpty,
   onClose,
   onReorder,
 }: LayoutProps) {
@@ -123,6 +124,8 @@ export function StackLayout({
     height: '100%',
     minHeight: 0,
   };
+
+  if (orderedMounts.length === 0) return (renderEmpty?.() ?? null) as ReactNode;
 
   return (
     <div

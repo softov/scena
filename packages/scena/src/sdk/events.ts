@@ -9,6 +9,7 @@ export type ScenaSystemEvent =
   | 'scena:mount:focused'
   | 'scena:mount:blurred'
   | 'scena:mount:close-asked'
+  | 'scena:surface:empty-changed'
   | 'scena:registry:changed'
   | 'scena:store:changed'
   | 'scena:menu:changed'
@@ -29,6 +30,8 @@ export interface ScenaEventMap {
   'scena:mount:blurred': { key: string; surface: SurfaceName };
   // A close waits for an answer, or (null) no longer does.
   'scena:mount:close-asked': CloseAsk | null;
+  // A surface's empty view was set or cleared.
+  'scena:surface:empty-changed': { surface: SurfaceName };
   'scena:registry:changed': {
     registry:
       | 'components'

@@ -86,7 +86,7 @@ export interface TreeProps<T = unknown> {
   onCopy?: (e: ReactClipboardEvent<HTMLDivElement>, node: TreeNode<T> | null) => void;
   onPaste?: (e: ReactClipboardEvent<HTMLDivElement>, node: TreeNode<T> | null) => void;
 
-  // Empty state if nodes is empty.
+  // What an empty tree shows. Omitted, it shows nothing.
   emptyState?: ReactNode;
 
   className?: string;
@@ -286,7 +286,8 @@ export function Tree<T = unknown>({
       ) : null}
 
       {flat.length === 0 ? (
-        <div className="oo-tree__empty">{emptyState ?? 'Empty'}</div>
+        // scena has no words of its own for an empty tree: only the app's.
+        emptyState === undefined || emptyState === null ? null : <div className="oo-tree__empty">{emptyState}</div>
       ) : (
         <div className="oo-tree__rows" role="presentation">
           {flat.map((row) => {

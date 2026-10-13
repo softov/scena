@@ -185,6 +185,7 @@ export interface ListableProps<T> {
   // fires on dragstart so the host can populate dataTransfer.
   onRowDragStart?: (e: ReactDragEvent<HTMLElement>, item: T) => void;
 
+  // What an empty list shows. Omitted, it shows nothing.
   emptyState?: ReactNode;
   className?: string;
   style?: CSSProperties;
@@ -541,7 +542,8 @@ export function Listable<T>({
       ) : null}
 
       {sortedItems.length === 0 ? (
-        <div className="oo-listable__empty">{emptyState ?? 'Empty'}</div>
+        // scena has no words of its own for an empty list: only the app's.
+        emptyState === undefined || emptyState === null ? null : <div className="oo-listable__empty">{emptyState}</div>
       ) : (
         // Single grid container in table mode — head-row and every data row
         // are subgrids that inherit these column tracks, so `auto`/`minmax`

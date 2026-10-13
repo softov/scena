@@ -30,6 +30,7 @@ export function SplitLayout({
   state,
   setState,
   renderMount,
+  renderEmpty,
   onClose,
   onReorder,
 }: LayoutProps) {
@@ -140,11 +141,7 @@ export function SplitLayout({
   }
 
   if (orderedMounts.length === 0) {
-    return (
-      <div style={{ padding: 24, color: 'var(--oo-color-muted)' }}>
-        Nothing open.
-      </div>
-    );
+    return (renderEmpty?.() ?? null) as ReactNode;
   }
 
   const containerStyle: CSSProperties = {

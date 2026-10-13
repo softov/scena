@@ -250,6 +250,8 @@ interface TabPanelContext {
   surface: string;
   mounts: ResolvedMount[];
   renderMount: (m: ResolvedMount) => unknown;
+  // The surface's empty view, shown when the surface holds no tab at all.
+  renderEmpty?: () => unknown;
   onActivate: (key: string) => void;
   onClose: (key: string) => void;
   commit: (tree: TabPanelNode) => void;
@@ -499,9 +501,15 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
         }}
       >
         {leaf.tabs.length === 0 ? (
-          <div style={{ padding: 24, color: 'var(--oo-color-muted)' }}>
-            Empty group. Drag a tab here.
-          </div>
+          // No tab anywhere: the surface's empty view. An empty group beside
+          // others is one a split made on purpose, and waits for a tab.
+          ctx.mounts.length === 0 ? (
+            (ctx.renderEmpty?.() ?? null) as ReactNode
+          ) : (
+            <div style={{ padding: 24, color: 'var(--oo-color-muted)' }}>
+              Empty group. Drag a tab here.
+            </div>
+          )
         ) : (
           // Keep every tab in the group mounted; show only the active one.
           // Rendering just the active mount unmounts the rest, losing state.
@@ -784,6 +792,7 @@ export function TabPanelLayout({
   state,
   setState,
   renderMount,
+  renderEmpty,
   onActivate,
   onClose,
 }: LayoutProps) {
@@ -818,6 +827,7 @@ export function TabPanelLayout({
     surface,
     mounts,
     renderMount,
+    renderEmpty,
     onActivate,
     onClose,
     tree,

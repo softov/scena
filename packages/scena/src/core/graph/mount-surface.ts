@@ -48,6 +48,8 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
   // Closes that wait for an answer, asked one at a time: "Close others" over
   // two edited tabs asks twice.
   const asking: (CloseAsk & { opts?: { reason?: string } })[] = [];
+  // Each surface's empty view, newest last: disposing one restores the one before.
+  const emptyBySurface = new Map<SurfaceName, ComponentNode[]>();
 
   function resolveTarget(t: MountTarget): ComponentNode {
     if (isDataBinding(t)) {
@@ -335,6 +337,25 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
     }
   }
 
+  function setEmpty(surface: SurfaceName, node: ComponentNode): Disposable {
+    const held = emptyBySurface.get(surface) ?? [];
+    held.push(node);
+    emptyBySurface.set(surface, held);
+    events.emit('scena:surface:empty-changed', { surface });
+    return disposableFrom(() => {
+      const now = emptyBySurface.get(surface);
+      const at = now?.lastIndexOf(node) ?? -1;
+      if (now === undefined || at === -1) return;
+      now.splice(at, 1);
+      if (now.length === 0) emptyBySurface.delete(surface);
+      events.emit('scena:surface:empty-changed', { surface });
+    });
+  }
+
+  function emptyAt(surface: SurfaceName): ComponentNode | undefined {
+    return emptyBySurface.get(surface)?.at(-1);
+  }
+
   return {
     mount,
     open,
@@ -348,5 +369,7 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
     listAt,
     listSurfaces,
     move,
+    setEmpty,
+    emptyAt,
   };
 }

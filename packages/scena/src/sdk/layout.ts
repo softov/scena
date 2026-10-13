@@ -209,6 +209,10 @@ export interface LayoutProps {
   presentation?: SurfacePresentation;
   setState(patch: Partial<SurfaceLayoutState>): void;
   renderMount(mount: ResolvedMount): unknown;
+  // What the surface shows with no mount, from `surfaces.setEmpty`, or null.
+  // Optional so layouts and tests written before it keep compiling; a layout
+  // with no mounts renders `renderEmpty?.() ?? null`.
+  renderEmpty?(): unknown;
   onActivate(key: string): void;
   onClose(key: string, opts?: { reason?: string }): void;
   onReorder(fromIndex: number, toIndex: number): void;

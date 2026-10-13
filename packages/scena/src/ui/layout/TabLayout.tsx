@@ -30,6 +30,7 @@ export function TabLayout({
   mounts,
   state,
   renderMount,
+  renderEmpty,
   onActivate,
   onClose,
   onReorder,
@@ -246,9 +247,7 @@ export function TabLayout({
         onContextMenu={onBgContextMenu}
       >
         {orderedMounts.length === 0 ? (
-          <div style={{ padding: 24, color: 'var(--oo-color-muted)' }}>
-            Nothing open.
-          </div>
+          (renderEmpty?.() ?? null) as ReactNode
         ) : (
           // Keep every mount mounted (state/scroll survive tab switches) and
           // show only the active one. Conditionally rendering just the active

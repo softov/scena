@@ -1,5 +1,6 @@
 import {
   type MouseEvent as ReactMouseEvent,
+  type ReactNode,
   useEffect,
   useMemo,
   useRef,
@@ -93,6 +94,7 @@ export function SpatialLayout({
   state,
   setState,
   renderMount,
+  renderEmpty,
   onClose,
   onActivate,
 }: LayoutProps) {
@@ -428,11 +430,7 @@ export function SpatialLayout({
   }
 
   if (mounts.length === 0) {
-    return (
-      <div style={{ padding: 24, color: 'var(--oo-color-muted)' }}>
-        Nothing open.
-      </div>
-    );
+    return (renderEmpty?.() ?? null) as ReactNode;
   }
 
   return (

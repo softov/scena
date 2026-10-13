@@ -166,6 +166,16 @@ export interface MountSurfaceRegistry {
   // own surfaces, so a hardcoded list skips whatever it predates.
   listSurfaces(): SurfaceName[];
   move(opts: { key: string; toSurface: SurfaceName; fromSurface?: SurfaceName }): void;
+  /*
+   * What a surface shows while it holds no mount: an app's start page in
+   * `main`, as an editor's watermark. The surface's layout renders it where
+   * its mounts would be, so the layout's own strip and buttons stay.
+   * With none set, an empty surface shows nothing: scena has no words of its
+   * own to put there. Disposing restores what was set before.
+   */
+  setEmpty(surface: SurfaceName, node: ComponentNode): Disposable;
+  // The node `setEmpty` gave `surface`, or undefined.
+  emptyAt(surface: SurfaceName): ComponentNode | undefined;
 }
 
 // A close that waits for an answer: the mount, and what closing it loses.

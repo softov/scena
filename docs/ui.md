@@ -60,7 +60,8 @@ you take over one `format` without taking over the form.
 **`ui/data`** — `List`, `Listable`, `DataTable`, `Tree`, `Pagination`,
 `Filter`. `Listable` is the workhorse: columns with per-column `mode`
 (`table` for wide, omitted for both), `getKey`, `selectedKey`, `onSelect`,
-`contextMenuSlot` plus `contextFor`, and an `emptyState`. `Pagination` and
+`contextMenuSlot` plus `contextFor`, and an `emptyState` (omitted, an empty
+list shows nothing; `Tree` takes one too). `Pagination` and
 `Filter` bind to a namespace and drive its `query` path, so a list, its filter
 and its paginator need no wiring between them.
 

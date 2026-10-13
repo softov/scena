@@ -9,7 +9,7 @@ import { useMountTitle } from './MountTitle.js';
 // active mount declares a title/icon/actions (mount.props ?? component.props), a
 // SectionHeader strip renders above it — this is how sidebar sections get their
 // `[icon Title] [actions] [⋯]` header.
-export function SingleLayout({ mounts, state, renderMount }: LayoutProps) {
+export function SingleLayout({ mounts, state, renderMount, renderEmpty }: LayoutProps) {
   const scena = useScena();
   const active =
     mounts.find((m) => m.key === state.activeContainerKey) ??
@@ -31,7 +31,7 @@ export function SingleLayout({ mounts, state, renderMount }: LayoutProps) {
       {showHeader ? <SectionHeader title={title || active?.key || ''} icon={icon} color={color} actions={actions} /> : null}
       <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
         {mounts.length === 0 ? (
-          <div style={{ padding: 24, color: 'var(--oo-color-muted)' }}>Nothing open.</div>
+          (renderEmpty?.() ?? null) as ReactNode
         ) : (
           // Keep every mount mounted; show only the active one so switching
           // between mounts doesn't unmount (and reset) the others.

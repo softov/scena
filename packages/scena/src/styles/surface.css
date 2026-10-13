@@ -389,3 +389,13 @@
   outline: 2px solid var(--oo-color-accent);
   outline-offset: 2px;
 }
+
+/*
+ * A surface's empty view (`surfaces.setEmpty`), where its mounts would be. It
+ * fills the place and scrolls on its own; what sits inside is the app's.
+ */
+.oo-surface-empty {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+}

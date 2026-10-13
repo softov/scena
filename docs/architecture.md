@@ -157,6 +157,14 @@ A **layout** decides how a surface's several mounts are shown: `Tab`,
 runtime and persistable per user — `LayoutStorage` is the interface, and
 `createLocalStorageLayoutStorage` the obvious implementation.
 
+What a surface shows while it holds **no mount** is the app's, never scena's.
+`surfaces.setEmpty('main', { component: 'StartPage' })` gives a surface an
+empty view, as an editor's watermark; the layout draws it where its mounts would
+be, so its own strip and buttons stay. With none set, an empty surface shows
+nothing: scena has no words of its own to put there, and an app in another
+language would show English. A `TabPanel` group left empty by a split is not an
+empty surface, and keeps its drop hint.
+
 A **shell** is the frame around the surfaces. It receives `scena`, the active
 layout, and a `renderSurface(name)` function; where it puts the results is the
 whole of what a shell decides.
