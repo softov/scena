@@ -4,6 +4,7 @@ import { weightStyle } from '../_utils.js';
 import { Checks, type CheckRuleResolved } from './Checks.js';
 import { ControlLabel, ControlHint, ControlError } from './_field-parts.js';
 import './ChoicePicker.css';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // a2ui v0.10: required `options`, `value` (DynamicStringList — array!). The
 // spec's `variant` is selection mode (multipleSelection/mutuallyExclusive);
@@ -58,6 +59,7 @@ export function ChoicePicker({
   typeTag,
   onChange: onChangeProp,
 }: ChoicePickerProps) {
+  const { t } = useI18n();
   // displayStyle is accepted for spec parity but visual treatment (chips
   // rendering) is deferred to Group D rework.
   void _displayStyle;
@@ -97,7 +99,7 @@ export function ChoicePicker({
           <input
             className="oo-input"
             type="search"
-            placeholder="Filter…"
+            placeholder={t('query/filter', 'Filter…')}
             value={filter}
             onChange={(e) => setFilter(e.currentTarget.value)}
             disabled={disabled}

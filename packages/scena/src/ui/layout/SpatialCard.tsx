@@ -5,6 +5,7 @@ import { useScena } from '../../react/ScenaProvider.js';
 import { useMountTitle } from './MountTitle.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import type { CampusNodeRenderProps } from '../campus/types.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // The `card` node-type for SpatialLayout's CampusView. Rendered INSIDE a
 // CampusNodus frame (the frame owns position/drag/resize/selection), so this
@@ -19,6 +20,7 @@ export interface SpatialCardData {
 }
 
 export function SpatialCard({ selected, data }: CampusNodeRenderProps) {
+  const { t } = useI18n();
   const { mount, renderMount, onClose } = data as SpatialCardData;
   const scena = useScena();
   // Per-field merge: mount.props ?? component.props ?? key.
@@ -66,7 +68,7 @@ export function SpatialCard({ selected, data }: CampusNodeRenderProps) {
             e.stopPropagation();
             onClose();
           }}
-          title="Close"
+          title={t('common/close', 'Close')}
           style={{ cursor: 'pointer' }}
         >
           {NAMED_GLYPH.closePanel}

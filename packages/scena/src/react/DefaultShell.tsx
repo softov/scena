@@ -8,6 +8,7 @@ import { useLayout } from './hooks/useLayout.js';
 import { useStore } from './hooks/useStore.js';
 import { SurfaceArea } from './SurfaceArea.js';
 import { CloseConfirm } from './CloseConfirm.js';
+import { useI18n } from './hooks/useI18n.js';
 
 export interface DefaultShellProps {
   /**
@@ -61,6 +62,7 @@ const OVERLAYABLE: SurfaceName[] = ['sidebar:left', 'sidebar:right', 'panel:bott
  * playground's CustomShell.
  */
 export function DefaultShell({ presentation, dismissOnScrim = true }: DefaultShellProps = {}) {
+  const { t } = useI18n();
   const scena = useScena();
   const layout = useLayout();
   const surfaces = layout.surfaces;
@@ -223,7 +225,7 @@ export function DefaultShell({ presentation, dismissOnScrim = true }: DefaultShe
             <button
               type="button"
               className="oo-surface-scrim"
-              aria-label="Close"
+              aria-label={t('common/close', 'Close')}
               onClick={closeLifted}
             />
           ) : (

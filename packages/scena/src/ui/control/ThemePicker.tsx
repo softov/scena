@@ -3,6 +3,7 @@ import { useStore, useStoreSetter } from '../../react/hooks/useStore.js';
 import { listThemes } from '../../styles/index.js';
 import { THEME_ID_PATH } from '../../styles/controller.js';
 import './ThemePicker.css';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 export interface ThemePickerProps {
   // Restrict and order the offered families; defaults to every registered one.
@@ -32,11 +33,13 @@ export interface ThemePickerProps {
  */
 export function ThemePicker({
   themes,
-  label = 'Theme',
+  label,
   compact = false,
   className,
   style,
 }: ThemePickerProps): ReactNode {
+  const { t } = useI18n();
+  const text = label ?? t('theme/label', 'Theme');
   const current = useStore<string>(THEME_ID_PATH) ?? 'default';
   const setStore = useStoreSetter();
 
@@ -51,13 +54,13 @@ export function ThemePicker({
     <label
       className={['oo-theme-picker', className].filter(Boolean).join(' ')}
       style={style}
-      title={label}
+      title={text}
     >
-      {compact ? null : <span className="oo-theme-picker__label">{label}</span>}
+      {compact ? null : <span className="oo-theme-picker__label">{text}</span>}
       <select
         className="oo-theme-picker__select"
         value={current}
-        aria-label={label}
+        aria-label={text}
         onChange={(e) => setStore(THEME_ID_PATH, e.currentTarget.value)}
       >
         {items.map((theme) => (

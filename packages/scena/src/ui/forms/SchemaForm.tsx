@@ -22,6 +22,7 @@ import {
 import './SchemaForm.css';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { Markdown } from '../display/Markdown.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Custom field renderer keyed by `format`. Domain-coupled renderers (model
 // pickers, tool lists, OAuth buttons) live in the consumer (web-next), not in
@@ -106,6 +107,7 @@ export function SchemaForm({
   onJsonValidChange,
   style,
 }: SchemaFormProps) {
+  const { t } = useI18n();
   const writeValue = useWriteBack('value');
   const [jsonError, setJsonError] = useState<string | null>(null);
 
@@ -282,8 +284,8 @@ export function SchemaForm({
     <div className="oo-schema-form__modebar">
       {showRootToggle ? (
         <>
-          <button type="button" data-active={mode === 'fields'} onClick={enterFields}>fields</button>
-          <button type="button" data-active={mode === 'json'} onClick={enterJson}>json</button>
+          <button type="button" data-active={mode === 'fields'} onClick={enterFields}>{t('form/fields', 'fields')}</button>
+          <button type="button" data-active={mode === 'json'} onClick={enterJson}>{t('form/json', 'json')}</button>
         </>
       ) : null}
       {dirty ? (
@@ -352,6 +354,7 @@ interface SchemaControlProps {
 }
 
 function SchemaControl({ field, value, onChange, meta, required, error, namespace, formatRenderers, jsonEditor, jsonTextFields }: SchemaControlProps) {
+  const { t } = useI18n();
   const unionOptions = normalizeUnionOptions(field);
   const [unionIndex, setUnionIndex] = useState(0);
 
@@ -402,7 +405,7 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
       : (field.enum ?? []);
     const withPlaceholder: ChoiceOption[] = required
       ? options
-      : [{ value: '', label: '— select —' }, ...options];
+      : [{ value: '', label: t('form/select', 'Select…') }, ...options];
     return (
       <ChoicePicker
         options={withPlaceholder}
@@ -583,6 +586,7 @@ interface ArrayControlProps {
 }
 
 function ArrayControl({ field, value, onChange, namespace, formatRenderers, jsonEditor, jsonTextFields }: ArrayControlProps) {
+  const { t } = useI18n();
   const items = Array.isArray(value) ? value : [];
   const itemSchema = resolveArrayItemSchema(field);
 
@@ -607,7 +611,7 @@ function ArrayControl({ field, value, onChange, namespace, formatRenderers, json
             type="button"
             className="oo-schema-form__array-remove"
             onClick={() => onChange(items.filter((_, i) => i !== index))}
-            aria-label="Remove item"
+            aria-label={t('form/removeItem', 'Remove item')}
           >
             {NAMED_GLYPH.closePanel}
           </button>
@@ -618,7 +622,7 @@ function ArrayControl({ field, value, onChange, namespace, formatRenderers, json
         className="oo-btn oo-schema-form__array-add"
         onClick={() => onChange([...items, defaultValueForSchema(itemSchema)])}
       >
-        + add item
+        {t('form/addItem', '+ add item')}
       </button>
     </div>
   );

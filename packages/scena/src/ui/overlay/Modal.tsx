@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { useWriteBack } from '../../react/mount-context.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // a2ui v0.10: required `trigger` (ComponentId) + `content` (ComponentId).
 // scena's controlled model (`open`/`defaultOpen`/`child`) diverges from spec
@@ -29,6 +30,7 @@ export function Modal({
   onClose,
   dismissable = true,
 }: ModalProps) {
+  const { t } = useI18n();
   const writeOpen = useWriteBack('open');
   const [internalOpen, setInternalOpen] = useState<boolean>(
     open ?? defaultOpen ?? false,
@@ -97,7 +99,7 @@ export function Modal({
                   font: 'inherit',
                   color: 'inherit',
                 }}
-                aria-label="Close"
+                aria-label={t('common/close', 'Close')}
               >
                 {NAMED_GLYPH.closePanel}
               </button>

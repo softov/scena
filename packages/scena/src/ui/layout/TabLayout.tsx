@@ -11,6 +11,7 @@ import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { TabTitle } from './TabPanelLayout.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Tab strip + active mount. Tabs are draggable for reorder (HTML5 DnD).
 // Right-click on a tab opens slot `tab:context`. The [...] trailing button
@@ -35,6 +36,7 @@ export function TabLayout({
   onClose,
   onReorder,
 }: LayoutProps) {
+  const { t } = useI18n();
   const scena = useScena();
   const persistedOrder = state.split?.order ?? [];
   const orderSet = new Set(persistedOrder);
@@ -236,8 +238,8 @@ export function TabLayout({
           })}
           <button
             className="tab-bar__more"
-            title="Group actions"
-            aria-label="Group actions"
+            title={t('layout/groupActions', 'Group actions')}
+            aria-label={t('layout/groupActions', 'Group actions')}
             onClick={openGroupMenu}
           >{NAMED_GLYPH.moreHoriz}</button>
         </div>

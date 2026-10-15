@@ -8,6 +8,7 @@ import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { resolveMountTitle } from './MountTitle.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 interface LayoutHeaderProps extends Pick<LayoutProps, 'mounts' | 'state' | 'setState'> {
   title: string;
@@ -29,6 +30,7 @@ export function StackHeader({
   // onClose,
   // onReorder,
 }: LayoutHeaderProps) {
+  const { t } = useI18n();
 
   const scena = useScena();
   // Merge persisted order with new mounts so a freshly opened section shows up
@@ -97,8 +99,8 @@ export function StackHeader({
         <button
           type="button"
           className="oo-stack-container-header__overflow"
-          title="Toggle panes"
-          aria-label="Toggle panes"
+          title={t('layout/togglePanes', 'Toggle panes')}
+          aria-label={t('layout/togglePanes', 'Toggle panes')}
           onClick={openOverflowMenu}
           style={{
             background: 'transparent',

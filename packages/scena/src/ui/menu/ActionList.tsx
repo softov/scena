@@ -17,6 +17,7 @@ import { useI18n } from '../../react/hooks/useI18n.js';
 import { canonicalShortcut } from './token.js';
 import './ActionList.css';
 import { resolveColorVar } from '../../sdk/colors.js';
+import { translate } from '../../core/i18n/registry.js';
 
 // ---------- Internal row shape -------------------------------------------------
 
@@ -491,7 +492,7 @@ export function ActionList({
       return <div className="oo-action-list__error">{resolved.message}</div>;
     }
     if (grouped.length === 0 || resolved.rows.length === 0) {
-      return <div className="oo-action-list__empty">No matches</div>;
+      return <div className="oo-action-list__empty">{t('noMatches', 'No matches')}</div>;
     }
     return (
       <>
@@ -499,7 +500,7 @@ export function ActionList({
           <div key={group.label ?? `__g${gi}`}>
             {gi > 0 ? <div className="oo-action-list__divider" /> : null}
             {group.label ? (
-              <div className="oo-action-list__group-label">{group.label}</div>
+              <div className="oo-action-list__group-label">{translate(`groups/${group.label}`, group.label)}</div>
             ) : null}
             {group.rows.map(renderRow)}
           </div>
@@ -514,10 +515,10 @@ export function ActionList({
 
   return (
     <div className="oo-action-list" data-layout={layout}>
-      {pending ? <div className="oo-action-list__pending" aria-hidden>searching…</div> : null}
+      {pending ? <div className="oo-action-list__pending" aria-hidden>{t('searching', 'searching…')}</div> : null}
       {onBack ? (
         <button type="button" className="oo-action-list__back" onClick={onBack}>
-          ← {spec.title ?? 'Back'}
+          ← {spec.title ?? t('backTo', 'Back')}
         </button>
       ) : null}
       {spec.customHeader ? (

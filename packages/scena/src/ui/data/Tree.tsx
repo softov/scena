@@ -16,6 +16,7 @@ import type { PickerAction } from '../../sdk/host.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import './Tree.css';
 import { resolveColorVar } from '../../sdk/colors.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Generic hierarchical tree. Controlled selection + expansion, kbd nav,
 // optional right-click ContextMenu, optional drag-drop and clipboard hooks.
@@ -142,6 +143,7 @@ export function Tree<T = unknown>({
   className,
   style,
 }: TreeProps<T>): ReactNode {
+  const { t } = useI18n();
   // Expansion state — controlled vs uncontrolled.
   const [internalExpanded, setInternalExpanded] = useState<Set<string>>(
     () => new Set(defaultExpanded ?? []),
@@ -322,7 +324,7 @@ export function Tree<T = unknown>({
                 {hasChildren ? (
                   <button
                     type="button"
-                    aria-label={rowExpanded ? 'Collapse' : 'Expand'}
+                    aria-label={rowExpanded ? t('tree/collapse', 'Collapse') : t('tree/expand', 'Expand')}
                     className="oo-tree__twisty"
                     data-expanded={rowExpanded ? 'true' : undefined}
                     onClick={(e) => {

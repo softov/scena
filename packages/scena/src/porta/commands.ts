@@ -1,6 +1,7 @@
 import type { Scena } from '../sdk/scena.js';
 import type { PortaProvider, Session } from './provider.js';
 import { SIGILLUM_PATHS } from './sigillum.js';
+import { translate } from '../core/i18n/registry.js';
 
 // Registers the four sigillum.* commands. The composer (`LoginForm`) and the
 // app dispatch these — providers don't talk to commands directly, they're
@@ -95,7 +96,7 @@ export function registerSigillumCommands(
 
   scena.commands.register({
     id: 'sigillum.verifyOtp',
-    title: 'Verify code',
+    title: () => translate('auth/verifyCode', 'Verify code'),
     dispatch: 'client',
     run: async (ctx, args) => {
       const a = (args ?? {}) as { providerId: string; code: string };
@@ -123,7 +124,7 @@ export function registerSigillumCommands(
       } catch (err) {
         ctx.store.patchMany({
           [SIGILLUM_PATHS.pending]: false,
-          [SIGILLUM_PATHS.error]: err instanceof Error ? err.message : 'Verify failed',
+          [SIGILLUM_PATHS.error]: err instanceof Error ? err.message : translate('auth/verifyFailed', 'Verify failed'),
         });
       }
     },

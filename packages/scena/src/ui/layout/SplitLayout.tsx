@@ -13,6 +13,7 @@ import { ContextMenu } from '../menu/ContextMenu.js';
 import { MountTitle } from './MountTitle.js';
 import { Divisor } from '../display/Divisor.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Side-by-side panes with a draggable divider between each adjacent pair AND
 // a thin header per pane that acts as the drag handle for reorder (HTML5 DnD).
@@ -34,6 +35,7 @@ export function SplitLayout({
   onClose,
   onReorder,
 }: LayoutProps) {
+  const { t } = useI18n();
   const scena = useScena();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -210,7 +212,7 @@ export function SplitLayout({
                   e.stopPropagation();
                   onClose(mount.key);
                 }}
-                title="Close"
+                title={t('common/close', 'Close')}
                 style={{ cursor: 'pointer' }}
               >
                 {NAMED_GLYPH.closePanel}

@@ -76,7 +76,7 @@ export function Pagination({
 
   return (
     <div style={bar}>
-      <button style={btn} disabled={page <= 1} onClick={() => setPage(page - 1)} aria-label="Previous">
+      <button style={btn} disabled={page <= 1} onClick={() => setPage(page - 1)} aria-label={t('previous', 'Previous')}>
         ‹
       </button>
       <span
@@ -87,7 +87,7 @@ export function Pagination({
       >
         {label}
       </span>
-      <button style={btn} disabled={page >= pages} onClick={() => setPage(page + 1)} aria-label="Next">
+      <button style={btn} disabled={page >= pages} onClick={() => setPage(page + 1)} aria-label={t('next', 'Next')}>
         ›
       </button>
       {pageSizes && pageSizes.length > 0 ? (

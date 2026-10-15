@@ -21,6 +21,7 @@ import { Divisor } from '../display/Divisor.js';
 import { resolveColorRgb } from '../../sdk/colors.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { useStoreLabel } from '../../react/hooks/useStoreLabel.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Multi-group tabs. Recursive binary tree: a leaf is one Tab strip; a split
 // holds two children with a draggable divider. Drag a tab onto another
@@ -265,6 +266,7 @@ interface TabPanelContext {
 
 // Renders one leaf: tab strip + group menu + active mount + drop overlay.
 function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext }) {
+  const { t } = useI18n();
   const scena = useScena();
   const activeKey = leaf.activeKey ?? leaf.tabs[0];
   // const activeMount = ctx.mounts.find((m) => m.key === activeKey);
@@ -481,8 +483,8 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
         <div className="tab-bar__extras">
           <button
             className="tab-bar__more"
-            title="Group actions"
-            aria-label="Group actions"
+            title={t('layout/groupActions', 'Group actions')}
+            aria-label={t('layout/groupActions', 'Group actions')}
             onClick={openGroupMenu}
           >{NAMED_GLYPH.moreHoriz}</button>
         </div>
@@ -882,6 +884,7 @@ export function TabTitle({
   onClose: (e: ReactMouseEvent<HTMLElement>) => void;
   onUnpin: (e: ReactMouseEvent<HTMLElement>) => void;
 }) {
+  const { t } = useI18n();
   const scena = useScena();
 
   // Per-field merge: mount.props ?? component.props ?? key.
@@ -919,7 +922,7 @@ export function TabTitle({
             e.stopPropagation();
             onUnpin(e);
           }}
-          title="Unpin"
+          title={t('tabs/unpin', 'Unpin tab')}
         >
           {NAMED_GLYPH.pin}
         </span>
@@ -930,7 +933,7 @@ export function TabTitle({
             e.stopPropagation();
             onClose(e);
           }}
-          title="Close"
+          title={t('common/close', 'Close')}
         >
           {NAMED_GLYPH.closePanel}
         </span>

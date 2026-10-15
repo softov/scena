@@ -22,7 +22,7 @@ export interface SectionHeaderProps {
 // from the active mount's display (mount.props ?? component.props).
 export function SectionHeader({ title, icon, color, actions = [] }: SectionHeaderProps): ReactNode {
   const scena = useScena();
-  useI18n(); // re-resolve `{ t }` labels on locale switch
+  const { t } = useI18n(); // also re-resolves `{ t }` labels on locale switch
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
   const run = (command: string) => void scena.commands.execute(command);
   const resolve = (l: Label | undefined) =>
@@ -65,8 +65,8 @@ export function SectionHeader({ title, icon, color, actions = [] }: SectionHeade
               className="oo-btn oo-btn--icon"
               data-variant="ghost"
               type="button"
-              title="More actions"
-              aria-label="More actions"
+              title={t('common/moreActions', 'More actions')}
+              aria-label={t('common/moreActions', 'More actions')}
               onClick={openMenu}
               style={iconBtn}>
               ⋯

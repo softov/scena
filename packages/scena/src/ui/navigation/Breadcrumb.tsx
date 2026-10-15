@@ -1,5 +1,6 @@
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import './Breadcrumb.css';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 export interface BreadcrumbItem {
   label: ReactNode;
@@ -18,10 +19,11 @@ export interface BreadcrumbProps {
 // location); earlier items render as links (href) or buttons (onClick) or
 // muted plain text when neither is set.
 export function Breadcrumb({ items, separator = '/', style, className }: BreadcrumbProps) {
+  const { t } = useI18n();
   return (
     <nav
       className={['oo-breadcrumb', className].filter(Boolean).join(' ')}
-      aria-label="Breadcrumb"
+      aria-label={t('common/breadcrumb', 'Breadcrumb')}
       style={style}
     >
       {items.map((item, i) => {

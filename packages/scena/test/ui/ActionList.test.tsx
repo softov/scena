@@ -85,3 +85,24 @@ describe('ActionList ticked rows', () => {
     expect(getComputedStyle(rows[0]!).getPropertyValue('background')).toBe('none');
   });
 });
+
+describe('ActionList group labels', () => {
+  const grouped: ListSpec = {
+    items: [
+      { title: 'Zen', group: 'View', onSelect: () => undefined },
+      { title: 'Log', group: 'Panel', onSelect: () => undefined },
+    ],
+  };
+
+  it('a group label is translated through groups/<label>, and shown as it is without a message', () => {
+    registerMessages('pt-BR', { groups: { View: 'Exibir' } });
+    setLocale('pt-BR');
+    const { container } = render(
+      <ScenaProvider scena={createScena()}>
+        <ActionList spec={grouped} hostCtx={host} manageKeys={false} />
+      </ScenaProvider>,
+    );
+    const labels = [...container.querySelectorAll('.oo-action-list__group-label')].map((el) => el.textContent);
+    expect(labels).toEqual(['Exibir', 'Panel']);
+  });
+});

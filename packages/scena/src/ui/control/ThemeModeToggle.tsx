@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useStore, useStoreSetter } from '../../react/hooks/useStore.js';
 import { THEME_MODE_PATH, type ThemeModeChoice } from '../../styles/controller.js';
 import './ThemeModeToggle.css';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 const ORDER: ThemeModeChoice[] = ['light', 'dark', 'system'];
 const ICON: Record<ThemeModeChoice, string> = {
@@ -9,6 +10,7 @@ const ICON: Record<ThemeModeChoice, string> = {
   dark: '☾︎',
   system: '◐︎',
 };
+// English for each choice; `theme/mode/<choice>` translates it.
 const TITLE: Record<ThemeModeChoice, string> = {
   light: 'Light',
   dark: 'Dark',
@@ -39,6 +41,8 @@ export function ThemeModeToggle({
   className,
   style,
 }: ThemeModeToggleProps): ReactNode {
+  const { t } = useI18n();
+  const name = (choice: ThemeModeChoice): string => t(`theme/mode/${choice}`, TITLE[choice]);
   const mode = useStore<ThemeModeChoice>(THEME_MODE_PATH) ?? 'system';
   const setStore = useStoreSetter();
 
@@ -53,12 +57,12 @@ export function ThemeModeToggle({
       className={['oo-theme-mode-toggle', className].filter(Boolean).join(' ')}
       style={style}
       data-mode={mode}
-      title={`${TITLE[mode]} — click for ${TITLE[next].toLowerCase()}`}
-      aria-label={`Theme mode: ${TITLE[mode]}`}
+      title={t('theme/mode/next', { mode: name(mode), next: name(next), fallback: '{mode}, click for {next}' })}
+      aria-label={t('theme/mode/label', { mode: name(mode), fallback: 'Theme mode: {mode}' })}
       onClick={() => setStore(THEME_MODE_PATH, next)}
     >
       {display !== 'text' ? <span aria-hidden="true">{ICON[mode]}</span> : null}
-      {display !== 'icon' ? <span>{TITLE[mode]}</span> : null}
+      {display !== 'icon' ? <span>{name(mode)}</span> : null}
     </button>
   );
 }

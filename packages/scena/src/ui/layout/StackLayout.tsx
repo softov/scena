@@ -11,6 +11,7 @@ import { ContextMenu } from '../menu/ContextMenu.js';
 import { StackHeader } from './StackHeader.js';
 import { MountTitle } from './MountTitle.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Vertical stack of mounts, each with a header that toggles collapsed.
 // Headers are draggable for reorder (HTML5 DnD). Used primarily for
@@ -28,6 +29,7 @@ export function StackLayout({
   onClose,
   onReorder,
 }: LayoutProps) {
+  const { t } = useI18n();
   const scena = useScena();
   // Merge persisted order with new mounts so a freshly opened section shows up
   // even if state.split.order was captured before it existed.
@@ -199,7 +201,7 @@ export function StackLayout({
                   e.stopPropagation();
                   onClose(mount.key);
                 }}
-                title="Close"
+                title={t('common/close', 'Close')}
                 style={{ cursor: 'pointer' }}
               >
                 {NAMED_GLYPH.closePanel}

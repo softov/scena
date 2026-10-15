@@ -22,6 +22,7 @@ import { SpatialCard, type SpatialCardData } from './SpatialCard.js';
 import { useMountTitle } from './MountTitle.js';
 import type { ResolvedMount } from '../../sdk/mount-surface.js';
 import { Toolbar } from '../navigation/Toolbar.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Free-form positioning with three arrangement strategies:
 //
@@ -98,6 +99,7 @@ export function SpatialLayout({
   onClose,
   onActivate,
 }: LayoutProps) {
+  const { t } = useI18n();
   const scena = useScena();
 
   // Background + per-card context menus.
@@ -456,8 +458,8 @@ export function SpatialLayout({
         <button
           type="button"
           onClick={() => campusRef.current?.zoomBy(1 / ZOOM_STEP)}
-          title="Zoom out"
-          aria-label="Zoom out"
+          title={t('spatial/zoomOut', 'Zoom out')}
+          aria-label={t('spatial/zoomOut', 'Zoom out')}
         >−</button>
         <ZoomPercentInput
           value={viewport.scale}
@@ -466,13 +468,13 @@ export function SpatialLayout({
         <button
           type="button"
           onClick={() => campusRef.current?.zoomBy(ZOOM_STEP)}
-          title="Zoom in"
-          aria-label="Zoom in"
+          title={t('spatial/zoomIn', 'Zoom in')}
+          aria-label={t('spatial/zoomIn', 'Zoom in')}
         >+</button>
-        <button type="button" onClick={fitToView} title="Fit all cards to viewport">
+        <button type="button" onClick={fitToView} title={t('spatial/fit', 'Fit all cards to viewport')}>
           Fit
         </button>
-        <button type="button" onClick={() => campusRef.current?.resetViewport()} title="Reset zoom + pan">
+        <button type="button" onClick={() => campusRef.current?.resetViewport()} title={t('spatial/reset', 'Reset zoom + pan')}>
           Reset
         </button>
         <span
@@ -582,13 +584,14 @@ function SelectionFooter({
   onClose,
   onDeselect,
 }: SelectionFooterProps) {
+  const { t } = useI18n();
   // The card's own title, as its header shows it; the key only when it has none.
   const title = useMountTitle(mount, selectedKey);
   return (
     <div
       className="oo-spatial-footer"
       role="toolbar"
-      aria-label="Selected card actions"
+      aria-label={t('spatial/selectedActions', 'Selected card actions')}
       style={{
         position: 'absolute',
         bottom: 16,
@@ -680,6 +683,7 @@ interface ZoomPercentInputProps {
 }
 
 function ZoomPercentInput({ value, onCommit }: ZoomPercentInputProps) {
+  const { t } = useI18n();
   const percent = Math.round(value * 100);
   const [draft, setDraft] = useState<string>(`${percent}`);
   const [editing, setEditing] = useState(false);
@@ -721,8 +725,8 @@ function ZoomPercentInput({ value, onCommit }: ZoomPercentInputProps) {
           (e.target as HTMLInputElement).blur();
         }
       }}
-      title="Zoom percent"
-      aria-label="Zoom percent"
+      title={t('spatial/zoomPercent', 'Zoom percent')}
+      aria-label={t('spatial/zoomPercent', 'Zoom percent')}
       style={{
         width: 56,
         textAlign: 'center',

@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import './Alert.css';
 import { NAMED_GLYPH } from './Icon.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Inline banner: info / success / warning / danger. Icon is auto-derived from
 // tone unless explicitly set. Body slot accepts any ReactNode.
@@ -34,6 +35,7 @@ export function Alert({
   style,
   className,
 }: AlertProps) {
+  const { t } = useI18n();
   const body = children ?? message;
   return (
     <div
@@ -54,7 +56,7 @@ export function Alert({
           type="button"
           className="oo-alert__close"
           onClick={onClose}
-          aria-label="Dismiss"
+          aria-label={t('common/dismiss', 'Dismiss')}
         >
           {NAMED_GLYPH.closePanel}
         </button>
