@@ -128,6 +128,13 @@
   font: inherit;
 }
 
+/* A ticked row is marked by its check alone. base.css paints every
+   button[data-active] as pressed, which here made each ticked row look like
+   the focused one. Before :hover and [data-selected], so those still win. */
+.oo-action-list__row[data-active='true'] {
+  background: none;
+}
+
 .oo-action-list__row:hover {
   color: var(--oo-color-text);
   background: var(--oo-color-hover);

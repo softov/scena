@@ -13,6 +13,7 @@ import type { PickerAction, HostCtx, ListSpec } from '../../sdk/host.js';
 import type { Command, CommandContext } from '../../sdk/command.js';
 import type { BindingPath } from '../../sdk/component-graph.js';
 import { useScena } from '../../react/ScenaProvider.js';
+import { useI18n } from '../../react/hooks/useI18n.js';
 import { canonicalShortcut } from './token.js';
 import './ActionList.css';
 import { resolveColorVar } from '../../sdk/colors.js';
@@ -94,6 +95,8 @@ export function ActionList({
   ref,
 }: ActionListProps) {
   const scena = useScena();
+  // The footer hints follow the locale; `picker/*` keys, English as the fallback.
+  const { t } = useI18n('picker');
   const [selected, setSelected] = useState(0);
   const [resolved, setResolved] = useState<ResolvedItems>({ kind: 'loading' });
   // True while an async provider is re-resolving but we're still showing the
@@ -539,7 +542,8 @@ export function ActionList({
       </div>
       {spec.footerHints ? (
         <div className="oo-action-list__footer">
-          ↑↓ navigate · ↵ select{onBack ? ' · ← back' : ''} · ⎋ close
+          ↑↓ {t('navigate', 'navigate')} · ↵ {t('select', 'select')}
+          {onBack ? ` · ← ${t('back', 'back')}` : ''} · ⎋ {t('close', 'close')}
         </div>
       ) : null}
     </div>
