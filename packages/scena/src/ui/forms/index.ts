@@ -12,7 +12,7 @@ export type { FormSectionProps } from './FormSection.js';
 export { FormActions } from './FormActions.js';
 export type { FormActionsProps, FormActionItem } from './FormActions.js';
 export { SchemaForm } from './SchemaForm.js';
-export type { SchemaFormProps, FormatRenderer, FormatRendererProps } from './SchemaForm.js';
+export type { SchemaFormProps, FormatRenderer, FormatRendererProps, JsonEditor, JsonEditorProps } from './SchemaForm.js';
 export { DangerZone } from './DangerZone.js';
 export type { DangerZoneProps } from './DangerZone.js';
 export { SettingsContainer } from './SettingsContainer.js';

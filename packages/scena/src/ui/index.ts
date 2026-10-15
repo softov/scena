@@ -219,6 +219,8 @@ export type {
   SchemaFormProps,
   FormatRenderer,
   FormatRendererProps,
+  JsonEditor,
+  JsonEditorProps,
   JsonSchemaField,
   JsonSchemaObject,
   EnumOption,

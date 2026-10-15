@@ -38,6 +38,20 @@
   background: var(--oo-color-canvas);
   color: inherit;
 }
+.oo-schema-form__json-editor {
+  height: 20rem;
+  min-height: 8rem;
+  overflow: hidden;
+  resize: vertical;
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-color-canvas);
+}
+.oo-schema-form__json-error {
+  margin: var(--oo-spacing-xs, 4px) 0 0;
+  color: var(--oo-color-danger);
+  font-size: var(--oo-font-size-xs);
+}
 .oo-schema-form__empty {
   font-size: var(--oo-font-size-xs);
   color: var(--oo-color-muted);

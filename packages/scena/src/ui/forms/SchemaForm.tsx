@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from 'react';
 import { useWriteBack, WriteContext } from '../../react/mount-context.js';
 import { TextField } from '../control/TextField.js';
 import { CheckBox } from '../control/CheckBox.js';
@@ -34,6 +34,15 @@ export interface FormatRendererProps {
 }
 export type FormatRenderer = ComponentType<FormatRendererProps>;
 
+// The editor the form's JSON text is written in: the root's `json` mode, a
+// nested section's, and a tuple array. A consumer with a code editor passes it
+// here; without one the form uses a plain textarea.
+export interface JsonEditorProps {
+  value: string;
+  onChange: (text: string) => void;
+}
+export type JsonEditor = ComponentType<JsonEditorProps>;
+
 export interface SchemaFormProps {
   schema: JsonSchemaObject;
   // Bound (graph) OR controlled (direct React). Both supply the object here.
@@ -46,6 +55,7 @@ export interface SchemaFormProps {
   namespace?: string;
   header?: string;
   formatRenderers?: Record<string, FormatRenderer>;
+  jsonEditor?: JsonEditor;
   // `fields | json` switch. `jsonTextRoot` toggles it on this form (default
   // true). `jsonTextFields` toggles it on nested object sections; when unset it
   // follows the effective root value, so disabling it here disables children
@@ -58,6 +68,10 @@ export interface SchemaFormProps {
   baseline?: Record<string, unknown>;
   // Emitted whenever dirtiness (value ≠ baseline) changes.
   onDirtyChange?: (dirty: boolean) => void;
+  // Emitted when the form's JSON text, its own or any nested section's or
+  // tuple array's, starts or stops parsing. While it does not parse, the value
+  // is the last one that did, so a consumer holds its save until this is true.
+  onJsonValidChange?: (valid: boolean) => void;
   style?: CSSProperties;
 }
 
@@ -84,13 +98,42 @@ export function SchemaForm({
   namespace,
   header,
   formatRenderers,
+  jsonEditor,
   jsonTextRoot,
   jsonTextFields,
   baseline,
   onDirtyChange,
+  onJsonValidChange,
   style,
 }: SchemaFormProps) {
   const writeValue = useWriteBack('value');
+  const [jsonError, setJsonError] = useState<string | null>(null);
+
+  // The outermost form gathers the editors whose text does not parse; a nested
+  // one hands its own state up to it.
+  const outer = useContext(JsonValidityContext);
+  const [invalid, setInvalid] = useState<ReadonlySet<string>>(() => new Set());
+  const gather = useCallback((id: string, valid: boolean) => {
+    setInvalid((current) => {
+      if (current.has(id) !== valid) return current;
+      const next = new Set(current);
+      if (valid) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+  const report = outer ?? gather;
+  const selfId = useId();
+  useEffect(() => {
+    report(selfId, jsonError === null);
+  }, [report, selfId, jsonError]);
+  useEffect(() => () => report(selfId, true), [report, selfId]);
+  const allValid = invalid.size === 0;
+  useEffect(() => {
+    if (outer === null) onJsonValidChange?.(allValid);
+    // Fires on transitions only, as onDirtyChange does.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allValid]);
   const [internal, setInternal] = useState<Record<string, unknown>>(value ?? defaultValue ?? {});
   const [mode, setMode] = useState<'fields' | 'json'>('fields');
   const [jsonText, setJsonText] = useState(() => JSON.stringify(value ?? defaultValue ?? {}, null, 2));
@@ -105,9 +148,18 @@ export function SchemaForm({
   const baselineValue = baseline ?? initialRef.current;
   const dirty = !deepEqual(internal, baselineValue);
 
+  // The value this form last sent. A `value` that is not it came from outside,
+  // as a consumer's reset or the host's own change, and replaces the JSON text,
+  // which is otherwise the person's to keep while they edit it.
+  const sentRef = useRef<Record<string, unknown> | undefined>(value ?? defaultValue);
+
   useEffect(() => {
     if (value === undefined) return;
     setInternal((current) => (current === value ? current : value));
+    if (deepEqual(value, sentRef.current)) return;
+    sentRef.current = value;
+    setJsonText(JSON.stringify(value, null, 2));
+    setJsonError(null);
   }, [value]);
 
   useEffect(() => {
@@ -126,6 +178,7 @@ export function SchemaForm({
   const requiredSet = new Set(schema.required ?? []);
 
   function commit(next: Record<string, unknown>): void {
+    sentRef.current = next;
     setInternal(next);
     writeValue(next);   // bound/graph: writes the whole object back (no-op in plain React)
     onChange?.(next);   // controlled: direct-React parent
@@ -137,12 +190,27 @@ export function SchemaForm({
 
   function enterJson(): void {
     setJsonText(JSON.stringify(internal, null, 2));
+    setJsonError(null);
     setMode('json');
+  }
+
+  // Leaving the JSON text drops what did not parse; the fields show the value.
+  function enterFields(): void {
+    setJsonError(null);
+    setMode('fields');
+  }
+
+  function editJson(text: string): void {
+    setJsonText(text);
+    const { parsed, error } = jsonProblem(text, isObjectRecord, 'an object');
+    setJsonError(error);
+    if (error === null) commit(parsed as Record<string, unknown>);
   }
 
   function reset(): void {
     commit(baselineValue);
     setJsonText(JSON.stringify(baselineValue, null, 2));
+    setJsonError(null);
   }
 
   function renderField(key: string, field: JsonSchemaField): ReactNode {
@@ -172,7 +240,7 @@ export function SchemaForm({
             baseline={isObjectRecord(baselineValue[key]) ? (baselineValue[key] as Record<string, unknown>) : {}}
             onChange={set}
             namespace={childNamespace}
-            formatRenderers={formatRenderers}
+            formatRenderers={formatRenderers} jsonEditor={jsonEditor}
             jsonTextRoot={childToggle}
           />
         </FormSection>
@@ -187,7 +255,7 @@ export function SchemaForm({
     if (isComposite) {
       return (
         <Field key={key} name={key} label={meta.label} hint={meta.hint} required={meta.required} typeTag={meta.typeTag} error={meta.error}>
-          <SchemaControl field={field} value={internal[key]} onChange={set} required={meta.required} error={meta.error} namespace={childNamespace} formatRenderers={formatRenderers} jsonTextFields={childToggle} />
+          <SchemaControl field={field} value={internal[key]} onChange={set} required={meta.required} error={meta.error} namespace={childNamespace} formatRenderers={formatRenderers} jsonEditor={jsonEditor} jsonTextFields={childToggle} />
         </Field>
       );
     }
@@ -203,7 +271,7 @@ export function SchemaForm({
         required={meta.required}
         error={meta.error}
         namespace={childNamespace}
-        formatRenderers={formatRenderers}
+        formatRenderers={formatRenderers} jsonEditor={jsonEditor}
       />
     );
   }
@@ -214,7 +282,7 @@ export function SchemaForm({
     <div className="oo-schema-form__modebar">
       {showRootToggle ? (
         <>
-          <button type="button" data-active={mode === 'fields'} onClick={() => setMode('fields')}>fields</button>
+          <button type="button" data-active={mode === 'fields'} onClick={enterFields}>fields</button>
           <button type="button" data-active={mode === 'json'} onClick={enterJson}>json</button>
         </>
       ) : null}
@@ -226,21 +294,20 @@ export function SchemaForm({
 
   const body =
     mode === 'json' ? (
-      <textarea
-        className="oo-schema-form__json"
-        value={jsonText}
-        spellCheck={false}
-        rows={16}
-        onChange={(e) => {
-          setJsonText(e.target.value);
-          try {
-            const parsed = JSON.parse(e.target.value) as unknown;
-            if (isObjectRecord(parsed)) commit(parsed);
-          } catch {
-            /* keep editing until the JSON parses */
-          }
-        }}
-      />
+      <>
+        {jsonEditor ? (
+          <JsonEditorBox editor={jsonEditor} value={jsonText} onChange={editJson} />
+        ) : (
+          <textarea
+            className="oo-schema-form__json"
+            value={jsonText}
+            spellCheck={false}
+            rows={16}
+            onChange={(e) => editJson(e.target.value)}
+          />
+        )}
+        <JsonError error={jsonError} />
+      </>
     ) : header ? (
       <FormSection title={header}>{rows}</FormSection>
     ) : (
@@ -252,11 +319,13 @@ export function SchemaForm({
   return (
     <FormContext.Provider value={{ errors, namespace }}>
       <WriteContext.Provider value={null}>
-        <div className="oo-schema-form" style={style}>
-          {schema.description ? <Markdown text={schema.description} /> : null}
-          {modebar}
-          {body}
-        </div>
+        <JsonValidityContext.Provider value={report}>
+          <div className="oo-schema-form" style={style}>
+            {schema.description ? <Markdown text={schema.description} /> : null}
+            {modebar}
+            {body}
+          </div>
+        </JsonValidityContext.Provider>
       </WriteContext.Provider>
     </FormContext.Provider>
   );
@@ -277,11 +346,12 @@ interface SchemaControlProps {
   error?: string;
   namespace?: string;
   formatRenderers?: Record<string, FormatRenderer>;
+  jsonEditor?: JsonEditor;
   // Whether nested object forms rendered by this control show their switch.
   jsonTextFields?: boolean;
 }
 
-function SchemaControl({ field, value, onChange, meta, required, error, namespace, formatRenderers, jsonTextFields }: SchemaControlProps) {
+function SchemaControl({ field, value, onChange, meta, required, error, namespace, formatRenderers, jsonEditor, jsonTextFields }: SchemaControlProps) {
   const unionOptions = normalizeUnionOptions(field);
   const [unionIndex, setUnionIndex] = useState(0);
 
@@ -311,7 +381,7 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
             onChange(defaultValueForSchema(unionOptions[safe]!));
           }}
         />
-        <SchemaControl field={current} value={value} onChange={onChange} namespace={namespace} formatRenderers={formatRenderers} jsonTextFields={jsonTextFields} />
+        <SchemaControl field={current} value={value} onChange={onChange} namespace={namespace} formatRenderers={formatRenderers} jsonEditor={jsonEditor} jsonTextFields={jsonTextFields} />
       </div>
     );
   }
@@ -395,7 +465,7 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
   }
 
   if (type === 'array') {
-    return <ArrayControl field={field} value={value} onChange={onChange} namespace={namespace} formatRenderers={formatRenderers} jsonTextFields={jsonTextFields} />;
+    return <ArrayControl field={field} value={value} onChange={onChange} namespace={namespace} formatRenderers={formatRenderers} jsonEditor={jsonEditor} jsonTextFields={jsonTextFields} />;
   }
 
   if (type === 'object') {
@@ -405,7 +475,7 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
         value={isObjectRecord(value) ? value : {}}
         onChange={(next) => onChange(next)}
         namespace={namespace}
-        formatRenderers={formatRenderers}
+        formatRenderers={formatRenderers} jsonEditor={jsonEditor}
         jsonTextRoot={jsonTextFields}
       />
     );
@@ -429,6 +499,77 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
   );
 }
 
+// ── JSON validity, gathered at the outermost form ──────────────────────────
+
+// Each JSON editor in a form reports under its own id whether its text parses;
+// the outermost SchemaForm holds the ones that do not and tells its consumer.
+const JsonValidityContext = createContext<((id: string, valid: boolean) => void) | null>(null);
+
+/** Reports `error === null` to the form's gatherer while mounted, and valid when unmounted. */
+function useJsonValidity(error: string | null): void {
+  const report = useContext(JsonValidityContext);
+  const id = useId();
+  useEffect(() => {
+    report?.(id, error === null);
+  }, [report, id, error]);
+  useEffect(() => () => report?.(id, true), [report, id]);
+}
+
+/** Why a JSON text is not the value it should be, or null when it is. */
+function jsonProblem(text: string, fits: (parsed: unknown) => boolean, shape: string): { parsed: unknown; error: string | null } {
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    return fits(parsed) ? { parsed, error: null } : { parsed, error: `The JSON must be ${shape}.` };
+  } catch (error) {
+    return { parsed: undefined, error: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+function JsonError({ error }: { error: string | null }) {
+  return error === null ? null : <p className="oo-schema-form__json-error" role="alert">{error}</p>;
+}
+
+// ── The consumer's JSON editor ─────────────────────────────────────────────
+
+function JsonEditorBox({ editor: Editor, value, onChange }: { editor: JsonEditor; value: string; onChange: (text: string) => void }) {
+  return (
+    <div className="oo-schema-form__json-editor">
+      <Editor value={value} onChange={onChange} />
+    </div>
+  );
+}
+
+// A tuple array as JSON text. It holds the text it shows, so a draft that does
+// not parse stays on screen with its error instead of snapping back.
+function TupleJson({ items, onChange, jsonEditor }: { items: unknown[]; onChange: (next: unknown) => void; jsonEditor?: JsonEditor }) {
+  const shown = JSON.stringify(items, null, 2);
+  const [text, setText] = useState(shown);
+  const [error, setError] = useState<string | null>(null);
+  // The value this editor last sent; any other value came from outside, as a reset, and replaces the text.
+  const sent = useRef<string>(shown);
+  useEffect(() => {
+    if (shown === sent.current) return;
+    sent.current = shown;
+    setText(shown);
+    setError(null);
+  }, [shown]);
+  useJsonValidity(error);
+  const edit = (next: string): void => {
+    setText(next);
+    const problem = jsonProblem(next, Array.isArray, 'an array');
+    setError(problem.error);
+    if (problem.error !== null) return;
+    sent.current = JSON.stringify(problem.parsed, null, 2);
+    onChange(problem.parsed);
+  };
+  return (
+    <>
+      {jsonEditor ? <JsonEditorBox editor={jsonEditor} value={text} onChange={edit} /> : <TextField multiline rows={5} value={text} onChange={edit} />}
+      <JsonError error={error} />
+    </>
+  );
+}
+
 // ── Array repeater ──────────────────────────────────────────────────────────
 
 interface ArrayControlProps {
@@ -437,31 +578,16 @@ interface ArrayControlProps {
   onChange: (next: unknown) => void;
   namespace?: string;
   formatRenderers?: Record<string, FormatRenderer>;
+  jsonEditor?: JsonEditor;
   jsonTextFields?: boolean;
 }
 
-function ArrayControl({ field, value, onChange, namespace, formatRenderers, jsonTextFields }: ArrayControlProps) {
+function ArrayControl({ field, value, onChange, namespace, formatRenderers, jsonEditor, jsonTextFields }: ArrayControlProps) {
   const items = Array.isArray(value) ? value : [];
   const itemSchema = resolveArrayItemSchema(field);
 
   // Tuple arrays — edited as raw JSON.
-  if (!itemSchema) {
-    return (
-      <TextField
-        multiline
-        rows={5}
-        value={JSON.stringify(items, null, 2)}
-        onChange={(s) => {
-          try {
-            const parsed = JSON.parse(s) as unknown;
-            if (Array.isArray(parsed)) onChange(parsed);
-          } catch {
-            /* keep previous valid array */
-          }
-        }}
-      />
-    );
-  }
+  if (!itemSchema) return <TupleJson items={items} onChange={onChange} jsonEditor={jsonEditor} />;
 
   return (
     <div className="oo-schema-form__array">
@@ -473,7 +599,7 @@ function ArrayControl({ field, value, onChange, namespace, formatRenderers, json
               value={item}
               onChange={(next) => onChange(items.map((it, i) => (i === index ? next : it)))}
               namespace={namespace}
-              formatRenderers={formatRenderers}
+              formatRenderers={formatRenderers} jsonEditor={jsonEditor}
               jsonTextFields={jsonTextFields}
             />
           </div>
