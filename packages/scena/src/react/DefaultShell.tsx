@@ -21,7 +21,8 @@ export interface DefaultShellProps {
    */
   presentation?: PresentationPolicy;
   /**
-   * Clicking the scrim closes whatever is overlaying `main`.
+   * Clicking the scrim closes the top surface overlaying `main`, one per
+   * click: the right sidebar, then the bottom panel, then the left sidebar.
    *
    * On by default because a drawer that cannot be dismissed by tapping beside
    * it is a trap on the size of screen that produces drawers in the first
@@ -34,6 +35,10 @@ export interface DefaultShellProps {
 // them. `main`, the bars and the rail are never overlaid by this shell -- a
 // `bar` presentation keeps occupying its edge, so nothing covers anything.
 const OVERLAYABLE: SurfaceName[] = ['sidebar:left', 'sidebar:right', 'panel:bottom'];
+
+// The order the scrim closes them, one per click, the top one first: the right
+// sidebar is drawn over the bottom panel, and both over the left sidebar.
+const STACKED: SurfaceName[] = ['sidebar:right', 'panel:bottom', 'sidebar:left'];
 
 /**
  * Minimal flex shell.
@@ -111,9 +116,8 @@ export function DefaultShell({ presentation, dismissOnScrim = true }: DefaultShe
   ): CSSProperties | undefined => (docked ? style : undefined);
 
   function closeLifted(): void {
-    for (const surface of lifted) {
-      scena.layout.setSurface(surface, { ...surfaces[surface], visible: false });
-    }
+    const top = STACKED.find((surface) => lifted.includes(surface));
+    if (top !== undefined) scena.layout.setSurface(top, { ...surfaces[top], visible: false });
   }
 
   return (

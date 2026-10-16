@@ -71,7 +71,12 @@ export function SectionHeader({ title, icon, color, actions = [] }: SectionHeade
               title: label(a) || a.command,
               icon: a.icon,
               ...(a.active === undefined ? {} : { active: scena.when.evaluate(a.active) }),
+              // A button that opens a menu opens it here as a sub-list.
               onSelect: (h) => {
+                if (a.menu !== undefined) {
+                  h.pushList({ title: label(a) || a.command, query: { slot: a.menu } });
+                  return;
+                }
                 run(a.command);
                 h.closeMenu();
               },

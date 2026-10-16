@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach } from 'vitest';
-import { act, cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { SectionHeader } from '../../src/ui/layout/SectionHeader.js';
@@ -67,4 +67,18 @@ describe('SectionHeader actions', () => {
     const { button } = mount([{ command: 'x.new', label: 'New', icon: '+' }]);
     expect(button('New')!.hasAttribute('aria-pressed')).toBe(false);
   });
+
+  it('a button with a menu opens its slot under itself, and runs no command', async () => {
+    const { scena, ran, button } = mount([{ command: 'x.new', label: 'Group', icon: 'G', menu: 'x:group' }]);
+    scena.commands.register({ id: 'x.byFolder', title: 'By folder', slots: ['x:group'], run: () => void ran.push('x.byFolder') });
+    expect(button('Group')!.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(button('Group')!);
+    expect(button('Group')!.getAttribute('aria-expanded')).toBe('true');
+    expect(ran).toEqual([]);
+    fireEvent.click(await screen.findByText('By folder'));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+    expect(ran).toEqual(['x.byFolder']);
+    expect(button('Group')!.getAttribute('aria-expanded')).toBe('false');
+  });
 });
+

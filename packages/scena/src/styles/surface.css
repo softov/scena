@@ -10,9 +10,12 @@
  * ancestor, so the shell region that hosts them must set `position: relative`.
  * Widths come from custom properties so a shell can override per surface
  * without rewriting the rule.
+ *
+ * Declared at the root with no specificity: the shell body reads the bar size
+ * too (it leaves room for a bar), and an app's own `:root` value wins.
  */
 
-.oo-surface {
+:where(:root) {
   --oo-surface-float-width: 17rem;
   --oo-surface-sheet-height: 85%;
   --oo-surface-bar-size: 2.75rem;
@@ -204,6 +207,24 @@
   height: var(--oo-surface-bar-size);
   flex: none;
   background: var(--oo-color-surface, var(--oo-color-canvas));
+}
+
+/* A rail pinned to the bottom edge takes that edge: the body leaves room for it,
+ * so main and the overlaid surfaces end above it instead of behind it. The bar
+ * keeps bottom: 0, which lands in that room. */
+.oo-shell__body:has(> .oo-surface[data-presentation='bar']) {
+  padding-bottom: var(--oo-surface-bar-size);
+}
+
+.oo-shell__body:has(> .oo-surface[data-presentation='bar']) > .oo-surface[data-presentation='floating'],
+.oo-shell__body:has(> .oo-surface[data-presentation='bar']) > .oo-surface[data-presentation='sheet'] {
+  bottom: var(--oo-surface-bar-size);
+}
+
+/* A sheet's height is a share of the body with that room in it; a tall one
+ * (an app's 100%) would otherwise reach above the body's top. */
+.oo-shell__body:has(> .oo-surface[data-presentation='bar']) > .oo-surface[data-presentation='sheet'] {
+  max-height: calc(100% - var(--oo-surface-bar-size));
 }
 
 /* The scrim a shell renders behind any overlaid surface. Sits below the

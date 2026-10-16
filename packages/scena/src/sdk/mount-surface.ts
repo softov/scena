@@ -88,6 +88,10 @@ export interface MountAction {
   active?: WhenClause;
   // Drawn busy and disabled while it holds (a reload in flight). Watched like `when`.
   busy?: WhenClause;
+  // A command slot: a press opens its commands as a menu under the button
+  // instead of running `command` (a "Group by" choice). `command` still names
+  // the action where a menu cannot open, such as the header's [⋯] list.
+  menu?: string;
 }
 
 export interface MountDeclaration<TResource extends MountTarget = MountTarget> {

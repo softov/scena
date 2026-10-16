@@ -5,6 +5,11 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { ActivityBarItem } from '../../src/ui/navigation/ActivityBarItem.js';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+const itemCss = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../src/ui/navigation/ActivityBarItem.css'), 'utf8');
 
 const SECTION_PATH = '$/layout/surfaces/sidebar:left/section';
 
@@ -24,6 +29,14 @@ describe('ActivityBarItem', () => {
     mount(scena, <ActivityBarItem icon="N" label="Notes" section="notes" />);
     expect(screen.getByRole('button').getAttribute('data-active')).toBe('true');
     expect(screen.getByRole('button').getAttribute('aria-current')).toBe('true');
+  });
+
+  it('is not active while its sidebar is closed, though its section is the one set', () => {
+    const scena = createScena();
+    scena.layout.setSurface('sidebar:left', { section: 'notes', visible: false });
+
+    mount(scena, <ActivityBarItem icon="N" label="Notes" section="notes" />);
+    expect(screen.getByRole('button').getAttribute('data-active')).toBe('false');
   });
 
   it('is not active for a different section', () => {
@@ -235,5 +248,11 @@ describe('ActivityBarItem', () => {
     expect(baseElement.querySelectorAll('.oo-action-list__divider').length).toBe(1);
     expect(baseElement.querySelector('.oo-action-list__group-label')).toBeNull();
     expect(item).not.toHaveBeenCalled();
+  });
+
+  // jsdom does no layout, so the rule itself is what can be checked.
+  it('marks the open item on its bottom edge in a rail laid out as a bar', () => {
+    expect(itemCss).toMatch(/\.oo-layout--rail\[data-orientation='horizontal'\] \.oo-activity-item \{\s*border-inline-start: 0;\s*border-block-end: 2px solid transparent;/);
+    expect(itemCss).toMatch(/\.oo-layout--rail\[data-orientation='horizontal'\] \.oo-activity-item\[data-active='true'\] \{\s*border-block-end-color: var\(--oo-color-accent\);/);
   });
 });

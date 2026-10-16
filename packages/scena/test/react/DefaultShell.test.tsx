@@ -7,6 +7,11 @@ import { createModusBackend } from '../../src/core/store/backends/modus-backend.
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { DefaultShell } from '../../src/react/DefaultShell.js';
 import type { PresentationPolicy } from '../../src/core/graph/surface-presentation.js';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+const surfaceCss = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../src/styles/surface.css'), 'utf8');
 
 const tick = () => new Promise<void>((r) => setTimeout(r, 0));
 
@@ -101,17 +106,22 @@ describe('DefaultShell', () => {
       expect(scrim?.getAttribute('aria-label')).toBe('Close');
     });
 
-    it('closes what is lifted, and nothing else', async () => {
+    it('closes one lifted surface per click, the top one first, and nothing else', async () => {
       const scena = mk('small');
       scena.layout.setSurface('sidebar:right', { visible: true });
       await tick();
       const { container } = mount(scena, <DefaultShell presentation={POLICY} />);
 
+      // The right sidebar is drawn over the left one, so it goes first.
       fireEvent.click(container.querySelector('.oo-surface-scrim')!);
       await tick();
-
-      expect(scena.layout.get().surfaces['sidebar:left']?.visible).toBe(false);
       expect(scena.layout.get().surfaces['sidebar:right']?.visible).toBe(false);
+      expect(scena.layout.get().surfaces['sidebar:left']?.visible).not.toBe(false);
+
+      fireEvent.click(container.querySelector('.oo-surface-scrim')!);
+      await tick();
+      expect(scena.layout.get().surfaces['sidebar:left']?.visible).toBe(false);
+      expect(container.querySelector('.oo-surface-scrim')).toBeNull();
       // `main` and the bars are never lifted, so the scrim must not touch them.
       expect(scena.layout.get().surfaces.main?.visible).toBe(true);
       expect(scena.layout.get().surfaces.statusbar?.visible).toBe(true);
@@ -129,6 +139,16 @@ describe('DefaultShell', () => {
       expect(scrim).not.toBeNull();
       // A focusable control that does nothing is worse than none.
       expect(scrim?.tagName).toBe('DIV');
+    });
+  });
+
+  describe('a rail pinned to the bottom as a bar', () => {
+    // jsdom does no layout, so the rule itself is what can be checked.
+    it('takes its edge: the body leaves room, and overlaid surfaces end above it', () => {
+      const room = /\.oo-shell__body:has\(> \.oo-surface\[data-presentation='bar'\]\) \{\s*padding-bottom: var\(--oo-surface-bar-size\);/;
+      expect(surfaceCss).toMatch(room);
+      expect(surfaceCss).toMatch(/\[data-presentation='sheet'\] \{\s*bottom: var\(--oo-surface-bar-size\);/);
+      expect(surfaceCss).toMatch(/max-height: calc\(100% - var\(--oo-surface-bar-size\)\);/);
     });
   });
 

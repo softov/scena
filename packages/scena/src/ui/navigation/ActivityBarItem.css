@@ -37,6 +37,17 @@
   border-inline-start-color: var(--oo-color-accent);
 }
 
+/* A rail laid out as a bar (pinned to the bottom edge on a narrow window)
+ * marks the open item on its bottom edge, as a tab bar does, not on the side. */
+.oo-layout--rail[data-orientation='horizontal'] .oo-activity-item {
+  border-inline-start: 0;
+  border-block-end: 2px solid transparent;
+}
+
+.oo-layout--rail[data-orientation='horizontal'] .oo-activity-item[data-active='true'] {
+  border-block-end-color: var(--oo-color-accent);
+}
+
 /* The rail layout stacks these; `bottom` pushes an entry to the far end. */
 .oo-activity-item[data-pos='bottom'] {
   margin-block-start: auto;

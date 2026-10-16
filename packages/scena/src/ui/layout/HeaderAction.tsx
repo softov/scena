@@ -1,8 +1,9 @@
-import { type CSSProperties, type ReactNode, useEffect, useState } from 'react';
+import { type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode, useEffect, useState } from 'react';
 import type { MountAction } from '../../sdk/mount-surface.js';
 import type { Scena } from '../../sdk/scena.js';
 import type { WhenClause } from '../../sdk/when.js';
 import { useScena } from '../../react/ScenaProvider.js';
+import { ContextMenu } from '../menu/ContextMenu.js';
 import './HeaderAction.css';
 
 // A button in a layout header: a section's (SectionHeader) or a stacked pane's
@@ -42,20 +43,38 @@ export function HeaderAction({ action, text, run }: { action: MountAction; text:
   const visible = useClause(action.when, true);
   const active = useClause(action.active, false);
   const busy = useClause(action.busy, false);
+  const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null);
   if (!visible) return null;
+
+  function press(e: ReactMouseEvent<HTMLButtonElement>): void {
+    if (action.menu === undefined) {
+      run(action.command);
+      return;
+    }
+    // Under the button, from its left edge; the popup keeps itself on screen.
+    const r = e.currentTarget.getBoundingClientRect();
+    setMenuAt({ x: r.left, y: r.bottom + 2 });
+  }
+
   return (
-    <button
-      className="oo-btn oo-btn--icon oo-header-action"
-      data-variant="ghost"
-      type="button"
-      title={text}
-      aria-label={text}
-      {...(action.active === undefined ? {} : { 'aria-pressed': active, 'data-active': active ? 'true' : undefined })}
-      data-busy={busy ? 'true' : undefined}
-      disabled={busy}
-      onClick={() => run(action.command)}
-      style={iconBtn}>
-      <span className="oo-header-action__icon">{action.icon ?? text ?? '•'}</span>
-    </button>
+    <>
+      <button
+        className="oo-btn oo-btn--icon oo-header-action"
+        data-variant="ghost"
+        type="button"
+        title={text}
+        aria-label={text}
+        {...(action.active === undefined ? {} : { 'aria-pressed': active, 'data-active': active ? 'true' : undefined })}
+        data-busy={busy ? 'true' : undefined}
+        disabled={busy}
+        {...(action.menu === undefined ? {} : { 'aria-haspopup': 'menu' as const, 'aria-expanded': menuAt !== null })}
+        onClick={press}
+        style={iconBtn}>
+        <span className="oo-header-action__icon">{action.icon ?? text ?? '•'}</span>
+      </button>
+      {action.menu !== undefined && menuAt !== null ? (
+        <ContextMenu x={menuAt.x} y={menuAt.y} onClose={() => setMenuAt(null)} spec={{ query: { slot: action.menu } }} />
+      ) : null}
+    </>
   );
 }

@@ -122,7 +122,10 @@ export function ActivityBarItem({
   const scena = useScena();
   const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null);
   const activeSection = useStore<string | undefined>(sectionPath);
-  const active = section !== undefined && activeSection === section;
+  // The section is its surface's layout state, beside its visibility: a section
+  // behind a closed sidebar is not what is showing, so the item is not active.
+  const surfaceVisible = useStore<boolean | undefined>(sectionPath.replace(/\/section$/, '/visible') as BindingPath);
+  const active = section !== undefined && activeSection === section && surfaceVisible !== false;
 
   const hasBadge = shown(badge);
   const hasSecondBadge = shown(secondBadge);
