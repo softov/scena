@@ -70,12 +70,17 @@ export interface MountDisplay {
   actions?: MountAction[];
 }
 
-// A button in a section header — e.g. an explorer's "New" / "Refresh".
+// A button in a section header - e.g. an explorer's "New" / "Refresh".
 export interface MountAction {
   command: string;
   label?: Label; // string | { path } | { t }
   icon?: string;
+  // Shown only while it holds; watched, so the button comes and goes with the store.
   when?: WhenClause;
+  // Drawn pressed while it holds (a toggle: "Show archived"). Watched like `when`.
+  active?: WhenClause;
+  // Drawn busy and disabled while it holds (a reload in flight). Watched like `when`.
+  busy?: WhenClause;
 }
 
 export interface MountDeclaration<TResource extends MountTarget = MountTarget> {

@@ -102,7 +102,7 @@ describe('ActionList group labels', () => {
         <ActionList spec={grouped} hostCtx={host} manageKeys={false} />
       </ScenaProvider>,
     );
-    const labels = [...container.querySelectorAll('.oo-action-list__group-label')].map((el) => el.textContent);
+    const labels = Array.from(container.querySelectorAll('.oo-action-list__group-label'), (el) => el.textContent);
     expect(labels).toEqual(['Exibir', 'Panel']);
   });
 });
