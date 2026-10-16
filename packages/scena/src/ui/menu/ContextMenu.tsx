@@ -88,7 +88,7 @@ export function ContextMenu({
     },
     back: () => setStack((cur) => (cur.length > 1 ? cur.slice(0, -1) : cur)),
     closeMenu: onClose,
-    keepOpen: () => undefined, // ContextMenu defaults to closing on dispatch; toggles override via run not running close
+    keepOpen: () => undefined, // ActionList closes after a choice unless it calls this
     insertAtCursor: () => undefined, // right-click context has no text input
     replaceActiveToken: () => undefined,
     query: '',

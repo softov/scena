@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -106,3 +106,67 @@ describe('ActionList group labels', () => {
     expect(labels).toEqual(['Exibir', 'Panel']);
   });
 });
+
+describe('ActionList closes after a choice unless the choice decides', () => {
+  function pick(items: ListSpec['items'] | ListSpec, setup?: (scena: ReturnType<typeof createScena>) => void) {
+    const scena = createScena();
+    setup?.(scena);
+    const closeMenu = vi.fn();
+    const replaceActiveToken = vi.fn();
+    const view = render(
+      <ScenaProvider scena={scena}>
+        <ActionList spec={Array.isArray(items) ? { items } : items} hostCtx={{ ...host, closeMenu, replaceActiveToken }} manageKeys={false} />
+      </ScenaProvider>,
+    );
+    return { view, closeMenu, replaceActiveToken };
+  }
+  const settle = () => act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+
+  it('a choice that says nothing closes the menu once it is done', async () => {
+    const ran = vi.fn();
+    const { view, closeMenu } = pick([{ title: 'Toggle', onSelect: ran }]);
+    fireEvent.click(view.getByText('Toggle'));
+    await settle();
+    expect(ran).toHaveBeenCalled();
+    expect(closeMenu).toHaveBeenCalledTimes(1);
+  });
+
+  it('a command run from the menu that knows nothing of menus closes it too', async () => {
+    const run = vi.fn();
+    const { view, closeMenu } = pick([{ commandId: 'x.toggle' }], (scena) => {
+      scena.commands.register({ id: 'x.toggle', title: 'Toggle sidebar', run });
+    });
+    fireEvent.click(await view.findByText('Toggle sidebar'));
+    await settle();
+    expect(run).toHaveBeenCalled();
+    expect(closeMenu).toHaveBeenCalledTimes(1);
+  });
+
+  it('keepOpen, a sub-list, a token replaced or the row closing itself leave it to the row', async () => {
+    const { view, closeMenu } = pick([
+      { title: 'Stay', onSelect: (h) => h.keepOpen() },
+      { title: 'Deeper', onSelect: (h) => h.pushList({ items: [] }) },
+      { title: 'Folder', onSelect: (h) => h.replaceActiveToken('@src/') },
+      { title: 'Done', onSelect: (h) => h.closeMenu() },
+    ]);
+    for (const title of ['Stay', 'Deeper', 'Folder']) {
+      fireEvent.click(view.getByText(title));
+      await settle();
+    }
+    expect(closeMenu).not.toHaveBeenCalled();
+    fireEvent.click(view.getByText('Done'));
+    await settle();
+    expect(closeMenu).toHaveBeenCalledTimes(1);
+  });
+
+  it("completing a command's shortcut is ActionList's own step, not the command's decision", async () => {
+    const { view, closeMenu, replaceActiveToken } = pick({ query: { slot: 'x:chat' } }, (scena) => {
+      scena.commands.register({ id: 'x.clear', title: 'Clear', shortcut: '/clear', slots: ['x:chat'], run: () => undefined });
+    });
+    fireEvent.click(await view.findByText('Clear'));
+    await settle();
+    expect(replaceActiveToken).toHaveBeenCalledWith('/clear');
+    expect(closeMenu).toHaveBeenCalledTimes(1);
+  });
+});
+

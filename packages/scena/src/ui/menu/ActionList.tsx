@@ -45,6 +45,8 @@ interface Row {
   // Bound dispatcher — called when the row is selected. Captures the
   // command ref or synthetic closure once at resolve time.
   invoke: (host: HostCtx) => void | Promise<void>;
+  // A command's shortcut, typed over the active token before it runs (see `choose`).
+  autocomplete?: string;
 }
 
 // Debounce (ms) for async provider re-resolves while results are already on
@@ -139,18 +141,13 @@ export function ActionList({
         category: c.category,
         active,
         disabled,
+        ...(canonicalShortcut(c.shortcut) ? { autocomplete: canonicalShortcut(c.shortcut) } : {}),
         invoke: (host) => {
-          // Autocomplete the typed token to the command's canonical shortcut
-          // (e.g. '/mod' → '/model') so the input matches the submenu it opens
-          // and the picker's sentinel keeps the submenu open. No-op on hosts
-          // without a text input (context menus stub replaceActiveToken).
-          const sc = canonicalShortcut(c.shortcut);
-          if (sc) host.replaceActiveToken(sc);
-          void scena.commands.execute(c.id, undefined, {
+          return scena.commands.execute(c.id, undefined, {
             source: 'menu',
             dataContext,
             host,
-          });
+          }).then(() => undefined);
         },
       };
     });
@@ -170,16 +167,16 @@ export function ActionList({
         }
         const row = rowsFromCommands([cmd])[0]!;
         const args = a.args;
+        const { autocomplete: _autocomplete, ...plain } = row;
         return {
-          ...row,
+          ...plain,
           key: `cmd:${a.commandId}:${i}`,
-          invoke: (host) => {
-            void scena.commands.execute(cmd.id, args, {
+          invoke: (host) =>
+            scena.commands.execute(cmd.id, args, {
               source: 'menu',
               dataContext,
               host,
-            });
-          },
+            }).then(() => undefined),
         };
       }
       return {
@@ -323,6 +320,41 @@ export function ActionList({
     };
   }, [spec, hostCtx, rowsFromActions, rowsFromCommands, scena]);
 
+  // A choice closes the picker once it is done, unless it said what comes next:
+  // a sub-list (push, replace, inline, popover), a step back, text put in the
+  // input, closing itself, or keepOpen (a toggle in a list of toggles). So a
+  // command that knows nothing of menus, run from one, still closes it.
+  const choose = useCallback(async (row: Row): Promise<void> => {
+    let decided = false;
+    const decide = <A extends unknown[]>(fn: (...args: A) => void) => (...args: A): void => {
+      decided = true;
+      fn(...args);
+    };
+    const tracked: HostCtx = {
+      pushList: decide(hostCtx.pushList),
+      replaceList: decide(hostCtx.replaceList),
+      openInline: decide(hostCtx.openInline),
+      openPopover: decide(hostCtx.openPopover),
+      back: decide(hostCtx.back),
+      closeMenu: decide(hostCtx.closeMenu),
+      keepOpen: decide(hostCtx.keepOpen),
+      insertAtCursor: decide(hostCtx.insertAtCursor),
+      // A row walking into a folder or completing a mention keeps the list on the token.
+      replaceActiveToken: decide(hostCtx.replaceActiveToken),
+      query: hostCtx.query,
+    };
+    // Autocomplete the typed token to the command's canonical shortcut
+    // (e.g. '/mod' → '/model') so the input matches the submenu it opens and
+    // the picker's sentinel keeps the submenu open. ActionList's own step, so
+    // not the row's decision; a no-op on hosts without a text input.
+    if (row.autocomplete) hostCtx.replaceActiveToken(row.autocomplete);
+    try {
+      await row.invoke(tracked);
+    } finally {
+      if (!decided) hostCtx.closeMenu();
+    }
+  }, [hostCtx]);
+
   // Flat list of selectable rows (skip group headers and disabled rows).
   const interactiveRows = useMemo(() => {
     if (resolved.kind !== 'ready') return [];
@@ -385,7 +417,7 @@ export function ActionList({
     if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       const row = interactiveRows[selected];
-      if (row) void row.invoke(hostCtx);
+      if (row) void choose(row);
       return true;
     }
     if (e.key === 'Escape') {
@@ -399,7 +431,7 @@ export function ActionList({
       return true;
     }
     return false;
-  }, [interactiveRows, selected, hostCtx, onBack]);
+  }, [interactiveRows, selected, hostCtx, choose, onBack]);
 
   // Document-level key listener for popup hosts (ContextMenu). Chat hosts
   // disable it via `manageKeys: false` and route keys through the
@@ -455,7 +487,7 @@ export function ActionList({
         data-selected={isSelected ? 'true' : undefined}
         style={inlineStyle}
         onMouseEnter={() => { if (isInteractive) setSelected(capturedIndex); }}
-        onClick={() => { if (isInteractive) void row.invoke(hostCtx); }}
+        onClick={() => { if (isInteractive) void choose(row); }}
       >
         <span className="oo-icon">{row.icon ?? '·'}</span>
         {rich ? (

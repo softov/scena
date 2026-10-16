@@ -33,10 +33,12 @@ export interface HostCtx {
   // Pop one stack level (back button or ←).
   back(): void;
 
-  // Close the entire picker.
+  // Close the entire picker. A choice that says nothing closes it anyway
+  // (see ActionList's `choose`), so a row needs this only to close early.
   closeMenu(): void;
 
-  // For toggle commands — don't auto-close after run.
+  // Stay open after this choice (a toggle in a list of toggles). Without it, or
+  // a push, replace, back or insert, the picker closes once the choice is done.
   keepOpen(): void;
 
   // Text-input helpers. No-op when the host has no input (right-click menus).
