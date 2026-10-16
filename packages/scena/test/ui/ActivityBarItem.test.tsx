@@ -216,4 +216,24 @@ describe('ActivityBarItem', () => {
     expect(() => fireEvent.click(screen.getByRole('button'))).not.toThrow();
     expect(scena.store.get(SECTION_PATH as never)).toBeUndefined();
   });
+
+  it('with a menu, opens its slot as a menu, parted by category with no group labels, and runs no command', async () => {
+    const scena = createScena();
+    const run = vi.fn();
+    scena.commands.register({ id: 'x.language', title: 'Language', slots: ['x:manage'], run });
+    scena.commands.register({ id: 'x.logout', title: 'Logout', category: 'account', slots: ['x:manage'], run });
+    const item = vi.fn();
+    scena.commands.register({ id: 'x.item', title: 'Item', run: item });
+
+    const { baseElement } = mount(scena, <ActivityBarItem icon="M" label="Manage" menu="x:manage" command="x.item" />);
+    const button = screen.getByRole('button', { name: 'Manage' });
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(button);
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    expect(await screen.findByText('Language')).toBeTruthy();
+    expect(screen.getByText('Logout')).toBeTruthy();
+    expect(baseElement.querySelectorAll('.oo-action-list__divider').length).toBe(1);
+    expect(baseElement.querySelector('.oo-action-list__group-label')).toBeNull();
+    expect(item).not.toHaveBeenCalled();
+  });
 });

@@ -125,6 +125,10 @@ export interface ListSpec {
   // Optional category-order override for grouping. Defaults to insertion order.
   groupOrder?: string[];
 
+  // false: groups are parted by a line alone, unlabelled, as an app menu draws
+  // them (VS Code's Manage menu). Defaults to true, a label over each group.
+  groupLabels?: boolean;
+
   // Optional title shown above the items (for back button label when this
   // frame is mid-stack).
   title?: string;

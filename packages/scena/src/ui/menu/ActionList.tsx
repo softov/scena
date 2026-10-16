@@ -499,7 +499,7 @@ export function ActionList({
         {grouped.map((group, gi) => (
           <div key={group.label ?? `__g${gi}`}>
             {gi > 0 ? <div className="oo-action-list__divider" /> : null}
-            {group.label ? (
+            {group.label && spec.groupLabels !== false ? (
               <div className="oo-action-list__group-label">{translate(`groups/${group.label}`, group.label)}</div>
             ) : null}
             {group.rows.map(renderRow)}

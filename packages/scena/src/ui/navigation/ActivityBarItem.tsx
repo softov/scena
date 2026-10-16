@@ -1,5 +1,6 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode, useState } from 'react';
 import { useScena } from '../../react/ScenaProvider.js';
+import { ContextMenu } from '../menu/ContextMenu.js';
 import { useStore } from '../../react/hooks/useStore.js';
 import type { BindingPath } from '../../sdk/component-graph.js';
 import './ActivityBarItem.css';
@@ -56,6 +57,9 @@ export interface ActivityBarItemProps {
   // and the section still activates.
   command?: string;
   args?: Record<string, unknown>;
+  // A command slot: clicking opens its commands as a menu beside the item
+  // instead (VS Code's Manage gear). Their categories part it into groups.
+  menu?: string;
   onClick?: () => void;
   className?: string;
   style?: CSSProperties;
@@ -110,11 +114,13 @@ export function ActivityBarItem({
   secondBadgeLabel,
   command,
   args,
+  menu,
   onClick,
   className,
   style,
 }: ActivityBarItemProps): ReactNode {
   const scena = useScena();
+  const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null);
   const activeSection = useStore<string | undefined>(sectionPath);
   const active = section !== undefined && activeSection === section;
 
@@ -133,7 +139,13 @@ export function ActivityBarItem({
   const name = label ?? section ?? '';
   const described = counts.length === 0 ? label : `${name}: ${counts.join(', ')}`;
 
-  function handleClick(): void {
+  function handleClick(e: ReactMouseEvent<HTMLButtonElement>): void {
+    if (menu) {
+      // Beside the rail, level with the item; the popup keeps itself on screen.
+      const r = e.currentTarget.getBoundingClientRect();
+      setMenuAt({ x: r.right + 2, y: r.top });
+      return;
+    }
     if (onClick) {
       onClick();
       return;
@@ -145,35 +157,47 @@ export function ActivityBarItem({
   }
 
   return (
-    <button
-      type="button"
-      className={['oo-activity-item', className].filter(Boolean).join(' ')}
-      style={style}
-      data-active={active}
-      data-pos={pos}
-      title={described}
-      aria-label={described}
-      aria-current={active ? 'true' : undefined}
-      onClick={handleClick}
-    >
-      <span className="oo-activity-item__icon" aria-hidden="true">
-        {icon ?? '·'}
-      </span>
-      {hasBadge ? (
-        <span className="oo-activity-item__badge" data-tone={badgeTone} aria-hidden="true">
-          {clamp(badge!)}
+    <>
+      <button
+        type="button"
+        className={['oo-activity-item', className].filter(Boolean).join(' ')}
+        style={style}
+        data-active={active}
+        data-pos={pos}
+        title={described}
+        aria-label={described}
+        aria-current={active ? 'true' : undefined}
+        aria-haspopup={menu ? 'menu' : undefined}
+        aria-expanded={menu ? menuAt !== null : undefined}
+        onClick={handleClick}
+      >
+        <span className="oo-activity-item__icon" aria-hidden="true">
+          {icon ?? '·'}
         </span>
+        {hasBadge ? (
+          <span className="oo-activity-item__badge" data-tone={badgeTone} aria-hidden="true">
+            {clamp(badge!)}
+          </span>
+        ) : null}
+        {hasSecondBadge ? (
+          <span
+            className="oo-activity-item__badge oo-activity-item__badge--second"
+            data-tone={secondBadgeTone}
+            aria-hidden="true"
+          >
+            {clamp(secondBadge!)}
+          </span>
+        ) : null}
+      </button>
+      {menu && menuAt ? (
+        <ContextMenu
+          x={menuAt.x}
+          y={menuAt.y}
+          onClose={() => setMenuAt(null)}
+          spec={{ query: { slot: menu }, groupLabels: false }}
+        />
       ) : null}
-      {hasSecondBadge ? (
-        <span
-          className="oo-activity-item__badge oo-activity-item__badge--second"
-          data-tone={secondBadgeTone}
-          aria-hidden="true"
-        >
-          {clamp(secondBadge!)}
-        </span>
-      ) : null}
-    </button>
+    </>
   );
 }
 
