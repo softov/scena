@@ -8,7 +8,7 @@ import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { ActionList } from '../../src/ui/menu/ActionList.js';
 import { clearMessages, registerMessages, setLocale } from '../../src/core/i18n/registry.js';
-import type { HostCtx, ListSpec } from '../../src/sdk/host.js';
+import type { HostCtx, ListSpec, PickerAction } from '../../src/sdk/host.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const css = (path: string): string => readFileSync(resolve(here, path), 'utf8');
@@ -108,7 +108,7 @@ describe('ActionList group labels', () => {
 });
 
 describe('ActionList closes after a choice unless the choice decides', () => {
-  function pick(items: ListSpec['items'] | ListSpec, setup?: (scena: ReturnType<typeof createScena>) => void) {
+  function pick(items: PickerAction[] | ListSpec, setup?: (scena: ReturnType<typeof createScena>) => void) {
     const scena = createScena();
     setup?.(scena);
     const closeMenu = vi.fn();
