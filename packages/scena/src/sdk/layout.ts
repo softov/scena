@@ -147,6 +147,9 @@ export interface SurfaceLayoutState {
       color?: string;
     };
     hidden?: string[];
+    // Pane heights in px by mount key, written by a divider drag. Read as
+    // weights, so the panes keep their proportions when the surface resizes.
+    sizes?: Record<string, number>;
   };
 }
 

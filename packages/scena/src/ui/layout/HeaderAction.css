@@ -1,25 +1,25 @@
 /* Header buttons: transparent until pressed, so a toggle shows its state. */
-.oo-section-header__action {
+.oo-header-action {
   background: transparent;
 }
 
-.oo-section-header__action[data-active='true'] {
+.oo-header-action[data-active='true'] {
   background: var(--oo-color-active);
   color: var(--oo-color-accent);
 }
 
-.oo-section-header__action-icon {
+.oo-header-action__icon {
   display: inline-block;
 }
 
 /* A reload in flight: the icon turns, the button waits. */
-.oo-section-header__action[data-busy='true'] {
+.oo-header-action[data-busy='true'] {
   color: var(--oo-color-accent);
   cursor: progress;
   opacity: 1;
 }
 
-.oo-section-header__action[data-busy='true'] .oo-section-header__action-icon {
+.oo-header-action[data-busy='true'] .oo-header-action__icon {
   animation: oo-spin 0.9s linear infinite;
 }
 
@@ -28,7 +28,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .oo-section-header__action[data-busy='true'] .oo-section-header__action-icon {
+  .oo-header-action[data-busy='true'] .oo-header-action__icon {
     animation: none;
   }
 }

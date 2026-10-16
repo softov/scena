@@ -52,6 +52,13 @@ export interface MountPolicy {
   persistent?: boolean;
   transient?: boolean;
   customizable?: boolean;
+  // false: a layout draws no close for it. A pane an app declares for a section
+  // (an explorer's Open Editors) is part of the section, not a page to close.
+  closable?: boolean;
+  // true: a stack pane takes the height of its content, up to half the stack,
+  // instead of an equal share (an Open Editors list with one row). A divider
+  // drag gives it a size of its own like any pane.
+  fitContent?: boolean;
 }
 
 // Display metadata for a mount — used by layouts (TabLayout, TabPanelLayout,

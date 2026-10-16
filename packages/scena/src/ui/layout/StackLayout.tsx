@@ -3,6 +3,8 @@ import {
   type DragEvent as ReactDragEvent,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
+  Fragment,
+  useRef,
   useState,
 } from 'react';
 import type { LayoutProps } from '../../sdk/layout.js';
@@ -11,13 +13,20 @@ import { ContextMenu } from '../menu/ContextMenu.js';
 import { StackHeader } from './StackHeader.js';
 import { MountTitle } from './MountTitle.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
+import { Divisor } from '../display/Divisor.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
+import { HeaderAction } from './HeaderAction.js';
+import { resolveLabel } from '../../sdk/label.js';
+import { translate } from '../../core/i18n/registry.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 
 // Vertical stack of mounts, each with a header that toggles collapsed.
 // Headers are draggable for reorder (HTML5 DnD). Used primarily for
 // sidebar:right multi-section panels.
 
 const DRAG_MIME = 'application/x-scena-stack-index';
+// The least a divider drag leaves a pane: its header and a row or so.
+const MIN_PANE_PX = 48;
 
 export function StackLayout({
   surface,
@@ -50,6 +59,43 @@ export function StackLayout({
 
   const collapsed = new Set(state.split?.collapsed ?? []);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef(new Map<string, HTMLDivElement>());
+
+  // Sized once a divider was dragged with every open pane showing. A pane
+  // opened or shown since has no size, and the stack falls back to shares.
+  const open = orderedMounts.filter((m) => !collapsed.has(m.key));
+  const sizes = state.stack?.sizes ?? {};
+  const sized = open.length > 0 && open.every((m) => (sizes[m.key] ?? 0) > 0);
+
+  // A divider between `upper` and `lower` was dropped at `ratio` of the stack.
+  // Every open pane keeps the height it shows now; the two either side split
+  // their joint height at the cursor.
+  function onDividerCommit(ratio: number, upper: string, lower: string): void {
+    const box = containerRef.current?.getBoundingClientRect();
+    const top = sectionRefs.current.get(upper)?.getBoundingClientRect();
+    const bottom = sectionRefs.current.get(lower)?.getBoundingClientRect();
+    if (!box || !top || !bottom) return;
+    const next: Record<string, number> = { ...sizes };
+    for (const m of open) {
+      const height = sectionRefs.current.get(m.key)?.getBoundingClientRect().height ?? 0;
+      next[m.key] = Math.max(height, MIN_PANE_PX);
+    }
+    const joint = top.height + bottom.height;
+    if (joint < 2 * MIN_PANE_PX) return;
+    const cursor = box.top + ratio * box.height;
+    const upperHeight = Math.min(Math.max(cursor - top.top, MIN_PANE_PX), joint - MIN_PANE_PX);
+    next[upper] = upperHeight;
+    next[lower] = joint - upperHeight;
+    setState({ stack: { ...state.stack, sizes: next } });
+  }
+
+  function paneFlex(mount: (typeof mounts)[number], isCollapsed: boolean): CSSProperties {
+    if (isCollapsed) return { flex: '0 0 auto' };
+    if (sized) return { flex: `${sizes[mount.key]} 1 0px` };
+    if (mount.policy.fitContent) return { flex: '0 1 auto', maxHeight: '50%' };
+    return { flex: '1 1 0px' };
+  }
 
   function toggleCollapsed(key: string): void {
     const next = new Set(collapsed);
@@ -131,6 +177,7 @@ export function StackLayout({
 
   return (
     <div
+      ref={containerRef}
       className="oo-layout oo-layout--stack"
       style={containerStyle}
       onContextMenu={onBgContextMenu}
@@ -149,70 +196,108 @@ export function StackLayout({
         // Per-field merge: mount.props ?? component.props ?? key.
         const compProps = scena.components.get(mount.component.component)?.props;
         const color = mount.props?.color ?? compProps?.color;
+        // A pane's buttons, as a section header draws them: mount.props ?? component.props.
+        const actions = mount.props?.actions ?? compProps?.actions ?? [];
+        // A divider only between two open panes; the line under a folded one stays a border.
+        const below = orderedMounts[idx + 1];
+        const divided = !isCollapsed && below !== undefined && !collapsed.has(below.key);
+        const fits = !sized && !isCollapsed && mount.policy.fitContent === true;
         return (
-          <div
-            key={mount.key}
-            className="oo-stack-section"
-            data-collapsed={isCollapsed}
-            data-drag-over={dragOverIdx === idx}
-            data-color={color}
-            style={{
-              flex: isCollapsed ? '0 0 auto' : 1,
-              minHeight: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              borderBottom: '1px solid var(--oo-color-border)',
-            }}
-          >
+          <Fragment key={mount.key}>
             <div
-              className="oo-stack-header"
-              draggable
-              onDragStart={(e) => onHeaderDragStart(e, idx)}
-              onDragOver={(e) => onHeaderDragOver(e, idx)}
-              onDragLeave={onHeaderDragLeave}
-              onDrop={(e) => onHeaderDrop(e, idx)}
-              onClick={() => toggleCollapsed(mount.key)}
-              onContextMenu={(e) => onSectionContextMenu(e, mount.key, idx)}
+              ref={(el) => {
+                if (el) sectionRefs.current.set(mount.key, el);
+                else sectionRefs.current.delete(mount.key);
+              }}
+              className="oo-stack-section"
+              data-collapsed={isCollapsed}
+              data-drag-over={dragOverIdx === idx}
+              data-color={color}
               style={{
-                cursor: 'grab',
-                padding:
-                  'var(--oo-spacing-xs) var(--oo-spacing-sm)',
-                background: 'var(--oo-color-surface)',
-                fontSize: 'var(--oo-font-size-xs)',
-                textTransform: 'uppercase',
-                color: 'var(--oo-color-muted)',
+                ...paneFlex(mount, isCollapsed),
+                minHeight: 0,
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                userSelect: 'none',
+                flexDirection: 'column',
+                borderBottom: divided ? undefined : '1px solid var(--oo-color-border)',
               }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <span aria-hidden>{isCollapsed ? '▶' : '▼'}</span>
-                <MountTitle
-                  mount={mount}
-                  fallback={mount.key}
-                  iconClassName="oo-stack-section__icon"
-                  titleClassName="oo-stack-section__title"
-                />
-              </span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClose(mount.key);
+              <div
+                className="oo-stack-header"
+                draggable
+                onDragStart={(e) => onHeaderDragStart(e, idx)}
+                onDragOver={(e) => onHeaderDragOver(e, idx)}
+                onDragLeave={onHeaderDragLeave}
+                onDrop={(e) => onHeaderDrop(e, idx)}
+                onClick={() => toggleCollapsed(mount.key)}
+                onContextMenu={(e) => onSectionContextMenu(e, mount.key, idx)}
+                style={{
+                  cursor: 'grab',
+                  padding:
+                    'var(--oo-spacing-xs) var(--oo-spacing-sm)',
+                  background: 'var(--oo-color-surface)',
+                  fontSize: 'var(--oo-font-size-xs)',
+                  textTransform: 'uppercase',
+                  color: 'var(--oo-color-muted)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  userSelect: 'none',
                 }}
-                title={t('common/close', 'Close')}
-                style={{ cursor: 'pointer' }}
               >
-                {NAMED_GLYPH.closePanel}
-              </span>
-            </div>
-            {!isCollapsed ? (
-              <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-                {renderMount(mount) as ReactNode}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <span aria-hidden>{isCollapsed ? '▶' : '▼'}</span>
+                  <MountTitle
+                    mount={mount}
+                    fallback={mount.key}
+                    iconClassName="oo-stack-section__icon"
+                    titleClassName="oo-stack-section__title"
+                  />
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                  {actions.length > 0 ? (
+                    // Its own clicks: a button press must not also fold the pane.
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }} onClick={(e) => e.stopPropagation()}>
+                      {actions.map((a) => (
+                        <HeaderAction
+                          key={a.command}
+                          action={a}
+                          text={resolveLabel(a.label, { get: (p) => scena.store.get(p as BindingPath), translate })}
+                          run={(command) => void scena.commands.execute(command)}
+                        />
+                      ))}
+                    </span>
+                  ) : null}
+                  {mount.policy.closable === false ? null : (
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClose(mount.key);
+                      }}
+                      title={t('common/close', 'Close')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {NAMED_GLYPH.closePanel}
+                    </span>
+                  )}
+                </span>
               </div>
+              {!isCollapsed ? (
+                // A pane sized to its content grows with it; the others fill their share.
+                <div style={{ flex: fits ? '1 1 auto' : 1, overflow: 'auto', minHeight: 0 }}>
+                  {renderMount(mount) as ReactNode}
+                </div>
+              ) : null}
+            </div>
+            {divided ? (
+              <Divisor
+                direction="col"
+                containerRef={containerRef}
+                min={0}
+                max={1}
+                onCommit={(ratio) => onDividerCommit(ratio, mount.key, below.key)}
+              />
             ) : null}
-          </div>
+          </Fragment>
         );
       })}
 
