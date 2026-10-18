@@ -67,8 +67,11 @@ export function Divisor({
       className={`oo-divisor oo-divisor__${direction}`}
       data-divisor-id={id}
       // aria-controls={aria.valueControls}
+      // A focusable separator is the ARIA role that carries a value; its orientation is the line's,
+      // so panes in a row are split by a vertical line.
+      role="separator"
+      aria-orientation={direction === 'row' ? 'vertical' : 'horizontal'}
       aria-disabled={disabled || undefined}
-      aria-direction={direction}
       aria-valuemax={max}
       aria-valuemin={min}
       aria-valuenow={pendingRef.current ?? undefined}
