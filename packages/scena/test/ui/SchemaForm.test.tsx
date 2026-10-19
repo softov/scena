@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SchemaForm, type JsonEditorProps } from '../../src/ui/forms/SchemaForm.js';
+import { fieldsView, jsonView, type SchemaFormViewProps } from '../../src/ui/forms/views.js';
+import { sectionsView } from '../../src/ui/forms/SectionsView.js';
 
 /** A stand-in for a consumer's code editor: a text box under a test id. */
 function TestEditor({ value, onChange }: JsonEditorProps) {
@@ -166,6 +168,152 @@ describe('SchemaForm', () => {
     expect(JSON.parse((screen.getByTestId('json-editor') as HTMLInputElement).value)).toEqual({ name: 'z' });
     expect(screen.queryByRole('alert')).toBeNull();
     expect(valid.at(-1)).toBe(true);
+  });
+
+  it('draws a view it is given, through the form\'s own fields, beside fields and json', () => {
+    const seen: unknown[] = [];
+    function Pair({ keys, renderField, value, onChange }: SchemaFormViewProps) {
+      return (
+        <div data-testid="pair">
+          <span data-testid="count">{keys.length}</span>
+          {renderField('name')}
+          <button type="button" onClick={() => onChange({ ...value, name: 'from view' })}>fill</button>
+        </div>
+      );
+    }
+    render(
+      <SchemaForm
+        schema={{ type: 'object', properties: { name: { type: 'string', title: 'Name' }, age: { type: 'number' } } }}
+        value={{ name: 'a' }}
+        onChange={(next) => seen.push(next)}
+        views={[fieldsView, jsonView, { id: 'pair', label: 'pair', render: Pair }]}
+      />,
+    );
+    expect(screen.getAllByRole('button').map((one) => one.textContent)).toEqual(['fields', 'json', 'pair']);
+    fireEvent.click(screen.getByRole('button', { name: 'pair' }));
+    expect(screen.getByTestId('count').textContent).toBe('2');
+    expect((screen.getByLabelText(/Name/) as HTMLInputElement).value).toBe('a');
+    fireEvent.click(screen.getByRole('button', { name: 'fill' }));
+    expect(seen.at(-1)).toEqual({ name: 'from view' });
+  });
+
+  it('draws no field actions unless asked', () => {
+    render(<SchemaForm schema={{ type: 'object', properties: { name: { type: 'string' } } }} value={{ name: 'a' }} onChange={() => {}} />);
+    expect(screen.queryByRole('button', { name: 'Setting actions' })).toBeNull();
+    expect(screen.queryByRole('tooltip')).toBeNull();
+  });
+
+  it('shows a field\'s key, resets it out of the value, copies it, and shows the JSON', () => {
+    const seen: Record<string, unknown>[] = [];
+    const written: string[] = [];
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: (text: string) => { written.push(text); return Promise.resolve(); } } });
+    const schema = { type: 'object' as const, properties: { closedChats: { type: 'string' as const, title: 'Closed chats', default: 'hidden' } } };
+    const { rerender } = render(<SchemaForm schema={schema} value={{ closedChats: 'delete' }} onChange={(next) => seen.push(next)} fieldActions />);
+    expect(screen.getByRole('tooltip').textContent).toBe('closedChats');
+    const gear = screen.getByRole('button', { name: 'Setting actions' });
+    expect(gear.getAttribute('aria-describedby')).toBe(screen.getByRole('tooltip').id);
+
+    fireEvent.click(gear);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy setting ID' }));
+    expect(written).toEqual(['closedChats']);
+
+    fireEvent.click(gear);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy setting as JSON' }));
+    expect(written.at(-1)).toBe('"closedChats": "delete"');
+
+    fireEvent.click(gear);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Reset setting' }));
+    expect(seen.at(-1)).toEqual({});
+
+    rerender(<SchemaForm schema={schema} value={{}} onChange={(next) => seen.push(next)} fieldActions />);
+    fireEvent.click(screen.getByRole('button', { name: 'Setting actions' }));
+    expect((screen.getByRole('menuitem', { name: 'Reset setting' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Show in JSON' }));
+    expect(document.querySelector('textarea.oo-schema-form__json')).not.toBeNull();
+  });
+
+  describe('sections view', () => {
+    const schema = {
+      type: 'object' as const,
+      properties: {
+        closedChats: { type: 'string' as const, title: 'Closed chats', description: 'What closing one chat does.' },
+        port: { type: 'number' as const, title: 'Port' },
+        wire: { type: 'string' as const, title: 'Wire log' },
+        brandNew: { type: 'boolean' as const, title: 'Brand new' },
+      },
+    };
+    const groups = [
+      { id: 'daemon', title: 'Daemon', sections: [
+        { id: 'sessions', title: 'Sessions', keys: ['closedChats', 'gone'] },
+        { id: 'listener', title: 'Listener', keys: ['port'] },
+      ] },
+      { id: 'host', title: 'Host', sections: [{ id: 'limits', title: 'Limits', keys: ['wire'] }] },
+    ];
+    const draw = (value: Record<string, unknown>, onChange: (next: Record<string, unknown>) => void = () => {}) => (
+      <SchemaForm schema={schema} value={value} baseline={{ closedChats: 'hidden', port: 9187, wire: '' }} onChange={onChange} views={[fieldsView, jsonView, sectionsView(groups)]} defaultView="sections" />
+    );
+    const tree = () => screen.getByRole('navigation', { name: 'Sections' });
+
+    it('opens on the first section and draws only its keys', () => {
+      render(draw({ closedChats: 'hidden', port: 9187, wire: '' }));
+      expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Sessions');
+      expect(screen.getByLabelText(/Closed chats/)).toBeTruthy();
+      expect(screen.queryByLabelText(/Port/)).toBeNull();
+    });
+
+    it('lists a key no section names under Other, and leaves out a key the schema lacks', () => {
+      render(draw({ closedChats: 'hidden', port: 9187, wire: '' }));
+      fireEvent.click(within(tree()).getAllByRole('button', { name: /Other/ })[1]!);
+      expect(screen.getByLabelText(/Brand new/)).toBeTruthy();
+      expect(within(tree()).queryByRole('button', { name: /gone/ })).toBeNull();
+    });
+
+    it('draws every section of a chosen group under its title', () => {
+      render(draw({ closedChats: 'hidden', port: 9187, wire: '' }));
+      fireEvent.click(within(tree()).getByRole('button', { name: /Daemon/ }));
+      expect(screen.getAllByRole('heading', { level: 3 }).map((one) => one.textContent)).toEqual(['Sessions', 'Listener']);
+    });
+
+    it('finds a field by its key across sections', () => {
+      render(draw({ closedChats: 'hidden', port: 9187, wire: '' }));
+      fireEvent.change(screen.getByRole('searchbox', { name: 'Search settings' }), { target: { value: 'wire' } });
+      expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Search results');
+      expect(screen.getByLabelText(/Wire log/)).toBeTruthy();
+      expect(screen.queryByLabelText(/Closed chats/)).toBeNull();
+    });
+
+    it('narrows the tree to what a search finds, with counts, and a node scopes the results without leaving the search', () => {
+      render(draw({ closedChats: 'hidden', port: 9187, wire: '' }));
+      const search = screen.getByRole('searchbox', { name: 'Search settings' }) as HTMLInputElement;
+      fireEvent.change(search, { target: { value: 'o' } });
+      // closedChats ("one chat does"), port, wire log ("log"), brandNew: "o" is in Closed, Port, Wire log, and not in Brand new.
+      expect(screen.getByRole('status').textContent).toBe('3 settings found');
+      const names = within(tree()).getAllByRole('button').map((one) => one.textContent);
+      expect(names).toEqual(['▾Daemon2', 'Sessions1', 'Listener1', '▾Host1', 'Limits1']);
+
+      fireEvent.click(within(tree()).getByRole('button', { name: /Listener/ }));
+      expect(search.value).toBe('o');
+      expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Daemon › Listener');
+      expect(screen.getByLabelText(/Port/)).toBeTruthy();
+      expect(screen.queryByLabelText(/Closed chats/)).toBeNull();
+
+      fireEvent.click(within(tree()).getByRole('button', { name: /Listener/ }));
+      expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Search results');
+      expect(screen.getByLabelText(/Closed chats/)).toBeTruthy();
+    });
+
+    it('marks a section whose keys differ from the baseline', () => {
+      render(draw({ closedChats: 'delete', port: 9187, wire: '' }));
+      expect(within(within(tree()).getByRole('button', { name: /Sessions/ })).getByTitle('Edited')).toBeTruthy();
+      expect(within(within(tree()).getByRole('button', { name: /Listener/ })).queryByTitle('Edited')).toBeNull();
+    });
+  });
+
+  it('opens on the view it is told to', () => {
+    render(
+      <SchemaForm schema={{ type: 'object', properties: { name: { type: 'string' } } }} value={{ name: 'a' }} onChange={() => {}} defaultView="json" />,
+    );
+    expect(document.querySelector('textarea.oo-schema-form__json')).not.toBeNull();
   });
 
   it('keeps the JSON text as typed when its own value comes back', () => {

@@ -204,6 +204,9 @@ export {
   DangerZone,
   SettingsContainer,
   LoginForm,
+  fieldsView,
+  jsonView,
+  sectionsView,
 } from './forms/index.js';
 export type {
   FormProps,
@@ -221,6 +224,10 @@ export type {
   FormatRendererProps,
   JsonEditor,
   JsonEditorProps,
+  SchemaFormView,
+  SchemaFormViewProps,
+  SchemaFormGroup,
+  SchemaFormSection,
   JsonSchemaField,
   JsonSchemaObject,
   EnumOption,

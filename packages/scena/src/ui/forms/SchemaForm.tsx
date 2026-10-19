@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from 'react';
 import { useWriteBack, WriteContext } from '../../react/mount-context.js';
 import { TextField } from '../control/TextField.js';
 import { CheckBox } from '../control/CheckBox.js';
@@ -22,6 +22,12 @@ import {
 import './SchemaForm.css';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { Markdown } from '../display/Markdown.js';
+import { JsonEditorBox, JsonError, JsonValidityContext, jsonProblem, useJsonValidity } from './json-text.js';
+import { fieldsView, jsonView, type SchemaFormView } from './views.js';
+import { FieldRow } from './FieldRow.js';
+
+// The views a form offers when it is given none.
+const DEFAULT_VIEWS: SchemaFormView[] = [fieldsView, jsonView];
 import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Custom field renderer keyed by `format`. Domain-coupled renderers (model
@@ -57,7 +63,13 @@ export interface SchemaFormProps {
   header?: string;
   formatRenderers?: Record<string, FormatRenderer>;
   jsonEditor?: JsonEditor;
-  // `fields | json` switch. `jsonTextRoot` toggles it on this form (default
+  // The ways to look at the value, one modebar button each. Default
+  // `[fieldsView, jsonView]`. Nested object sections always get the default.
+  views?: SchemaFormView[];
+  // The view the form opens on; the first view when unset.
+  defaultView?: string;
+  onViewChange?: (id: string) => void;
+  // The view switch. `jsonTextRoot` toggles it on this form (default
   // true). `jsonTextFields` toggles it on nested object sections; when unset it
   // follows the effective root value, so disabling it here disables children
   // while the root keeps its switch.
@@ -73,6 +85,10 @@ export interface SchemaFormProps {
   // tuple array's, starts or stops parsing. While it does not parse, the value
   // is the last one that did, so a consumer holds its save until this is true.
   onJsonValidChange?: (valid: boolean) => void;
+  // Each top-level field shows its key in a tooltip and offers a gear menu:
+  // reset (takes the key out of the value), copy its key or its JSON, show the
+  // JSON view. Off by default.
+  fieldActions?: boolean;
   style?: CSSProperties;
 }
 
@@ -100,16 +116,19 @@ export function SchemaForm({
   header,
   formatRenderers,
   jsonEditor,
+  views,
+  defaultView,
+  onViewChange,
   jsonTextRoot,
   jsonTextFields,
   baseline,
   onDirtyChange,
   onJsonValidChange,
+  fieldActions,
   style,
 }: SchemaFormProps) {
   const { t } = useI18n();
   const writeValue = useWriteBack('value');
-  const [jsonError, setJsonError] = useState<string | null>(null);
 
   // The outermost form gathers the editors whose text does not parse; a nested
   // one hands its own state up to it.
@@ -125,11 +144,6 @@ export function SchemaForm({
     });
   }, []);
   const report = outer ?? gather;
-  const selfId = useId();
-  useEffect(() => {
-    report(selfId, jsonError === null);
-  }, [report, selfId, jsonError]);
-  useEffect(() => () => report(selfId, true), [report, selfId]);
   const allValid = invalid.size === 0;
   useEffect(() => {
     if (outer === null) onJsonValidChange?.(allValid);
@@ -137,8 +151,9 @@ export function SchemaForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allValid]);
   const [internal, setInternal] = useState<Record<string, unknown>>(value ?? defaultValue ?? {});
-  const [mode, setMode] = useState<'fields' | 'json'>('fields');
-  const [jsonText, setJsonText] = useState(() => JSON.stringify(value ?? defaultValue ?? {}, null, 2));
+  const viewList = views ?? DEFAULT_VIEWS;
+  const [viewId, setViewId] = useState(() => defaultView ?? viewList[0]?.id ?? 'fields');
+  const activeView = viewList.find((one) => one.id === viewId) ?? viewList[0] ?? fieldsView;
 
   // Root shows its switch unless explicitly disabled. Nested object sections
   // follow `jsonTextFields`, which defaults to the effective root value.
@@ -150,18 +165,9 @@ export function SchemaForm({
   const baselineValue = baseline ?? initialRef.current;
   const dirty = !deepEqual(internal, baselineValue);
 
-  // The value this form last sent. A `value` that is not it came from outside,
-  // as a consumer's reset or the host's own change, and replaces the JSON text,
-  // which is otherwise the person's to keep while they edit it.
-  const sentRef = useRef<Record<string, unknown> | undefined>(value ?? defaultValue);
-
   useEffect(() => {
     if (value === undefined) return;
     setInternal((current) => (current === value ? current : value));
-    if (deepEqual(value, sentRef.current)) return;
-    sentRef.current = value;
-    setJsonText(JSON.stringify(value, null, 2));
-    setJsonError(null);
   }, [value]);
 
   useEffect(() => {
@@ -180,7 +186,6 @@ export function SchemaForm({
   const requiredSet = new Set(schema.required ?? []);
 
   function commit(next: Record<string, unknown>): void {
-    sentRef.current = next;
     setInternal(next);
     writeValue(next);   // bound/graph: writes the whole object back (no-op in plain React)
     onChange?.(next);   // controlled: direct-React parent
@@ -190,32 +195,40 @@ export function SchemaForm({
     commit({ ...internal, [key]: val });
   }
 
-  function enterJson(): void {
-    setJsonText(JSON.stringify(internal, null, 2));
-    setJsonError(null);
-    setMode('json');
-  }
-
-  // Leaving the JSON text drops what did not parse; the fields show the value.
-  function enterFields(): void {
-    setJsonError(null);
-    setMode('fields');
-  }
-
-  function editJson(text: string): void {
-    setJsonText(text);
-    const { parsed, error } = jsonProblem(text, isObjectRecord, 'an object');
-    setJsonError(error);
-    if (error === null) commit(parsed as Record<string, unknown>);
+  // Leaving the JSON view drops what did not parse; the next view shows the value.
+  function showView(id: string): void {
+    if (!viewList.some((one) => one.id === id) || id === activeView.id) return;
+    setViewId(id);
+    onViewChange?.(id);
   }
 
   function reset(): void {
     commit(baselineValue);
-    setJsonText(JSON.stringify(baselineValue, null, 2));
-    setJsonError(null);
   }
 
   function renderField(key: string, field: JsonSchemaField): ReactNode {
+    const control = renderControl(key, field);
+    if (!fieldActions || control === null) return control;
+    const inValue = Object.hasOwn(internal, key);
+    return (
+      <FieldRow
+        key={key}
+        fieldKey={key}
+        value={inValue ? internal[key] : field.default}
+        inValue={inValue}
+        onReset={() => {
+          const next = { ...internal };
+          delete next[key];
+          commit(next);
+        }}
+        {...(viewList.some((one) => one.id === 'json') ? { onShowJson: () => showView('json') } : {})}
+      >
+        {control}
+      </FieldRow>
+    );
+  }
+
+  function renderControl(key: string, field: JsonSchemaField): ReactNode {
     // x-show-if — hide unless a sibling field matches.
     const showIf = field['x-show-if'];
     if (showIf && internal[showIf.field] !== showIf.value) return null;
@@ -278,43 +291,42 @@ export function SchemaForm({
     );
   }
 
-  const rows = mode === 'fields' ? Object.entries(properties).map(([key, field]) => renderField(key, field)) : null;
+  const keys = Object.keys(properties);
+  const drawField = (key: string): ReactNode => {
+    const field = properties[key];
+    return field === undefined ? null : renderField(key, field);
+  };
 
   const modebar = showRootToggle || dirty ? (
     <div className="oo-schema-form__modebar">
-      {showRootToggle ? (
-        <>
-          <button type="button" data-active={mode === 'fields'} onClick={enterFields}>{t('form/fields', 'fields')}</button>
-          <button type="button" data-active={mode === 'json'} onClick={enterJson}>{t('form/json', 'json')}</button>
-        </>
-      ) : null}
+      {showRootToggle
+        ? viewList.map((one) => (
+            <button key={one.id} type="button" data-active={one.id === activeView.id} onClick={() => showView(one.id)}>
+              {one.label ?? t(`form/${one.id}`, one.id)}
+            </button>
+          ))
+        : null}
       {dirty ? (
         <button type="button" className="oo-schema-form__reset" onClick={reset}>reset</button>
       ) : null}
     </div>
   ) : null;
 
-  const body =
-    mode === 'json' ? (
-      <>
-        {jsonEditor ? (
-          <JsonEditorBox editor={jsonEditor} value={jsonText} onChange={editJson} />
-        ) : (
-          <textarea
-            className="oo-schema-form__json"
-            value={jsonText}
-            spellCheck={false}
-            rows={16}
-            onChange={(e) => editJson(e.target.value)}
-          />
-        )}
-        <JsonError error={jsonError} />
-      </>
-    ) : header ? (
-      <FormSection title={header}>{rows}</FormSection>
-    ) : (
-      rows
-    );
+  const View = activeView.render;
+  const body = (
+    <View
+      schema={schema}
+      keys={keys}
+      value={internal}
+      baseline={baselineValue}
+      onChange={commit}
+      renderField={drawField}
+      header={header}
+      jsonEditor={jsonEditor}
+      setView={showView}
+      hasView={(id) => viewList.some((one) => one.id === id)}
+    />
+  );
 
   // Suppress ambient write-back for the field controls: each control reports
   // through its explicit onChange, and SchemaForm aggregates into one object.
@@ -499,46 +511,6 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
       required={meta?.required}
       typeTag={meta?.typeTag}
     />
-  );
-}
-
-// ── JSON validity, gathered at the outermost form ──────────────────────────
-
-// Each JSON editor in a form reports under its own id whether its text parses;
-// the outermost SchemaForm holds the ones that do not and tells its consumer.
-const JsonValidityContext = createContext<((id: string, valid: boolean) => void) | null>(null);
-
-/** Reports `error === null` to the form's gatherer while mounted, and valid when unmounted. */
-function useJsonValidity(error: string | null): void {
-  const report = useContext(JsonValidityContext);
-  const id = useId();
-  useEffect(() => {
-    report?.(id, error === null);
-  }, [report, id, error]);
-  useEffect(() => () => report?.(id, true), [report, id]);
-}
-
-/** Why a JSON text is not the value it should be, or null when it is. */
-function jsonProblem(text: string, fits: (parsed: unknown) => boolean, shape: string): { parsed: unknown; error: string | null } {
-  try {
-    const parsed = JSON.parse(text) as unknown;
-    return fits(parsed) ? { parsed, error: null } : { parsed, error: `The JSON must be ${shape}.` };
-  } catch (error) {
-    return { parsed: undefined, error: error instanceof Error ? error.message : String(error) };
-  }
-}
-
-function JsonError({ error }: { error: string | null }) {
-  return error === null ? null : <p className="oo-schema-form__json-error" role="alert">{error}</p>;
-}
-
-// ── The consumer's JSON editor ─────────────────────────────────────────────
-
-function JsonEditorBox({ editor: Editor, value, onChange }: { editor: JsonEditor; value: string; onChange: (text: string) => void }) {
-  return (
-    <div className="oo-schema-form__json-editor">
-      <Editor value={value} onChange={onChange} />
-    </div>
   );
 }
 

@@ -1,0 +1,160 @@
+/* The sections view: a search, then a tree of groups and sections beside the chosen one's fields. */
+.oo-sections {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+  min-height: 0;
+}
+.oo-sections__search {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-sm);
+  padding: 0 var(--oo-spacing-sm);
+  border: 1px solid var(--oo-color-border);
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-color-canvas);
+}
+.oo-sections__search:focus-within {
+  border-color: var(--oo-color-accent);
+}
+.oo-sections__search input {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--oo-font-size-sm);
+}
+.oo-sections__found {
+  flex: none;
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  white-space: nowrap;
+}
+.oo-sections__body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--oo-spacing-md);
+}
+.oo-sections__tree {
+  position: sticky;
+  top: 0;
+  flex: 0 0 13rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-right: var(--oo-spacing-sm);
+  border-right: 1px solid var(--oo-color-border);
+}
+.oo-sections__node {
+  display: flex;
+  align-items: center;
+  gap: var(--oo-spacing-xs);
+  width: 100%;
+  padding: 4px var(--oo-spacing-sm);
+  border: 0;
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--oo-font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.oo-sections__node[data-level='group'] {
+  font-weight: 600;
+}
+.oo-sections__node[data-level='section'] {
+  padding-left: calc(var(--oo-spacing-sm) + 16px);
+}
+.oo-sections__node:hover {
+  background: var(--oo-color-hover);
+}
+.oo-sections__node[aria-current='true'] {
+  background: var(--oo-color-selected);
+  font-weight: 700;
+}
+.oo-sections__caret {
+  width: 12px;
+  color: var(--oo-color-muted);
+  font-size: var(--oo-font-size-xs);
+}
+.oo-sections__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.oo-sections__count {
+  flex: none;
+  font-size: var(--oo-font-size-xs);
+  font-weight: 400;
+  color: var(--oo-color-muted);
+}
+.oo-sections__dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--oo-color-accent);
+}
+.oo-sections__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+}
+.oo-sections__pick {
+  display: none;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+}
+.oo-sections__pick select {
+  font: inherit;
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-text);
+}
+.oo-sections__heading {
+  margin: 0;
+  font-size: var(--oo-font-size-xl);
+  font-weight: 600;
+}
+.oo-sections__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-xs);
+}
+.oo-sections__title {
+  margin: var(--oo-spacing-sm) 0 0;
+  font-size: var(--oo-font-size-md);
+  font-weight: 600;
+}
+.oo-sections__description,
+.oo-sections__empty {
+  margin: 0;
+  font-size: var(--oo-font-size-sm);
+  color: var(--oo-color-muted);
+}
+.oo-sections__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-md);
+}
+
+/* A narrow box has no room for the tree: a select of the same sections takes its place. */
+@container (max-width: 560px) {
+  .oo-sections__tree {
+    display: none;
+  }
+  .oo-sections__pick {
+    display: flex;
+  }
+}

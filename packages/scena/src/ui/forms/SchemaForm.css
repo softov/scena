@@ -93,3 +93,110 @@
   padding: var(--oo-spacing-xs) var(--oo-spacing-sm);
   cursor: pointer;
 }
+
+/* A field with its actions: a gear in the left gutter and the key at the row's top right, both shown on hover and focus. */
+.oo-schema-form__row {
+  position: relative;
+  padding: var(--oo-spacing-xs) var(--oo-spacing-sm) var(--oo-spacing-xs) 28px;
+  border-radius: var(--oo-radius-sm);
+}
+.oo-schema-form__row:hover,
+.oo-schema-form__row:focus-within,
+.oo-schema-form__row[data-menu='true'] {
+  background: var(--oo-color-hover);
+}
+.oo-schema-form__gear {
+  position: absolute;
+  left: 2px;
+  top: var(--oo-spacing-xs);
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: var(--oo-color-muted);
+  font: inherit;
+  cursor: pointer;
+  opacity: 0;
+}
+.oo-schema-form__row:hover > .oo-schema-form__gear,
+.oo-schema-form__row:focus-within > .oo-schema-form__gear,
+.oo-schema-form__row[data-menu='true'] > .oo-schema-form__gear {
+  opacity: 1;
+}
+.oo-schema-form__gear:hover,
+.oo-schema-form__row[data-menu='true'] > .oo-schema-form__gear {
+  background: var(--oo-color-active);
+  color: var(--oo-color-text);
+}
+.oo-schema-form__key {
+  position: absolute;
+  top: var(--oo-spacing-xs);
+  right: var(--oo-spacing-sm);
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 2;
+  padding: 2px var(--oo-spacing-sm);
+  border: 1px solid var(--oo-popup-border, var(--oo-color-border));
+  border-radius: var(--oo-radius-sm);
+  background: var(--oo-popup-bg, var(--oo-color-raised));
+  color: var(--oo-popup-fg, var(--oo-color-text));
+  font-family: var(--oo-font-mono);
+  font-size: var(--oo-font-size-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.oo-schema-form__row:hover > .oo-schema-form__key,
+.oo-schema-form__gear:focus-visible ~ .oo-schema-form__key {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0.4s;
+}
+.oo-schema-form__row[data-menu='true'] > .oo-schema-form__key {
+  visibility: hidden;
+}
+.oo-schema-form__menu {
+  min-width: 13rem;
+  padding: var(--oo-spacing-xs);
+  border: 1px solid var(--oo-popup-border, var(--oo-color-border));
+  border-radius: var(--oo-radius-md);
+  background: var(--oo-popup-bg, var(--oo-color-raised));
+  color: var(--oo-popup-fg, var(--oo-color-text));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
+}
+.oo-schema-form__menu [role='menu'] {
+  display: flex;
+  flex-direction: column;
+}
+.oo-schema-form__menu button {
+  padding: 5px var(--oo-spacing-sm);
+  border: 0;
+  border-radius: var(--oo-radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--oo-font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.oo-schema-form__menu button:hover:not(:disabled),
+.oo-schema-form__menu button:focus-visible {
+  background: var(--oo-color-hover);
+}
+.oo-schema-form__menu button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.oo-schema-form__menu hr {
+  margin: var(--oo-spacing-xs) 0;
+  border: 0;
+  border-top: 1px solid var(--oo-color-border);
+}
