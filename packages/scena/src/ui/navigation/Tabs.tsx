@@ -25,6 +25,8 @@ export interface TabsProps {
   // scena extensions:
   value?: string;
   defaultValue?: string;
+  // Controlled escape hatch for direct React, as SchemaForm's: told the chosen tab's key.
+  onChange?: (key: string) => void;
   style?: CSSProperties;
 }
 
@@ -35,7 +37,7 @@ function tabChild(t: TabsTab): ReactNode {
   return t.child ?? t.content;
 }
 
-export function Tabs({ tabs = [], value, defaultValue, weight, style }: TabsProps) {
+export function Tabs({ tabs = [], value, defaultValue, onChange, weight, style }: TabsProps) {
   const writeValue = useWriteBack('value');
   // Stable per-tab key: explicit `key`, else the index. Selection tracks this,
   // NOT the (possibly translated) title — so a language switch keeps the tab.
@@ -50,6 +52,7 @@ export function Tabs({ tabs = [], value, defaultValue, weight, style }: TabsProp
   function select(key: string): void {
     setInternal(key);
     writeValue(key);
+    onChange?.(key);
   }
 
   const activeIdx = [keys.indexOf(internal ?? ''), keys.indexOf(defaultValue ?? ''), 0].find((i) => i >= 0) ?? 0;
