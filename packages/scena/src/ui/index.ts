@@ -168,6 +168,7 @@ export {
   Checks,
   LocaleToggle,
   ButtonBar,
+  Chip,
   ThemePicker,
   ThemeModeToggle,
 } from './control/index.js';
@@ -175,6 +176,8 @@ export type { LocaleToggleProps, LocaleToggleDisplay, ReloadButtonProps } from '
 export type {
   ButtonBarProps,
   ButtonBarTone,
+  ChipProps,
+  ChipState,
   ThemePickerProps,
   ThemeModeToggleProps,
 } from './control/index.js';

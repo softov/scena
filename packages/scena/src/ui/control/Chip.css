@@ -1,0 +1,39 @@
+.oo-chip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 1px var(--oo-spacing-sm);
+  border: 1px solid var(--oo-color-border);
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--oo-color-muted);
+  font-family: var(--oo-mono);
+  font-size: var(--oo-font-size-xs);
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.oo-chip:hover:not(:disabled) {
+  border-color: var(--oo-color-text);
+}
+.oo-chip:focus-visible {
+  outline: 1px solid var(--oo-color-accent);
+  outline-offset: 1px;
+}
+/* Held itself: the text's own colour, a solid edge and a faint fill. */
+.oo-chip[data-state='on'] {
+  border-color: var(--oo-color-text);
+  background: var(--oo-color-hover);
+  color: var(--oo-color-text);
+  font-weight: 600;
+}
+/* Held through something wider: the accent, on a dashed edge. */
+.oo-chip[data-state='implied'] {
+  border-style: dashed;
+  border-color: var(--oo-color-accent);
+  color: var(--oo-color-accent);
+}
+.oo-chip:disabled {
+  cursor: default;
+  opacity: 0.6;
+}

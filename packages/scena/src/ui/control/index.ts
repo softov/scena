@@ -14,6 +14,8 @@ export type { CheckRuleResolved, ChecksProps } from './Checks.js';
 export { LocaleToggle } from './LocaleToggle.js';
 export type { LocaleToggleProps, LocaleToggleDisplay } from './LocaleToggle.js';
 export { ButtonBar } from './ButtonBar.js';
+export { Chip } from './Chip.js';
+export type { ChipProps, ChipState } from './Chip.js';
 export type { ButtonBarProps, ButtonBarTone } from './ButtonBar.js';
 export { ThemePicker } from './ThemePicker.js';
 export type { ThemePickerProps } from './ThemePicker.js';
