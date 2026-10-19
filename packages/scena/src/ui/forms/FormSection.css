@@ -12,6 +12,12 @@
   border-bottom: 1px solid var(--oo-color-border);
   padding-bottom: var(--oo-spacing-xs);
 }
+.oo-form-section__description {
+  margin: 0;
+  font-size: var(--oo-font-size-xs);
+  color: var(--oo-color-muted);
+  line-height: 1.5;
+}
 .oo-form-section__body {
   display: flex;
   flex-direction: column;

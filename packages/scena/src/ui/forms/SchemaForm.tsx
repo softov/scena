@@ -235,7 +235,7 @@ export function SchemaForm({
     // Object → a titled section with a nested form (its fields carry labels).
     if (type === 'object' && !isEnum && !hasFormatRenderer(field, formatRenderers)) {
       return (
-        <FormSection key={key} title={meta.label ?? key}>
+        <FormSection key={key} title={meta.label ?? key} {...(meta.hint ? { description: meta.hint } : {})}>
           <SchemaForm
             schema={{ type: 'object', properties: field.properties ?? {}, required: field.required ?? [] }}
             value={isObjectRecord(internal[key]) ? (internal[key] as Record<string, unknown>) : {}}
