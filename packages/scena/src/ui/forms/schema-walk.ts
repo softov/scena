@@ -16,6 +16,10 @@ export interface JsonSchemaField {
   anyOf?: JsonSchemaField[];
   oneOf?: JsonSchemaField[];
   allOf?: JsonSchemaField[];
+  /** Conditional subschemas: `then` holds where the value matches `if`, else `else`. */
+  if?: JsonSchemaField;
+  then?: JsonSchemaField;
+  else?: JsonSchemaField;
   const?: unknown;
   description?: string;
   enum?: string[];
@@ -29,6 +33,8 @@ export interface JsonSchemaField {
   properties?: Record<string, JsonSchemaField>;
   required?: string[];
   additionalProperties?: boolean;
+  /** What an object's keys must match; an `enum` here names the only keys it allows. */
+  propertyNames?: JsonSchemaField;
   /** Show this field only when a sibling field equals a value. */
   'x-show-if'?: { field: string; value: unknown };
   /** OAuth connect metadata — routed to a format renderer by the consumer. */
@@ -38,11 +44,25 @@ export interface JsonSchemaField {
   'x-header'?: boolean;
 }
 
-export interface JsonSchemaObject {
+export interface JsonSchemaObject
+  extends Pick<JsonSchemaField, 'allOf' | 'if' | 'then' | 'else' | 'propertyNames' | 'additionalProperties'> {
   type?: string;
   properties?: Record<string, JsonSchemaField>;
   required?: string[];
   description?: string;
+}
+
+// A nested object field as the schema of the form that draws it, keeping what
+// narrows it: its conditions and the keys it allows.
+export function objectSchema(field: JsonSchemaField): JsonSchemaObject {
+  const schema: JsonSchemaObject = { type: 'object', properties: field.properties ?? {}, required: field.required ?? [] };
+  if (field.allOf !== undefined) schema.allOf = field.allOf;
+  if (field.if !== undefined) schema.if = field.if;
+  if (field.then !== undefined) schema.then = field.then;
+  if (field.else !== undefined) schema.else = field.else;
+  if (field.propertyNames !== undefined) schema.propertyNames = field.propertyNames;
+  if (field.additionalProperties !== undefined) schema.additionalProperties = field.additionalProperties;
+  return schema;
 }
 
 export function isObjectRecord(value: unknown): value is Record<string, unknown> {
@@ -69,6 +89,81 @@ export function deepEqual(a: unknown, b: unknown): boolean {
     );
   }
   return false;
+}
+
+// Whether a value matches a schema, as far as an `if` needs to pick its branch:
+// `const`, `enum`, `required`, `properties` and `allOf`. Any other keyword
+// passes, as it would in a validator that does not know it. As in JSON Schema,
+// `required` and `properties` hold for a value that is not an object.
+export function matchesSchema(schema: JsonSchemaField, value: unknown): boolean {
+  if (schema.const !== undefined && !deepEqual(schema.const, value)) return false;
+  if (schema.enum !== undefined && !schema.enum.some((one) => deepEqual(one, value))) return false;
+  if (isObjectRecord(value)) {
+    if (schema.required?.some((key) => !Object.hasOwn(value, key))) return false;
+    for (const [key, sub] of Object.entries(schema.properties ?? {})) {
+      if (Object.hasOwn(value, key) && !matchesSchema(sub, value[key])) return false;
+    }
+  }
+  return (schema.allOf ?? []).every((one) => matchesSchema(one, value));
+}
+
+// The keys an object schema allows: its `propertyNames` enum, else its own
+// `properties` when it takes no others; undefined when any key will do.
+export function allowedKeys(schema: JsonSchemaField): string[] | undefined {
+  if (schema.propertyNames?.enum !== undefined) return schema.propertyNames.enum;
+  if (schema.additionalProperties === false) return Object.keys(schema.properties ?? {});
+  return undefined;
+}
+
+// Two schemas that must both hold, as one. Where both name a keyword they join:
+// enums intersect, required and properties combine, the keys an object allows
+// are those both allow, bounds take the tighter. Elsewhere `a` wins. A
+// condition in `b` is kept under `allOf`, for the form of the object it sits on.
+function mergeSchemas(a: JsonSchemaField, b: JsonSchemaField): JsonSchemaField {
+  const { if: test, then, else: otherwise, ...plain } = b;
+  const merged: JsonSchemaField = { ...plain, ...a };
+  if (a.enum !== undefined && b.enum !== undefined) merged.enum = a.enum.filter((one) => b.enum!.includes(one));
+  if (a.required !== undefined && b.required !== undefined) merged.required = [...new Set([...a.required, ...b.required])];
+  if (a.properties !== undefined && b.properties !== undefined) {
+    const keys = [...new Set([...Object.keys(a.properties), ...Object.keys(b.properties)])];
+    merged.properties = Object.fromEntries(keys.map((key) => {
+      const left = a.properties![key];
+      const right = b.properties![key];
+      return [key, left !== undefined && right !== undefined ? mergeSchemas(left, right) : (left ?? right)!];
+    }));
+  }
+  if (isObjectRecord(a.items) && isObjectRecord(b.items)) {
+    merged.items = mergeSchemas(a.items as JsonSchemaField, b.items as JsonSchemaField);
+  }
+  if (a.minimum !== undefined && b.minimum !== undefined) merged.minimum = Math.max(a.minimum, b.minimum);
+  if (a.maximum !== undefined && b.maximum !== undefined) merged.maximum = Math.min(a.maximum, b.maximum);
+  const left = allowedKeys(a);
+  const right = allowedKeys(b);
+  if (left !== undefined || right !== undefined) {
+    merged.propertyNames = { enum: left === undefined ? right! : right === undefined ? left : left.filter((key) => right.includes(key)) };
+  }
+  const condition: JsonSchemaField = {};
+  if (test !== undefined) condition.if = test;
+  if (then !== undefined) condition.then = then;
+  if (otherwise !== undefined) condition.else = otherwise;
+  const conditions = [...(a.allOf ?? []), ...(b.allOf ?? []), ...(test === undefined ? [] : [condition])];
+  if (conditions.length > 0) merged.allOf = conditions;
+  else delete merged.allOf;
+  return merged;
+}
+
+// The schema as it holds for a value: each `allOf` entry, and the `then` or
+// `else` its `if` picks, folded into one, so a branch's narrowing (fewer
+// choices, fewer keys, more required) shows in the form. Applied to one object
+// at a time; a nested object's conditions are its own form's to resolve.
+export function resolveConditionals<T extends JsonSchemaField>(schema: T, value: unknown): T {
+  const { allOf, if: test, then, else: otherwise, ...rest } = schema;
+  const branches: JsonSchemaField[] = [...(allOf ?? [])];
+  if (test !== undefined) {
+    const branch = matchesSchema(test, value) ? then : otherwise;
+    if (branch !== undefined) branches.push(branch);
+  }
+  return branches.reduce<JsonSchemaField>((merged, branch) => mergeSchemas(merged, resolveConditionals(branch, value)), rest) as T;
 }
 
 // Primary type, ignoring "null" in union arrays like ["string", "null"].

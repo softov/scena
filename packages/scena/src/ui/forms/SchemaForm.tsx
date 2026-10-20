@@ -10,13 +10,16 @@ import {
   type EnumOption,
   type JsonSchemaField,
   type JsonSchemaObject,
+  allowedKeys,
   cleanDescription,
   deepEqual,
   defaultValueForSchema,
   effectiveType,
   isObjectRecord,
   normalizeUnionOptions,
+  objectSchema,
   resolveArrayItemSchema,
+  resolveConditionals,
   textareaRows,
 } from './schema-walk.js';
 import './SchemaForm.css';
@@ -102,6 +105,13 @@ interface FieldMeta {
   typeTag?: string;
 }
 
+// Nothing typed: no value, an empty text, list or object.
+function isEmptyValue(value: unknown): boolean {
+  if (value === undefined || value === null || value === '') return true;
+  if (Array.isArray(value)) return value.length === 0;
+  return isObjectRecord(value) && Object.keys(value).length === 0;
+}
+
 function hasFormatRenderer(field: JsonSchemaField, renderers?: Record<string, FormatRenderer>): boolean {
   return Boolean(field.format && renderers?.[field.format]);
 }
@@ -178,12 +188,29 @@ export function SchemaForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty]);
 
-  const properties = schema.properties;
+  // The schema as it holds for the value now: a condition the value meets
+  // narrows it (fewer choices, fewer keys), and changing the value redraws it.
+  const resolved = resolveConditionals(schema, internal);
+  const properties = resolved.properties;
   if (!properties || Object.keys(properties).length === 0) {
     return <div className="oo-schema-form__empty">No parameters defined.</div>;
   }
 
-  const requiredSet = new Set(schema.required ?? []);
+  const requiredSet = new Set(resolved.required ?? []);
+  const allowed = allowedKeys(resolved);
+
+  // What the value holds that the schema no longer allows, as a choice left
+  // outside a narrowed enum or a key the object does not take. It stays on
+  // screen with its error, so a person sees it and can take it out.
+  function problemOf(key: string, field: JsonSchemaField): string | undefined {
+    if (!Object.hasOwn(internal, key)) return undefined;
+    if (allowed !== undefined && !allowed.includes(key)) return t('form/notAllowed', 'Not allowed here. Take it out.');
+    const held = internal[key];
+    if (field.enum !== undefined && held !== undefined && held !== '' && !field.enum.includes(String(held))) {
+      return t('form/notAChoice', 'Not one of the choices here.');
+    }
+    return undefined;
+  }
 
   function commit(next: Record<string, unknown>): void {
     setInternal(next);
@@ -192,6 +219,15 @@ export function SchemaForm({
   }
 
   function setField(key: string, val: unknown): void {
+    // A key the schema does not allow goes once it is emptied, which is how a
+    // person takes it out.
+    const allows = allowedKeys(resolveConditionals(schema, internal));
+    if (allows !== undefined && !allows.includes(key) && isEmptyValue(val)) {
+      const next = { ...internal };
+      delete next[key];
+      commit(next);
+      return;
+    }
     commit({ ...internal, [key]: val });
   }
 
@@ -240,7 +276,7 @@ export function SchemaForm({
       label: field.title ?? key,
       hint: cleanDescription(field.description),
       required: requiredSet.has(key),
-      error: errors?.[key],
+      error: errors?.[key] ?? problemOf(key, field),
       typeTag: isEnum ? 'enum' : type,
     };
     const childNamespace = namespace ? `${namespace}_${key}` : undefined;
@@ -250,7 +286,7 @@ export function SchemaForm({
       return (
         <FormSection key={key} title={meta.label ?? key} {...(meta.hint ? { description: meta.hint } : {})}>
           <SchemaForm
-            schema={{ type: 'object', properties: field.properties ?? {}, required: field.required ?? [] }}
+            schema={objectSchema(field)}
             value={isObjectRecord(internal[key]) ? (internal[key] as Record<string, unknown>) : {}}
             baseline={isObjectRecord(baselineValue[key]) ? (baselineValue[key] as Record<string, unknown>) : {}}
             onChange={set}
@@ -291,7 +327,8 @@ export function SchemaForm({
     );
   }
 
-  const keys = Object.keys(properties);
+  // A key the schema does not allow is drawn only while the value holds it.
+  const keys = Object.keys(properties).filter((key) => allowed === undefined || allowed.includes(key) || Object.hasOwn(internal, key));
   const drawField = (key: string): ReactNode => {
     const field = properties[key];
     return field === undefined ? null : renderField(key, field);
@@ -315,7 +352,7 @@ export function SchemaForm({
   const View = activeView.render;
   const body = (
     <View
-      schema={schema}
+      schema={resolved}
       keys={keys}
       value={internal}
       baseline={baselineValue}
@@ -415,9 +452,13 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
     const options: ChoiceOption[] = rich
       ? rich.map((o) => ({ value: o.value, label: o.description ? `${o.label} — ${o.description}` : o.label }))
       : (field.enum ?? []);
+    // A held value a narrowed enum left out stays a choice, so the picker shows
+    // what the value is rather than another option; the form marks it.
+    const held = value === undefined || value === '' ? '' : String(value);
+    const shown = held !== '' && !options.some((option) => (typeof option === 'string' ? option : option.value) === held) ? [...options, { value: held, label: held }] : options;
     const withPlaceholder: ChoiceOption[] = required
-      ? options
-      : [{ value: '', label: t('form/select', 'Select…') }, ...options];
+      ? shown
+      : [{ value: '', label: t('form/select', 'Select…') }, ...shown];
     return (
       <ChoicePicker
         options={withPlaceholder}
@@ -486,7 +527,7 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
   if (type === 'object') {
     return (
       <SchemaForm
-        schema={{ type: 'object', properties: field.properties ?? {}, required: field.required ?? [] }}
+        schema={objectSchema(field)}
         value={isObjectRecord(value) ? value : {}}
         onChange={(next) => onChange(next)}
         namespace={namespace}

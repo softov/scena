@@ -57,6 +57,15 @@ description per option), `x-show-if` for a field that depends on a sibling,
 and `x-header` for an object rendered as a section. `formatRenderers` is how
 you take over one `format` without taking over the form.
 
+It follows `allOf` and `if` / `then` / `else` for the value it holds, so a
+branch that narrows the schema narrows the form, and changing the value that
+picks the branch redraws it. Where both sides name a keyword they join as both
+must hold: enums intersect, `required` and `properties` combine, and an object
+draws only the keys every side allows, by `propertyNames` with an `enum` or by
+`additionalProperties: false`. A value the narrowed schema no longer takes
+stays on screen with an error, and a key it does not allow goes once it is
+emptied.
+
 **`ui/data`** — `List`, `Listable`, `DataTable`, `Tree`, `Pagination`,
 `Filter`. `Listable` is the workhorse: columns with per-column `mode`
 (`table` for wide, omitted for both), `getKey`, `selectedKey`, `onSelect`,

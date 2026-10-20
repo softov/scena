@@ -325,4 +325,59 @@ describe('SchemaForm', () => {
     rerender(<SchemaForm schema={schema} value={value} onChange={(next) => { value = next; }} jsonEditor={TestEditor} />);
     expect((screen.getByTestId('json-editor') as HTMLInputElement).value).toBe('{"name":"b"}');
   });
+
+  describe('conditions', () => {
+    /** A row whose kind narrows its limits' measures and its match's keys, as ahpd's `policy:` manifest does. */
+    const lines = { type: 'array', items: { type: 'string' } };
+    const narrow = (kind: string, measures: string[], matches: string[]) => ({
+      if: { properties: { kind: { const: kind } }, required: ['kind'] },
+      then: { properties: { limits: { items: { properties: { measure: { enum: measures } } } }, match: { propertyNames: { enum: matches } } } },
+    });
+    const policy = {
+      type: 'object',
+      properties: {
+        kind: { type: 'string', title: 'Kind', enum: ['model', 'agent'] },
+        match: { type: 'object', title: 'Match', properties: { model: { ...lines, title: 'Models' }, proxy: { ...lines, title: 'Proxies' }, agent: { ...lines, title: 'Agents' } } },
+        limits: { type: 'array', title: 'Limits', items: { type: 'object', properties: { measure: { type: 'string', title: 'Measure', enum: ['usd', 'tokens', 'turns'] } } } },
+      },
+      required: ['kind'],
+      allOf: [narrow('model', ['usd', 'tokens'], ['model', 'proxy']), narrow('agent', ['usd', 'turns'], ['agent'])],
+    };
+    const optionsOf = (label: RegExp): string[] =>
+      Array.from((screen.getByLabelText(label) as HTMLSelectElement).options).map((option) => option.value).filter((value) => value !== '');
+
+    it('draws what the chosen kind takes, and redraws when the kind changes', () => {
+      render(<SchemaForm schema={policy} value={{ kind: 'agent', match: {}, limits: [{ measure: 'usd' }] }} onChange={() => {}} />);
+      expect(screen.getByText('Agents')).toBeTruthy();
+      expect(screen.queryByText('Models')).toBeNull();
+      expect(optionsOf(/Measure/)).toEqual(['usd', 'turns']);
+
+      fireEvent.change(screen.getByLabelText(/Kind/), { target: { value: 'model' } });
+      expect(screen.getByText('Models')).toBeTruthy();
+      expect(screen.getByText('Proxies')).toBeTruthy();
+      expect(screen.queryByText('Agents')).toBeNull();
+      expect(optionsOf(/Measure/)).toEqual(['usd', 'tokens']);
+    });
+
+    it('draws every field while no kind is chosen', () => {
+      render(<SchemaForm schema={policy} value={{ match: {} }} onChange={() => {}} />);
+      for (const title of ['Models', 'Proxies', 'Agents']) expect(screen.getByText(title)).toBeTruthy();
+    });
+
+    it('keeps what the kind no longer takes on screen, marked, until it is taken out', () => {
+      render(<SchemaForm schema={policy} value={{ kind: 'agent', match: { proxy: ['openai'] }, limits: [{ measure: 'tokens' }] }} onChange={() => {}} />);
+      expect(screen.getByText('Proxies')).toBeTruthy();
+      expect(screen.getByText(/Not allowed here/)).toBeTruthy();
+      expect((screen.getByLabelText(/Measure/) as HTMLSelectElement).value).toBe('tokens');
+      expect(screen.getByText(/Not one of the choices/)).toBeTruthy();
+    });
+
+    it('takes a key the kind does not allow out of the value once it is emptied', () => {
+      const seen: Record<string, unknown>[] = [];
+      render(<SchemaForm schema={policy} value={{ kind: 'agent', match: { proxy: ['openai'] } }} onChange={(next) => seen.push(next)} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Remove item' }));
+      expect(seen.at(-1)).toEqual({ kind: 'agent', match: {} });
+      expect(screen.queryByText('Proxies')).toBeNull();
+    });
+  });
 });
