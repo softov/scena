@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Markdown } from '../display/Markdown.js';
 import './_field-parts.css';
 
 // Shared field chrome for the controls. All <span>s so they are valid inside a
@@ -25,9 +26,11 @@ export function ControlLabel({ label, required, typeTag, extra }: ControlLabelPr
   );
 }
 
+// A hint is Markdown: a schema's description often carries steps, emphasis or
+// a link. A plain sentence renders as one paragraph, as before.
 export function ControlHint({ text }: { text?: string }) {
   if (!text) return null;
-  return <span className="oo-field__hint">{text}</span>;
+  return <Markdown text={text} className="oo-field__hint" />;
 }
 
 export function ControlError({ text }: { text?: string }) {

@@ -33,6 +33,31 @@ describe('SchemaForm', () => {
     expect(value).toEqual({ token: '' });
   });
 
+  it('renders a field description as Markdown in the hint', () => {
+    const { container } = render(
+      <SchemaForm
+        schema={{
+          type: 'object',
+          properties: {
+            token: {
+              type: 'string',
+              title: 'Bot Token',
+              description: '\n**Authentication**:\n\n1. Talk to the [Botfather](https://telegram.me/BotFather).\n2. Type in "/newbot"',
+            },
+            name: { type: 'string', description: 'What the list shows.' },
+          },
+        }}
+        value={{}}
+        onChange={() => {}}
+      />,
+    );
+
+    expect(screen.getByText('Authentication').tagName).toBe('STRONG');
+    expect(container.querySelectorAll('.oo-field__hint ol > li')).toHaveLength(2);
+    expect(screen.getByRole('link', { name: 'Botfather' }).getAttribute('href')).toBe('https://telegram.me/BotFather');
+    expect(screen.getByText('What the list shows.').tagName).toBe('P');
+  });
+
   it('writes its JSON in the editor it is given, and a parsed edit reaches onChange', () => {
     const seen: unknown[] = [];
     const { container } = render(

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Markdown } from '../display/Markdown.js';
 import { useFormContext } from './Form.js';
 import './Field.css';
 
@@ -31,7 +32,7 @@ export interface FieldHintProps {
 
 export function FieldHint({ text }: FieldHintProps) {
   if (!text) return null;
-  return <span className="oo-field__hint oo-field-row__hint">{text}</span>;
+  return <Markdown text={text} className="oo-field__hint oo-field-row__hint" />;
 }
 
 export interface FieldErrorProps {
