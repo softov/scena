@@ -62,6 +62,8 @@ export type PickerAction =
       // Shown on hover only, for words too long to sit in the row.
       tooltip?: string;
       icon?: string;
+      // An image drawn in the icon's place, e.g. a `data:` URI; wins over `icon`.
+      iconSrc?: string;
       color?: ResourceColor;
       // Chat typed-prefix shown on the left of the row (e.g. '/agent').
       shortcut?: string;

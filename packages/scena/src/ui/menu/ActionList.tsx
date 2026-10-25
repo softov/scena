@@ -29,6 +29,7 @@ interface Row {
   description?: string;
   tooltip?: string;
   icon?: string;
+  iconSrc?: string;
   color?: string;
   // Chat typed-prefix (e.g. '/agent', '@persona') — what the user types into
   // a chat input to trigger this command. Renders as <kbd> on the left of
@@ -185,6 +186,7 @@ export function ActionList({
         description: a.description,
         tooltip: a.tooltip,
         icon: a.icon,
+        iconSrc: a.iconSrc,
         color: a.color,
         shortcut: a.shortcut,
         keys: a.keys,
@@ -489,7 +491,7 @@ export function ActionList({
         onMouseEnter={() => { if (isInteractive) setSelected(capturedIndex); }}
         onClick={() => { if (isInteractive) void choose(row); }}
       >
-        <span className="oo-icon">{row.icon ?? '·'}</span>
+        <span className="oo-icon">{row.iconSrc ? <img src={row.iconSrc} alt="" /> : row.icon ?? '·'}</span>
         {rich ? (
           <span className="oo-action-list__text">
             <span className="oo-action-list__title">{row.title}</span>
