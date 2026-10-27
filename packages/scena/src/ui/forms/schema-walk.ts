@@ -32,7 +32,8 @@ export interface JsonSchemaField {
   items?: JsonSchemaField | JsonSchemaField[];
   properties?: Record<string, JsonSchemaField>;
   required?: string[];
-  additionalProperties?: boolean;
+  /** `false` takes no other key; a schema is what each other key holds, as in a map. */
+  additionalProperties?: boolean | JsonSchemaField;
   /** What an object's keys must match; an `enum` here names the only keys it allows. */
   propertyNames?: JsonSchemaField;
   /** Show this field only when a sibling field equals a value. */
@@ -186,6 +187,7 @@ export function effectiveType(field: JsonSchemaField): string {
   }
   if (!t && field.items) return 'array';
   if (!t && field.properties) return 'object';
+  if (!t && mapValueSchema(field) !== undefined) return 'object';
   return (t as string | undefined) ?? 'string';
 }
 
@@ -202,6 +204,46 @@ export function normalizeUnionOptions(field: JsonSchemaField): JsonSchemaField[]
   }));
 }
 
+// The schema of each value of a map: an object's `additionalProperties` when
+// that is a schema, so the keys are the person's to name. Undefined otherwise.
+export function mapValueSchema(schema: JsonSchemaField | JsonSchemaObject): JsonSchemaField | undefined {
+  return isObjectRecord(schema.additionalProperties) ? schema.additionalProperties as JsonSchemaField : undefined;
+}
+
+// Whether a schema is `{}`, which is any JSON value: it names no type, choice,
+// shape or format, so no control fits it but its JSON text.
+export function isAnyValue(field: JsonSchemaField): boolean {
+  const shaping: (keyof JsonSchemaField)[] = [
+    'type', 'enum', 'x-enumOptions', 'const', 'oneOf', 'anyOf', 'allOf', 'if', 'properties', 'items', 'additionalProperties', 'format',
+  ];
+  return shaping.every((keyword) => field[keyword] === undefined);
+}
+
+// Whether a value has the JSON type a schema names. A schema that names none fits.
+function fitsType(field: JsonSchemaField, value: unknown): boolean {
+  const named = field.type === undefined ? [] : Array.isArray(field.type) ? field.type : [field.type];
+  if (named.length === 0) return true;
+  return named.some((type) => {
+    if (type === 'null') return value === null;
+    if (type === 'array') return Array.isArray(value);
+    if (type === 'object') return isObjectRecord(value);
+    if (type === 'integer') return Number.isInteger(value);
+    return typeof value === type;
+  });
+}
+
+// The union option a value already is: the first whose type, required keys
+// and allowed keys it fits. 0 when there is no value or none fits.
+export function unionIndexOf(options: JsonSchemaField[], value: unknown): number {
+  if (value === undefined) return 0;
+  const found = options.findIndex((option) => {
+    if (!fitsType(option, value) || !matchesSchema(option, value)) return false;
+    const allowed = allowedKeys(option);
+    return allowed === undefined || !isObjectRecord(value) || Object.keys(value).every((key) => allowed.includes(key));
+  });
+  return found === -1 ? 0 : found;
+}
+
 // null → tuple arrays (edited as raw JSON); object → item schema.
 export function resolveArrayItemSchema(field: JsonSchemaField): JsonSchemaField | null {
   if (!field.items) return { type: 'string' };
@@ -216,7 +258,9 @@ export function defaultValueForSchema(field: JsonSchemaField): unknown {
   }
   if (field.default !== undefined) return field.default;
   if (field.const !== undefined) return field.const;
+  if (isAnyValue(field)) return null;
   const type = effectiveType(field);
+  if (type === 'null') return null;
   if (type === 'boolean') return false;
   if (type === 'number' || type === 'integer') return 0;
   if (type === 'array') return [];

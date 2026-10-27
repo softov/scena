@@ -15,12 +15,15 @@ import {
   deepEqual,
   defaultValueForSchema,
   effectiveType,
+  isAnyValue,
   isObjectRecord,
+  mapValueSchema,
   normalizeUnionOptions,
   objectSchema,
   resolveArrayItemSchema,
   resolveConditionals,
   textareaRows,
+  unionIndexOf,
 } from './schema-walk.js';
 import './SchemaForm.css';
 import { NAMED_GLYPH } from '../display/Icon.js';
@@ -67,7 +70,7 @@ export interface SchemaFormProps {
   formatRenderers?: Record<string, FormatRenderer>;
   jsonEditor?: JsonEditor;
   // The ways to look at the value, one modebar button each. Default
-  // `[fieldsView, jsonView]`. Nested object sections always get the default.
+  // `[fieldsView, jsonView]`. Nested object sections get the same views.
   views?: SchemaFormView[];
   // The view the form opens on; the first view when unset.
   defaultView?: string;
@@ -191,8 +194,10 @@ export function SchemaForm({
   // The schema as it holds for the value now: a condition the value meets
   // narrows it (fewer choices, fewer keys), and changing the value redraws it.
   const resolved = resolveConditionals(schema, internal);
-  const properties = resolved.properties;
-  if (!properties || Object.keys(properties).length === 0) {
+  const properties = resolved.properties ?? {};
+  // A map names no keys of its own: each other key is the person's, and holds this.
+  const mapValue = mapValueSchema(resolved);
+  if (Object.keys(properties).length === 0 && mapValue === undefined) {
     return <div className="oo-schema-form__empty">No parameters defined.</div>;
   }
 
@@ -292,6 +297,7 @@ export function SchemaForm({
             onChange={set}
             namespace={childNamespace}
             formatRenderers={formatRenderers} jsonEditor={jsonEditor}
+            views={views}
             jsonTextRoot={childToggle}
           />
         </FormSection>
@@ -300,13 +306,14 @@ export function SchemaForm({
 
     // Composite — owns no single focusable input, so Field provides the label.
     const isComposite =
+      isAnyValue(field) ||
       normalizeUnionOptions(field).length > 0 ||
       type === 'array' ||
       hasFormatRenderer(field, formatRenderers);
     if (isComposite) {
       return (
         <Field key={key} name={key} label={meta.label} hint={meta.hint} required={meta.required} typeTag={meta.typeTag} error={meta.error}>
-          <SchemaControl field={field} value={internal[key]} onChange={set} required={meta.required} error={meta.error} namespace={childNamespace} formatRenderers={formatRenderers} jsonEditor={jsonEditor} jsonTextFields={childToggle} />
+          <SchemaControl field={field} value={internal[key]} onChange={set} required={meta.required} error={meta.error} namespace={childNamespace} formatRenderers={formatRenderers} jsonEditor={jsonEditor} views={views} jsonTextFields={childToggle} />
         </Field>
       );
     }
@@ -323,6 +330,7 @@ export function SchemaForm({
         error={meta.error}
         namespace={childNamespace}
         formatRenderers={formatRenderers} jsonEditor={jsonEditor}
+        views={views}
       />
     );
   }
@@ -364,6 +372,20 @@ export function SchemaForm({
       hasView={(id) => viewList.some((one) => one.id === id)}
     />
   );
+  // Only the fields view draws fields; every other view holds the whole value, map keys included.
+  const mapRows = mapValue !== undefined && activeView.id === fieldsView.id ? (
+    <MapControl
+      valueSchema={mapValue}
+      value={internal}
+      named={Object.keys(properties)}
+      onChange={commit}
+      namespace={namespace}
+      formatRenderers={formatRenderers}
+      jsonEditor={jsonEditor}
+      views={views}
+      jsonTextFields={childToggle}
+    />
+  ) : null;
 
   // Suppress ambient write-back for the field controls: each control reports
   // through its explicit onChange, and SchemaForm aggregates into one object.
@@ -375,6 +397,7 @@ export function SchemaForm({
             {schema.description ? <Markdown text={schema.description} /> : null}
             {modebar}
             {body}
+            {mapRows}
           </div>
         </JsonValidityContext.Provider>
       </WriteContext.Provider>
@@ -398,14 +421,16 @@ interface SchemaControlProps {
   namespace?: string;
   formatRenderers?: Record<string, FormatRenderer>;
   jsonEditor?: JsonEditor;
+  // The views nested object forms rendered by this control offer.
+  views?: SchemaFormView[];
   // Whether nested object forms rendered by this control show their switch.
   jsonTextFields?: boolean;
 }
 
-function SchemaControl({ field, value, onChange, meta, required, error, namespace, formatRenderers, jsonEditor, jsonTextFields }: SchemaControlProps) {
+function SchemaControl({ field, value, onChange, meta, required, error, namespace, formatRenderers, jsonEditor, views, jsonTextFields }: SchemaControlProps) {
   const { t } = useI18n();
   const unionOptions = normalizeUnionOptions(field);
-  const [unionIndex, setUnionIndex] = useState(0);
+  const [unionIndex, setUnionIndex] = useState(() => unionIndexOf(unionOptions, value));
 
   // Union (oneOf / anyOf): pick a variant, then render its sub-schema.
   if (unionOptions.length > 0) {
@@ -413,12 +438,14 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
     const current = unionOptions[idx] ?? unionOptions[0]!;
     const options: ChoiceOption[] = unionOptions.map((opt, i) => {
       const t = effectiveType(opt);
+      // An object option with no title is named by its keys, so two read apart.
+      const keys = opt.properties ? Object.keys(opt.properties) : [];
       const enumLabel =
         opt.const !== undefined
           ? String(opt.const)
           : opt.enum && opt.enum.length === 1
             ? opt.enum[0]!
-            : opt.title ?? t;
+            : opt.title ?? (t === 'object' && keys.length > 0 ? `{ ${keys.join(', ')} }` : t);
       return { value: String(i), label: opt.title ? `${opt.title} (${enumLabel})` : enumLabel };
     });
     return (
@@ -433,7 +460,7 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
             onChange(defaultValueForSchema(unionOptions[safe]!));
           }}
         />
-        <SchemaControl field={current} value={value} onChange={onChange} namespace={namespace} formatRenderers={formatRenderers} jsonEditor={jsonEditor} jsonTextFields={jsonTextFields} />
+        <SchemaControl field={current} value={value} onChange={onChange} namespace={namespace} formatRenderers={formatRenderers} jsonEditor={jsonEditor} views={views} jsonTextFields={jsonTextFields} />
       </div>
     );
   }
@@ -444,7 +471,15 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
     return <Renderer value={value} onChange={onChange} field={field} error={error} />;
   }
 
+  // `{}` is any JSON value, so only its JSON text can hold it.
+  if (isAnyValue(field)) {
+    return <JsonText value={value} fits={() => true} shape="JSON" onChange={onChange} jsonEditor={jsonEditor} fitRows />;
+  }
+
   const type = effectiveType(field);
+
+  // `null` is the whole value: there is nothing to type.
+  if (type === 'null') return null;
 
   // Enum / rich enum → ChoicePicker (owns its label via meta).
   if ((field.enum && field.enum.length > 0) || (field['x-enumOptions'] && field['x-enumOptions'].length > 0)) {
@@ -521,7 +556,7 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
   }
 
   if (type === 'array') {
-    return <ArrayControl field={field} value={value} onChange={onChange} namespace={namespace} formatRenderers={formatRenderers} jsonEditor={jsonEditor} jsonTextFields={jsonTextFields} />;
+    return <ArrayControl field={field} value={value} onChange={onChange} namespace={namespace} formatRenderers={formatRenderers} jsonEditor={jsonEditor} views={views} jsonTextFields={jsonTextFields} />;
   }
 
   if (type === 'object') {
@@ -532,6 +567,7 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
         onChange={(next) => onChange(next)}
         namespace={namespace}
         formatRenderers={formatRenderers} jsonEditor={jsonEditor}
+        views={views}
         jsonTextRoot={jsonTextFields}
       />
     );
@@ -555,10 +591,21 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
   );
 }
 
-// A tuple array as JSON text. It holds the text it shows, so a draft that does
-// not parse stays on screen with its error instead of snapping back.
-function TupleJson({ items, onChange, jsonEditor }: { items: unknown[]; onChange: (next: unknown) => void; jsonEditor?: JsonEditor }) {
-  const shown = JSON.stringify(items, null, 2);
+// A value as JSON text: a tuple array, or a value of any JSON shape. It holds
+// the text it shows, so a draft that does not parse stays on screen with its
+// error instead of snapping back.
+interface JsonTextProps {
+  value: unknown;
+  fits: (parsed: unknown) => boolean;
+  shape: string;
+  onChange: (next: unknown) => void;
+  jsonEditor?: JsonEditor;
+  /** Grow the text box with its lines, up to five, instead of five always. */
+  fitRows?: boolean;
+}
+
+function JsonText({ value, fits, shape, onChange, jsonEditor, fitRows }: JsonTextProps) {
+  const shown = value === undefined ? '' : JSON.stringify(value, null, 2);
   const [text, setText] = useState(shown);
   const [error, setError] = useState<string | null>(null);
   // The value this editor last sent; any other value came from outside, as a reset, and replaces the text.
@@ -572,7 +619,7 @@ function TupleJson({ items, onChange, jsonEditor }: { items: unknown[]; onChange
   useJsonValidity(error);
   const edit = (next: string): void => {
     setText(next);
-    const problem = jsonProblem(next, Array.isArray, 'an array');
+    const problem = jsonProblem(next, fits, shape);
     setError(problem.error);
     if (problem.error !== null) return;
     sent.current = JSON.stringify(problem.parsed, null, 2);
@@ -580,7 +627,7 @@ function TupleJson({ items, onChange, jsonEditor }: { items: unknown[]; onChange
   };
   return (
     <>
-      {jsonEditor ? <JsonEditorBox editor={jsonEditor} value={text} onChange={edit} /> : <TextField multiline rows={5} value={text} onChange={edit} />}
+      {jsonEditor ? <JsonEditorBox editor={jsonEditor} value={text} onChange={edit} /> : <TextField multiline rows={fitRows ? Math.min(5, text.split('\n').length) : 5} value={text} onChange={edit} />}
       <JsonError error={error} />
     </>
   );
@@ -595,16 +642,17 @@ interface ArrayControlProps {
   namespace?: string;
   formatRenderers?: Record<string, FormatRenderer>;
   jsonEditor?: JsonEditor;
+  views?: SchemaFormView[];
   jsonTextFields?: boolean;
 }
 
-function ArrayControl({ field, value, onChange, namespace, formatRenderers, jsonEditor, jsonTextFields }: ArrayControlProps) {
+function ArrayControl({ field, value, onChange, namespace, formatRenderers, jsonEditor, views, jsonTextFields }: ArrayControlProps) {
   const { t } = useI18n();
   const items = Array.isArray(value) ? value : [];
   const itemSchema = resolveArrayItemSchema(field);
 
   // Tuple arrays — edited as raw JSON.
-  if (!itemSchema) return <TupleJson items={items} onChange={onChange} jsonEditor={jsonEditor} />;
+  if (!itemSchema) return <JsonText value={items} fits={Array.isArray} shape="an array" onChange={onChange} jsonEditor={jsonEditor} />;
 
   return (
     <div className="oo-schema-form__array">
@@ -617,6 +665,7 @@ function ArrayControl({ field, value, onChange, namespace, formatRenderers, json
               onChange={(next) => onChange(items.map((it, i) => (i === index ? next : it)))}
               namespace={namespace}
               formatRenderers={formatRenderers} jsonEditor={jsonEditor}
+              views={views}
               jsonTextFields={jsonTextFields}
             />
           </div>
@@ -637,6 +686,116 @@ function ArrayControl({ field, value, onChange, namespace, formatRenderers, json
       >
         {t('form/addItem', '+ add item')}
       </button>
+    </div>
+  );
+}
+
+// ── Map rows ────────────────────────────────────────────────────────────────
+
+interface MapControlProps {
+  valueSchema: JsonSchemaField;
+  // The whole object: the named keys stay as they are, the rest are rows.
+  value: Record<string, unknown>;
+  named: string[];
+  onChange: (next: Record<string, unknown>) => void;
+  namespace?: string;
+  formatRenderers?: Record<string, FormatRenderer>;
+  jsonEditor?: JsonEditor;
+  views?: SchemaFormView[];
+  jsonTextFields?: boolean;
+}
+
+// The keys of an object that its schema does not name, one row each: a name,
+// a value drawn from `additionalProperties`, and remove. A new row starts from
+// a name typed below the rows.
+function MapControl({ valueSchema, value, named, onChange, namespace, formatRenderers, jsonEditor, views, jsonTextFields }: MapControlProps) {
+  const { t } = useI18n();
+  const [draft, setDraft] = useState('');
+  const entries = Object.keys(value).filter((key) => !named.includes(key));
+  const taken = (name: string): boolean => Object.hasOwn(value, name);
+
+  // A rename keeps the row where it was, so the object's order is the screen's.
+  function rename(from: string, to: string): void {
+    onChange(Object.fromEntries(Object.entries(value).map(([key, held]) => [key === from ? to : key, held])));
+  }
+
+  function remove(key: string): void {
+    const next = { ...value };
+    delete next[key];
+    onChange(next);
+  }
+
+  const draftError = draft !== '' && taken(draft) ? t('form/nameTaken', 'That name is taken.') : undefined;
+  const add = (): void => {
+    if (draft === '' || taken(draft)) return;
+    onChange({ ...value, [draft]: defaultValueForSchema(valueSchema) });
+    setDraft('');
+  };
+
+  return (
+    <div className="oo-schema-form__map">
+      {entries.map((key, index) => (
+        <div className="oo-schema-form__map-entry" key={index}>
+          <MapName name={key} taken={(name) => name !== key && taken(name)} onRename={(to) => rename(key, to)} />
+          <div className="oo-schema-form__map-value">
+            <SchemaControl
+              field={valueSchema}
+              value={value[key]}
+              onChange={(next) => onChange({ ...value, [key]: next })}
+              namespace={namespace}
+              formatRenderers={formatRenderers}
+              jsonEditor={jsonEditor}
+              views={views}
+              jsonTextFields={jsonTextFields}
+            />
+          </div>
+          <button
+            type="button"
+            className="oo-schema-form__array-remove"
+            onClick={() => remove(key)}
+            aria-label={t('form/removeEntry', { fallback: 'Remove {name}', name: key })}
+          >
+            {NAMED_GLYPH.closePanel}
+          </button>
+        </div>
+      ))}
+      <div className="oo-schema-form__map-add">
+        <TextField
+          value={draft}
+          placeholder={t('form/entryName', 'Name')}
+          onChange={setDraft}
+          error={draftError}
+        />
+        <button type="button" className="oo-btn oo-schema-form__array-add" disabled={draft === '' || draftError !== undefined} onClick={add}>
+          {t('form/addEntry', '+ add')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// A row's name. It holds what is typed, and renames the key only while the
+// text is a name no other row has, so a half-typed clash never takes a value.
+function MapName({ name, taken, onRename }: { name: string; taken: (name: string) => boolean; onRename: (to: string) => void }) {
+  const { t } = useI18n();
+  const [text, setText] = useState(name);
+  // A name that changed from outside, as a reset, replaces the text.
+  useEffect(() => {
+    setText((current) => (current === '' || taken(current) ? current : name));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name]);
+  const error = text === '' ? t('form/nameEmpty', 'A name is needed.') : taken(text) ? t('form/nameTaken', 'That name is taken.') : undefined;
+  return (
+    <div className="oo-schema-form__map-name">
+      <TextField
+        value={text}
+        placeholder={t('form/entryName', 'Name')}
+        error={error}
+        onChange={(next) => {
+          setText(next);
+          if (next !== '' && !taken(next) && next !== name) onRename(next);
+        }}
+      />
     </div>
   );
 }

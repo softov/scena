@@ -200,3 +200,32 @@
   border: 0;
   border-top: 1px solid var(--oo-color-border);
 }
+
+.oo-schema-form__map {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oo-spacing-sm);
+}
+.oo-schema-form__map-entry {
+  padding-bottom: var(--oo-spacing-sm);
+  border-bottom: 1px solid var(--oo-color-border);
+}
+.oo-schema-form__map-entry,
+.oo-schema-form__map-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--oo-spacing-xs);
+  align-items: flex-start;
+}
+.oo-schema-form__map-name {
+  flex: 0 1 14rem;
+  min-width: 8rem;
+}
+.oo-schema-form__map-value {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+.oo-schema-form__map-add > :first-child {
+  flex: 0 1 14rem;
+  min-width: 8rem;
+}

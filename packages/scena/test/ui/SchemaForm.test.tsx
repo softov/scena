@@ -405,4 +405,127 @@ describe('SchemaForm', () => {
       expect(screen.queryByText('Proxies')).toBeNull();
     });
   });
+  describe('maps', () => {
+    const REFERENCE = (keyword: string) => ({
+      type: 'object',
+      properties: { [keyword]: { type: 'string' } },
+      required: [keyword],
+      additionalProperties: false as const,
+    });
+    const ENV = {
+      type: 'object',
+      properties: {
+        env: {
+          type: 'object',
+          title: 'env',
+          additionalProperties: { oneOf: [{ type: 'string' }, { type: 'null' }, REFERENCE('fromEnv'), REFERENCE('$secret')] },
+        },
+      },
+    };
+
+    /** A form that keeps its own value, and reports each one. */
+    function Held({ schema, start, seen }: { schema: object; start: Record<string, unknown>; seen: Record<string, unknown>[] }) {
+      return <SchemaForm schema={schema} defaultValue={start} onChange={(next) => seen.push(next)} jsonTextRoot={false} />;
+    }
+
+    it('draws each key of a map as a name and a value, with the branch its value fits', () => {
+      const seen: Record<string, unknown>[] = [];
+      render(<Held schema={ENV} start={{ env: { BASE: 'https://a', OFF: null, KEY: { fromEnv: 'MY_KEY' } } }} seen={seen} />);
+      expect(screen.queryByText('No parameters defined.')).toBeNull();
+      const names = screen.getAllByPlaceholderText('Name') as HTMLInputElement[];
+      expect(names.map((one) => one.value)).toEqual(['BASE', 'OFF', 'KEY', '']);
+      const pickers = screen.getAllByRole('combobox') as HTMLSelectElement[];
+      expect(pickers.map((one) => one.selectedOptions[0]?.textContent)).toEqual(['string', 'null', '{ fromEnv }']);
+      expect((screen.getByDisplayValue('MY_KEY') as HTMLInputElement).value).toBe('MY_KEY');
+    });
+
+    it('edits a value, renames a key in place, and removes a row', () => {
+      const seen: Record<string, unknown>[] = [];
+      render(<Held schema={ENV} start={{ env: { A: '1', B: '2' } }} seen={seen} />);
+      fireEvent.change(screen.getByDisplayValue('2'), { target: { value: '3' } });
+      expect(seen.at(-1)).toEqual({ env: { A: '1', B: '3' } });
+      fireEvent.change(screen.getByDisplayValue('A'), { target: { value: 'C' } });
+      expect(Object.keys(seen.at(-1)!.env as object)).toEqual(['C', 'B']);
+      fireEvent.click(screen.getByRole('button', { name: 'Remove B' }));
+      expect(seen.at(-1)).toEqual({ env: { C: '1' } });
+    });
+
+    it('does not rename onto a name another row has, and says so', () => {
+      const seen: Record<string, unknown>[] = [];
+      render(<Held schema={ENV} start={{ env: { A: '1', B: '2' } }} seen={seen} />);
+      fireEvent.change(screen.getByDisplayValue('B'), { target: { value: 'A' } });
+      expect(seen).toEqual([]);
+      expect(screen.getByText('That name is taken.')).toBeTruthy();
+    });
+
+    it('adds a row from a typed name, with the first branch\'s value', () => {
+      const seen: Record<string, unknown>[] = [];
+      render(<Held schema={ENV} start={{}} seen={seen} />);
+      const add = screen.getByRole('button', { name: '+ add' }) as HTMLButtonElement;
+      expect(add.disabled).toBe(true);
+      fireEvent.change(screen.getByPlaceholderText('Name'), { target: { value: 'TOKEN' } });
+      fireEvent.click(add);
+      expect(seen.at(-1)).toEqual({ env: { TOKEN: '' } });
+    });
+
+    it('draws a value of any JSON shape as JSON text', () => {
+      const seen: Record<string, unknown>[] = [];
+      const schema = { type: 'object', properties: { extraArgs: { type: 'object', additionalProperties: {} } } };
+      render(<Held schema={schema} start={{ extraArgs: { settings: { allow: ['Read'] }, verbose: null } }} seen={seen} />);
+      const box = screen.getByDisplayValue((text) => text.includes('"allow"')) as HTMLTextAreaElement;
+      fireEvent.change(box, { target: { value: '{ "allow": ["Write"] }' } });
+      expect(seen.at(-1)).toEqual({ extraArgs: { settings: { allow: ['Write'] }, verbose: null } });
+      fireEvent.change(screen.getAllByPlaceholderText('Name').at(-1)!, { target: { value: 'debug' } });
+      fireEvent.click(screen.getByRole('button', { name: '+ add' }));
+      expect((seen.at(-1)!.extraArgs as Record<string, unknown>).debug).toBeNull();
+    });
+
+    it('keeps the named keys as fields and the others as rows', () => {
+      const seen: Record<string, unknown>[] = [];
+      const schema = { type: 'object', properties: { name: { type: 'string', title: 'Name field' } }, additionalProperties: { type: 'string' } };
+      render(<Held schema={schema} start={{ name: 'n', extra: 'x' }} seen={seen} />);
+      const names = screen.getAllByPlaceholderText('Name') as HTMLInputElement[];
+      expect(names.map((one) => one.value)).toEqual(['extra', '']);
+    });
+
+    /** A consumer's own view: the value as text, with no fields. */
+    const rawView = {
+      id: 'raw',
+      label: 'raw',
+      render: ({ value }: SchemaFormViewProps) => <pre data-testid="raw">{JSON.stringify(value)}</pre>,
+    };
+
+    it('offers a view given at the root on a nested section too', () => {
+      render(
+        <SchemaForm
+          schema={{ type: 'object', properties: { name: { type: 'string' }, env: { type: 'object', title: 'env', additionalProperties: { type: 'string' } } } }}
+          value={{ name: 'a', env: { HOME: '/h' } }}
+          onChange={() => {}}
+          views={[fieldsView, jsonView, rawView]}
+        />,
+      );
+      const raws = screen.getAllByRole('button', { name: 'raw' });
+      expect(raws).toHaveLength(2);
+      fireEvent.click(raws[1]!);
+      expect(screen.getByTestId('raw').textContent).toBe('{"HOME":"/h"}');
+      expect(screen.getByLabelText(/name/)).toBeTruthy();
+    });
+
+    it('draws the rows only in the fields view, not under another view', () => {
+      render(
+        <SchemaForm
+          schema={{ type: 'object', additionalProperties: { type: 'string' } }}
+          value={{ A: '1' }}
+          onChange={() => {}}
+          views={[fieldsView, jsonView, rawView]}
+          defaultView="raw"
+        />,
+      );
+      expect(screen.getByTestId('raw').textContent).toBe('{"A":"1"}');
+      expect(screen.queryAllByPlaceholderText('Name')).toHaveLength(0);
+      expect(screen.queryByRole('button', { name: 'Remove A' })).toBeNull();
+      fireEvent.click(screen.getByRole('button', { name: 'fields' }));
+      expect(screen.getByRole('button', { name: 'Remove A' })).toBeTruthy();
+    });
+  });
 });

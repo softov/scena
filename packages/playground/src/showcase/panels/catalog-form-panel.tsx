@@ -35,6 +35,18 @@ const DEMO_SCHEMA: JsonSchemaObject = {
         retries: { type: 'integer', title: 'Retries' },
       },
     },
+    env: {
+      type: 'object',
+      title: 'Environment',
+      additionalProperties: {
+        oneOf: [
+          { type: 'string' },
+          { type: 'null' },
+          { type: 'object', properties: { fromEnv: { type: 'string' } }, required: ['fromEnv'], additionalProperties: false },
+        ],
+      },
+    },
+    extraArgs: { type: 'object', title: 'Extra arguments', additionalProperties: {} },
     hasSecret: { type: 'boolean', title: 'Has API key?' },
     apiKey: {
       type: 'string',
@@ -83,7 +95,9 @@ const RECORDS: DemoRecord[] = [
     data: {
       name: 'Ada Lovelace', role: 'admin', bio: 'Wrote the first algorithm.', notifications: true,
       maxTokens: 8000, favoriteColor: '#3b82f6', tags: ['math', 'poetry'],
-      advanced: { temperature: 0.7, retries: 2 }, hasSecret: false,
+      advanced: { temperature: 0.7, retries: 2 },
+      env: { HOME: '/home/ada', TOKEN: { fromEnv: 'ADA_TOKEN' }, UNSET: null },
+      extraArgs: { verbose: true, depth: 3 }, hasSecret: false,
     },
   },
   {
