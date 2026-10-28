@@ -257,6 +257,45 @@ describe('SchemaForm', () => {
     expect(document.querySelector('textarea.oo-schema-form__json')).not.toBeNull();
   });
 
+  it('gives a nested field its actions, with its dotted path as the ID', () => {
+    const seen: Record<string, unknown>[] = [];
+    const written: string[] = [];
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: (text: string) => { written.push(text); return Promise.resolve(); } } });
+    const schema = { type: 'object' as const, properties: { machine: { type: 'object' as const, properties: { part: { type: 'string' as const }, state: { type: 'string' as const } } } } };
+    render(<SchemaForm schema={schema} value={{ machine: { part: 'claude', state: '/home/agent' } }} onChange={(next) => seen.push(next)} fieldActions />);
+    expect(screen.getAllByRole('tooltip').map((tip) => tip.textContent)).toEqual(['machine', 'machine.part', 'machine.state']);
+
+    const part = screen.getAllByRole('button', { name: 'Setting actions' })[1]!;
+    fireEvent.click(part);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy setting ID' }));
+    expect(written).toEqual(['machine.part']);
+
+    fireEvent.click(part);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy setting as JSON' }));
+    expect(written.at(-1)).toBe('"part": "claude"');
+
+    fireEvent.click(part);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Reset setting' }));
+    expect(seen.at(-1)).toEqual({ machine: { state: '/home/agent' } });
+  });
+
+  it('copies through a selected text box when the page has no clipboard API', () => {
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
+    const copied: string[] = [];
+    Object.defineProperty(document, 'execCommand', {
+      configurable: true,
+      value: (command: string) => {
+        copied.push(`${command}:${document.querySelector<HTMLTextAreaElement>('textarea[readonly]')?.value}`);
+        return true;
+      },
+    });
+    render(<SchemaForm schema={{ type: 'object', properties: { name: { type: 'string' } } }} value={{ name: 'a' }} onChange={() => {}} fieldActions />);
+    fireEvent.click(screen.getByRole('button', { name: 'Setting actions' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy setting ID' }));
+    expect(copied).toEqual(['copy:name']);
+    expect(document.querySelector('textarea[readonly]')).toBeNull();
+  });
+
   describe('sections view', () => {
     const schema = {
       type: 'object' as const,
