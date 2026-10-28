@@ -1,11 +1,21 @@
 name: Release
 
+# A pushed tag is the whole gesture: `pnpm release:tag --push` after the
+# version bump is merged. Nothing publishes from a branch or a fork.
 on:
   push:
     tags: ['v*']
+  # For rehearsing the whole thing without publishing anything.
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Pack and check, but do not publish
+        type: boolean
+        default: true
 
 permissions:
-  contents: read
+  # The GitHub Release for the tag, with its notes.
+  contents: write
   # The GitHub Packages publish. The built-in GITHUB_TOKEN is enough for it —
   # no PAT to create or rotate — as long as the package scope (@softov) matches
   # the repository owner, which GitHub Packages requires.
@@ -38,6 +48,7 @@ jobs:
       # A tag that disagrees with package.json publishes the wrong version
       # under the right tag, which cannot be undone once it is on npm.
       - name: Verify tag matches package version
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           PKG=$(node -p "require('./packages/scena/package.json').version")
@@ -75,16 +86,47 @@ jobs:
       # `restricted`, and restricted needs a paid plan, so without it the
       # publish fails rather than quietly going private.
 
-      # Node 22 ships npm 10, and OIDC publishing needs 11.5.1+. Safe to take
-      # the newest: npm 12's breaking changes are all install-time defaults
-      # (lifecycle scripts, git and remote dependencies), and nothing here
-      # installs with npm — pnpm does that, three steps up.
-      - name: An npm new enough to speak OIDC
-        run: npm install -g npm@latest
+      # Node 22 ships npm 10, which has neither OIDC publishing (11.5.1+) nor
+      # `npm stage` (12). npm 12's breaking changes are all install-time
+      # defaults (lifecycle scripts, git and remote dependencies), and nothing
+      # here installs with npm — pnpm does that, three steps up.
+      - name: An npm that can stage with OIDC
+        run: |
+          npm install -g npm@12
+          npm --version
 
-      - name: Publish to npm
-        run: npm publish
+      # Staged, not published, as ahpc and ahpd do. The version is uploaded and
+      # held, and nothing is installable until somebody approves it on the
+      # package page. A tag can be pushed by accident; an npm version cannot be
+      # unpublished, so the irreversible step is a person's click.
+      - name: Stage the release on npm
+        if: ${{ inputs.dry_run != true }}
+        run: npm stage publish --provenance
         working-directory: packages/scena
+
+      - name: Say what is waiting
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          echo "Staged. Approve it at https://www.npmjs.com/package/@softov/scena"
+          echo "The approve button stays disabled until npm has finished scanning."
+
+      # A rehearsal on a tree whose version is already on npm is refused, which
+      # is what every dry run before a bump looks like; recognised, so the
+      # rehearsal stays usable at any point and anything else still fails.
+      - name: What would have been staged
+        if: ${{ inputs.dry_run == true }}
+        working-directory: packages/scena
+        run: |
+          set -u
+          said=$(npm stage publish --dry-run 2>&1) && code=0 || code=$?
+          echo "$said"
+          if [ "$code" = "0" ]; then exit 0; fi
+          if printf '%s' "$said" | grep -q 'cannot publish over'; then
+            echo
+            echo "That version is already on npm. Expected until package.json is bumped."
+            exit 0
+          fi
+          exit "$code"
 
       # ── GitHub Packages ──────────────────────────────────────────────────
       # `--registry` is explicit here and required: a command-line registry is
@@ -92,18 +134,27 @@ jobs:
       # npmjs. Without the flag this step publishes to npm a second time and
       # fails on the duplicate version.
       #
-      # No `--provenance` flag anywhere. npmjs gets provenance for free now —
-      # trusted publishing generates it, which is half the reason to want it —
-      # and GitHub Packages rejects the attestation, so it must not be asked
-      # for on this second, separate `npm publish`.
+      # No `--provenance` here: GitHub Packages rejects the attestation.
+      # It has no staging, so this copy is live before npm's is approved; no
+      # consumer reads from it, so that order costs nothing.
       - uses: actions/setup-node@v7
+        if: ${{ inputs.dry_run != true }}
         with:
           node-version: 22
           registry-url: https://npm.pkg.github.com
           scope: '@softov'
 
       - name: Publish to GitHub Packages
+        if: ${{ inputs.dry_run != true }}
         run: npm publish --registry https://npm.pkg.github.com
         working-directory: packages/scena
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── GitHub Release ───────────────────────────────────────────────────
+      # The tag's page on GitHub, with notes from the merged pull requests.
+      - name: Create the GitHub Release
+        if: ${{ inputs.dry_run != true }}
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --title "@softov/scena $GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

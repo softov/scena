@@ -95,46 +95,63 @@ That step finds an export that points at a file the build did not emit.
 
 ## Releases
 
-A release publishes `@softov/scena` to two registries:
+A release publishes `@softov/scena` in three places:
 
-1. **npmjs.org.** This is the registry that consumers use. It needs no configuration.
-2. **GitHub Packages.** A copy. Every read from it needs a token, also for a public package.
+1. **npmjs.org.** This is the registry that consumers use.
+   It needs no configuration.
+   The release is staged there, and you approve it on the package page.
+2. **GitHub Packages.** A copy.
+   Every read from it needs a token, also for a public package.
+3. **GitHub Releases.** A page for the tag, with notes from the merged pull requests.
 
 You cannot overwrite a version in either registry.
 Do every check before you push the tag.
 
 ### Cut a release
 
-`scripts/publish.mjs` does the work before the tag.
+A release is two steps, as in ahpc and ahpd: a pull request with the version bump, then a tag on `main`.
+`scripts/publish.mjs` does the work for both.
 It runs the same checks as the release workflow, so a release that would fail in CI fails on your machine first.
 Your working tree must be clean, and your branch must not be behind `origin`.
 
-```bash
-pnpm release:check patch     # a dry run: checks and the next version, no changes
-pnpm release patch           # 0.5.1 -> 0.5.2: checks, bump, commit, tag
-pnpm release minor           # 0.5.1 -> 0.6.0
-pnpm release 1.0.0-rc.1      # an exact version
-pnpm release patch --push    # also push the commit and the tag
-```
+1. Bump the version on a branch, and open its pull request:
 
-Without `--push`, look at the commit and the tag, then push both:
+   ```bash
+   pnpm release:check patch     # a dry run: checks and the next version, no changes
+   pnpm release patch --push    # 0.5.1 -> 0.5.2 on the branch release/v0.5.2, pushed
+   pnpm release minor --push    # 0.5.1 -> 0.6.0
+   pnpm release 1.0.0-rc.1 --push   # an exact version
+   ```
 
-```bash
-git push origin main
-git push origin v0.5.2
-```
+2. After the pull request is merged, tag `main`:
+
+   ```bash
+   git switch main && git pull
+   pnpm release:tag --push      # tags v0.5.2 and pushes the tag
+   ```
+
+   Without `--push`, look at the tag, then push it with `git push origin v0.5.2`.
+
+3. When the release workflow is done, approve the staged version on https://www.npmjs.com/package/@softov/scena.
+   The approve button stays disabled until npm has finished scanning.
 
 The script does not publish.
-The tag starts the publish in CI.
+The tag starts the release in CI, and nothing is installable from npm until you approve it.
+
+To rehearse the workflow without publishing, run it by hand from the Actions tab: **Release**, **Run workflow**, with **dry_run** ticked.
 
 ### What the release workflow does
 
 `.github/workflows/release.yml` runs on each `v*` tag:
 
-1. It checks that the tag matches the version in `packages/scena/package.json`. If they differ, it stops.
+1. It checks that the tag matches the version in `packages/scena/package.json`.
+   If they differ, it stops.
 2. It runs `typecheck`, `lint`, `test` and `build`.
-3. It publishes to npmjs.org with trusted publishing (OIDC). There is no npm token to keep or rotate.
+3. It stages the release on npmjs.org with trusted publishing (OIDC) and provenance.
+   There is no npm token to keep or rotate.
 4. It publishes to GitHub Packages with the workflow's own `GITHUB_TOKEN`.
+   GitHub Packages has no staging, so this copy is live first.
+5. It creates the GitHub Release for the tag.
 
 npm trusts this repository and the workflow file name `release.yml`.
 If you rename the file, update the package's Trusted Publisher settings on npmjs.org, or the publish fails.
