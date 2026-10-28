@@ -231,7 +231,7 @@ Everything is a CSS custom property, and the two themes set the same names:
 --oo-radius-sm      --oo-<surface>-size  --oo-<surface>-visible
 ```
 
-A theme sets either the `--oo-rgb-*` channels (`--oo-rgb-accent: 78 201 176`) or the resolved `--oo-color-*` tokens (`--oo-color-accent: #586e75`). The resolved tokens are derived from the channels, so setting a channel moves every colour built on it; setting a resolved token moves that colour alone. scena's own styles read the resolved tokens, and derive a tint with relative colour syntax (`rgb(from var(--oo-color-primary) r g b / 0.88)`), so both kinds of theme work.
+A theme sets either the `--oo-rgb-*` channels (`--oo-rgb-accent: 91 155 255`) or the resolved `--oo-color-*` tokens (`--oo-color-accent: #586e75`). The resolved tokens are derived from the channels, so setting a channel moves every colour built on it; setting a resolved token moves that colour alone. scena's own styles read the resolved tokens, and derive a tint with relative colour syntax (`rgb(from var(--oo-color-primary) r g b / 0.88)`), so both kinds of theme work.
 
 scena ships six themes beside its default: VS Modern, Solarized, Paper, Coder, Sunset and Forest. Register them before the first `applyTheme()`, so a stored choice resolves:
 
