@@ -1,22 +1,24 @@
 // Cut a release of @softov/scena.
 //
-// The publish itself happens in CI, on the tag (.github/workflows/release.yml),
-// to npmjs and then to GitHub Packages. npmjs is the one consumers resolve
-// from, because GitHub Packages demands an auth header on every read.
+// The publish itself happens in CI, on the tag (.github/workflows/release.yml):
+// staged on npmjs until somebody approves it there, a copy on GitHub Packages,
+// and a GitHub Release. npmjs is the one consumers resolve from, because GitHub
+// Packages demands an auth header on every read.
 //
-// This does everything that has to be true before that tag exists, because a
-// tag is the one step with no undo: neither registry lets a version be
-// overwritten, and unpublishing is not something to plan around.
+// Two steps, as ahpc and ahpd release. The bump is a pull request; the tag is
+// cut from main once it is merged:
 //
-//   node scripts/publish.mjs patch          1.2.3 -> 1.2.4
+//   node scripts/publish.mjs patch          1.2.3 -> 1.2.4 on a branch release/v1.2.4
 //   node scripts/publish.mjs minor
 //   node scripts/publish.mjs 2.0.0-rc.1     an exact version
-//   node scripts/publish.mjs patch --push   also push, which starts the publish
+//   node scripts/publish.mjs patch --push   also push the branch, for its pull request
 //   node scripts/publish.mjs patch --dry-run
+//   node scripts/publish.mjs tag            tag main's version once the bump is merged
+//   node scripts/publish.mjs tag --push     also push the tag, which stages the publish
 //
-// It runs the same four checks the release workflow runs, so a release that
-// would fail in CI fails here instead - before the version is bumped, before
-// the commit, and before anything is pushed.
+// Both run the same four checks the release workflow runs, so a release that
+// would fail in CI fails here instead - before the version is bumped, and
+// before the tag exists.
 //
 // It deliberately does NOT publish. Doing both would race the workflow.
 import { execFileSync } from 'node:child_process';
@@ -67,12 +69,18 @@ function nextVersion(current, bump) {
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 const registry = manifest.publishConfig?.registry;
 
-if (request === undefined) fail('say which version: patch, minor, major, or an exact X.Y.Z');
-const version = nextVersion(manifest.version, request);
-if (version === null) fail(`"${request}" is not patch, minor, major, or a version`);
+if (request === undefined) fail('say which version: patch, minor, major, an exact X.Y.Z, or tag');
+// `tag` releases the version main already carries; anything else bumps it.
+const tagging = request === 'tag';
+const version = tagging ? manifest.version : nextVersion(manifest.version, request);
+if (version === null) fail(`"${request}" is not patch, minor, major, a version, or tag`);
 
-console.log(`release: ${manifest.name} ${manifest.version} -> ${version}`);
-console.log(`release: publishes to ${registry ?? '(no publishConfig!)'} when the tag lands\n`);
+console.log(
+  tagging
+    ? `release: tag ${manifest.name} ${version}`
+    : `release: ${manifest.name} ${manifest.version} -> ${version}`,
+);
+console.log(`release: stages on ${registry ?? '(no publishConfig!)'} when the tag lands\n`);
 
 // ── Where it would go ─────────────────────────────────────────────────────
 // Without publishConfig, npm defaults to public npmjs. scena is private, and an
@@ -104,6 +112,14 @@ try {
   const output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
   if (!/no upstream|does not point to a branch/iu.test(output)) throw error;
   console.warn('release: branch has no upstream, skipping the behind-check');
+}
+
+// The tag names what is on origin's main: the merged bump, nothing local.
+if (tagging) {
+  const branch = run('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { capture: true }).trim();
+  if (branch !== 'main') fail(`tag from main, not ${branch}`);
+  const ahead = run('git', ['rev-list', '--count', 'origin/main..HEAD'], { capture: true }).trim();
+  if (ahead !== '0') fail(`main is ${ahead} commit(s) ahead of origin - the tag must name a pushed commit`);
 }
 
 const tag = `v${version}`;
@@ -175,35 +191,46 @@ if (dryRun) {
   process.exit(0);
 }
 
-// ── Bump, commit, tag ─────────────────────────────────────────────────────
-// Everything above this line is read-only, so a failure there leaves nothing
-// behind. From here it does not, and a run that dies between the write and the
-// commit leaves a bumped-and-staged version that the next run then refuses as a
-// dirty tree - so the three steps undo themselves as one.
-const original = readFileSync(manifestPath, 'utf8');
 const packageName = manifest.name;
+
+// ── Tag main ──────────────────────────────────────────────────────────────
+if (tagging) {
+  run('git', ['tag', '-a', tag, '-m', `${packageName} ${tag}`]);
+  if (!push) {
+    // Not pushed by default: pushing the tag is what starts the release.
+    console.log(`\nrelease: tagged ${tag}, not pushed. Pushing it stages the publish:\n`);
+    console.log(`  git push origin ${tag}`);
+    process.exit(0);
+  }
+  run('git', ['push', 'origin', tag]);
+  console.log(`\nrelease: pushed ${tag}. When the Release workflow is done, approve it at`);
+  console.log(`  https://www.npmjs.com/package/${packageName}`);
+  process.exit(0);
+}
+
+// ── Bump on a branch, for a pull request ──────────────────────────────────
+// Everything above this line is read-only, so a failure there leaves nothing
+// behind. From here it does not, so the branch, the write and the commit undo
+// themselves as one.
+const original = readFileSync(manifestPath, 'utf8');
+const start = run('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { capture: true }).trim();
+const branch = `release/${tag}`;
 try {
+  run('git', ['switch', '--quiet', '-c', branch]);
   manifest.version = version;
   // The trailing newline is preserved, so the release commit is a one-line diff.
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   run('git', ['add', 'packages/scena/package.json']);
   run('git', ['commit', '-m', `release: ${packageName} ${tag}`]);
-  run('git', ['tag', '-a', tag, '-m', `${packageName} ${tag}`]);
 } catch (error) {
   writeFileSync(manifestPath, original);
   run('git', ['reset', '--quiet', 'HEAD', '--', 'packages/scena/package.json']);
-  fail(`could not commit and tag, version left at ${JSON.parse(original).version}:\n${error.message}`);
+  run('git', ['switch', '--quiet', start]);
+  run('git', ['branch', '--quiet', '-D', branch]);
+  fail(`could not commit the bump, version left at ${JSON.parse(original).version}:\n${error.message}`);
 }
 
-if (!push) {
-  // Not pushed by default. Pushing the tag is what starts the publish, and that
-  // is the irreversible half - it should be a thing somebody types.
-  console.log(`\nrelease: committed and tagged ${tag}, not pushed.`);
-  console.log(`release: pushing the tag starts the publish:\n`);
-  console.log(`  git push && git push origin ${tag}`);
-  process.exit(0);
-}
-
-run('git', ['push']);
-run('git', ['push', 'origin', tag]);
-console.log(`\nrelease: pushed ${tag}. Watch the Release workflow for the publish.`);
+if (push) run('git', ['push', '--quiet', '-u', 'origin', branch]);
+console.log(`\nrelease: bumped to ${version} on ${branch}${push ? ', pushed' : ''}.`);
+console.log(`release: open its pull request; once it is merged, on main:\n`);
+console.log(`  git pull && pnpm release:tag --push`);

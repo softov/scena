@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "release": "node scripts/publish.mjs",
-    "release:check": "node scripts/publish.mjs --dry-run"
+    "release:check": "node scripts/publish.mjs --dry-run",
+    "release:tag": "node scripts/publish.mjs tag"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
