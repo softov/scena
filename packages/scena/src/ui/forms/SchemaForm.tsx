@@ -91,10 +91,13 @@ export interface SchemaFormProps {
   // tuple array's, starts or stops parsing. While it does not parse, the value
   // is the last one that did, so a consumer holds its save until this is true.
   onJsonValidChange?: (valid: boolean) => void;
-  // Each top-level field shows its key in a tooltip and offers a gear menu:
-  // reset (takes the key out of the value), copy its key or its JSON, show the
-  // JSON view. Off by default.
+  // Each field, nested ones included, shows its dotted path in a tooltip and
+  // offers a gear menu: reset (takes the key out of the value), copy its path
+  // or its JSON, show the JSON view. Off by default.
   fieldActions?: boolean;
+  // The dotted path of the object this form edits inside the root form, set
+  // on nested sections; field paths start from it.
+  fieldPath?: string;
   style?: CSSProperties;
 }
 
@@ -138,6 +141,7 @@ export function SchemaForm({
   onDirtyChange,
   onJsonValidChange,
   fieldActions,
+  fieldPath,
   style,
 }: SchemaFormProps) {
   const { t } = useI18n();
@@ -255,6 +259,7 @@ export function SchemaForm({
       <FieldRow
         key={key}
         fieldKey={key}
+        fieldId={fieldPath === undefined ? key : `${fieldPath}.${key}`}
         value={inValue ? internal[key] : field.default}
         inValue={inValue}
         onReset={() => {
@@ -299,6 +304,8 @@ export function SchemaForm({
             formatRenderers={formatRenderers} jsonEditor={jsonEditor}
             views={views}
             jsonTextRoot={childToggle}
+            fieldActions={fieldActions}
+            fieldPath={fieldPath === undefined ? key : `${fieldPath}.${key}`}
           />
         </FormSection>
       );

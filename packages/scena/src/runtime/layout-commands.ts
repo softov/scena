@@ -12,6 +12,7 @@ import type { SurfaceName } from '../sdk/mount-surface.js';
 import { combineDisposables } from '../sdk/disposable.js';
 import { BindingPath } from '../sdk/component-graph.js';
 import { translate } from '../core/i18n/registry.js';
+import { copyText } from '../core/clipboard.js';
 
 function joinAbs(root: BindingPath | undefined, rel: string): BindingPath {
   if (rel.startsWith('$/')) return rel as BindingPath;
@@ -259,7 +260,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
       run: (ctx) => {
         const key = ctxTab(ctx);
         if (!key) return;
-        void navigator.clipboard?.writeText(key);
+        void copyText(key);
         ctx.host?.closeMenu();
       },
     }),
