@@ -222,10 +222,13 @@ describe('SchemaForm', () => {
     expect(seen.at(-1)).toEqual({ name: 'from view' });
   });
 
+  // The key a field's button shows, read through the button's description.
+  const keyOf = (button: HTMLElement): string | null => document.getElementById(button.getAttribute('aria-describedby') ?? '')?.textContent ?? null;
+
   it('draws no field actions unless asked', () => {
     render(<SchemaForm schema={{ type: 'object', properties: { name: { type: 'string' } } }} value={{ name: 'a' }} onChange={() => {}} />);
     expect(screen.queryByRole('button', { name: 'Setting actions' })).toBeNull();
-    expect(screen.queryByRole('tooltip')).toBeNull();
+    expect(document.querySelector('.oo-schema-form__key')).toBeNull();
   });
 
   it('shows a field\'s key, resets it out of the value, copies it, and shows the JSON', () => {
@@ -234,9 +237,9 @@ describe('SchemaForm', () => {
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: (text: string) => { written.push(text); return Promise.resolve(); } } });
     const schema = { type: 'object' as const, properties: { closedChats: { type: 'string' as const, title: 'Closed chats', default: 'hidden' } } };
     const { rerender } = render(<SchemaForm schema={schema} value={{ closedChats: 'delete' }} onChange={(next) => seen.push(next)} fieldActions />);
-    expect(screen.getByRole('tooltip').textContent).toBe('closedChats');
     const gear = screen.getByRole('button', { name: 'Setting actions' });
-    expect(gear.getAttribute('aria-describedby')).toBe(screen.getByRole('tooltip').id);
+    expect(keyOf(gear)).toBe('closedChats');
+    expect(gear.title).toBe('closedChats');
 
     fireEvent.click(gear);
     fireEvent.click(screen.getByRole('menuitem', { name: 'Copy setting ID' }));
@@ -263,7 +266,7 @@ describe('SchemaForm', () => {
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: (text: string) => { written.push(text); return Promise.resolve(); } } });
     const schema = { type: 'object' as const, properties: { machine: { type: 'object' as const, properties: { part: { type: 'string' as const }, state: { type: 'string' as const } } } } };
     render(<SchemaForm schema={schema} value={{ machine: { part: 'claude', state: '/home/agent' } }} onChange={(next) => seen.push(next)} fieldActions />);
-    expect(screen.getAllByRole('tooltip').map((tip) => tip.textContent)).toEqual(['machine', 'machine.part', 'machine.state']);
+    expect(screen.getAllByRole('button', { name: 'Setting actions' }).map(keyOf)).toEqual(['machine', 'machine.part', 'machine.state']);
 
     const part = screen.getAllByRole('button', { name: 'Setting actions' })[1]!;
     fireEvent.click(part);
