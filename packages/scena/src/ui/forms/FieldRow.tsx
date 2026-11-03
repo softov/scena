@@ -7,7 +7,7 @@ import { Popup } from '../overlay/Popup.js';
 export interface FieldRowProps {
   fieldKey: string;
   // The field's dotted path from the root form, which Copy setting ID copies
-  // and the tooltip shows: `machine.part` for `part` inside `machine`.
+  // and the key button shows: `machine.part` for `part` inside `machine`.
   fieldId: string;
   // The value the field shows: the form's, else the schema's default.
   value: unknown;
@@ -19,23 +19,23 @@ export interface FieldRowProps {
   children: ReactNode;
 }
 
-// A field with its actions: the key in a tooltip on hover and focus,
-// and a gear whose menu resets the field, copies its key or its JSON, or shows
-// the form's JSON. A Popup, not ContextMenu, so a form outside a scena root
-// draws it too.
+// A field with its actions: a button at the row's top right that shows a gear
+// and the field's key, and opens a menu that resets the field, copies its key
+// or its JSON, or shows the form's JSON. A Popup, not ContextMenu, so a form
+// outside a scena root draws it too.
 export function FieldRow({ fieldKey, fieldId, value, inValue, onReset, onShowJson, children }: FieldRowProps) {
   const { t } = useI18n();
   const tipId = useId();
-  const gear = useRef<HTMLButtonElement>(null);
+  const key = useRef<HTMLButtonElement>(null);
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
 
   const close = (): void => setMenu(null);
   const toggle = (): void => {
     if (menu !== null) return close();
-    const box = gear.current?.getBoundingClientRect();
+    const box = key.current?.getBoundingClientRect();
     setMenu({ x: box?.left ?? 0, y: (box?.bottom ?? 0) + 2 });
   };
-  // The popup closes on a mousedown outside it; the gear's own would close it
+  // The popup closes on a mousedown outside it; the button's own would close it
   // and the click would open it again.
   const keepOpen = (event: MouseEvent): void => {
     if (menu !== null) event.stopPropagation();
@@ -49,9 +49,10 @@ export function FieldRow({ fieldKey, fieldId, value, inValue, onReset, onShowJso
   return (
     <div className="oo-schema-form__row" data-menu={menu !== null ? 'true' : 'false'}>
       <button
-        ref={gear}
+        ref={key}
         type="button"
-        className="oo-schema-form__gear"
+        className="oo-schema-form__key"
+        title={fieldId}
         aria-label={t('form/fieldActions', 'Setting actions')}
         aria-describedby={tipId}
         aria-haspopup="menu"
@@ -59,9 +60,9 @@ export function FieldRow({ fieldKey, fieldId, value, inValue, onReset, onShowJso
         onMouseDown={keepOpen}
         onClick={toggle}
       >
-        {NAMED_GLYPH.settings}
+        <span aria-hidden="true" className="oo-schema-form__key-glyph">{NAMED_GLYPH.settings}</span>
+        <span id={tipId} className="oo-schema-form__key-id">{fieldId}</span>
       </button>
-      <span role="tooltip" id={tipId} className="oo-schema-form__key">{fieldId}</span>
       <div className="oo-schema-form__row-body">{children}</div>
       {menu === null ? null : (
         <Popup x={menu.x} y={menu.y} onClose={close} className="oo-schema-form__menu">
