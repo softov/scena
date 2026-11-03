@@ -447,6 +447,51 @@ describe('SchemaForm', () => {
       expect(screen.queryByText('Proxies')).toBeNull();
     });
   });
+  describe('choices', () => {
+    /** A connector field as ahpd sends it: the host's connectors, with their titles. */
+    const connector = (more: Record<string, unknown> = {}) => ({
+      type: 'object',
+      properties: {
+        connector: { type: 'string', title: 'Connector', enum: ['work', 'spare'], enumLabels: ['Work tunnel'], ...more },
+      },
+    });
+    const shown = (label: RegExp): [string, string][] =>
+      Array.from((screen.getByLabelText(label) as HTMLSelectElement).options)
+        .filter((option) => option.value !== '')
+        .map((option) => [option.value, option.text]);
+
+    it('labels each choice from enumLabels, and a choice with no label by its value', () => {
+      render(<SchemaForm schema={connector()} value={{}} onChange={() => {}} />);
+      expect(shown(/Connector/)).toEqual([['work', 'Work tunnel'], ['spare', 'spare']]);
+    });
+
+    it('keeps a held value outside enum unmarked when enumDynamic says enum is not every choice', () => {
+      render(<SchemaForm schema={connector({ enumDynamic: true })} value={{ connector: 'mine' }} onChange={() => {}} />);
+      expect((screen.getByLabelText(/Connector/) as HTMLSelectElement).value).toBe('mine');
+      expect(screen.queryByText(/Not one of the choices/)).toBeNull();
+    });
+
+    it('marks a held value outside enum when enum is every choice', () => {
+      render(<SchemaForm schema={connector()} value={{ connector: 'mine' }} onChange={() => {}} />);
+      expect(screen.getByText(/Not one of the choices/)).toBeTruthy();
+    });
+
+    it('keeps each label with its value when a condition narrows the enum', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          kind: { type: 'string', title: 'Kind', enum: ['a', 'b'] },
+          size: { type: 'string', title: 'Size', enum: ['s', 'm', 'l'], enumLabels: ['Small', 'Medium', 'Large'] },
+        },
+        allOf: [{
+          if: { properties: { kind: { const: 'b' } }, required: ['kind'] },
+          then: { properties: { size: { enum: ['m', 'l'] } } },
+        }],
+      };
+      render(<SchemaForm schema={schema} value={{ kind: 'b' }} onChange={() => {}} />);
+      expect(shown(/Size/)).toEqual([['m', 'Medium'], ['l', 'Large']]);
+    });
+  });
   describe('maps', () => {
     const REFERENCE = (keyword: string) => ({
       type: 'object',

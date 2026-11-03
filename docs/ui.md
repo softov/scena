@@ -53,7 +53,9 @@ of the way until a second theme is registered.
 `SchemaForm` renders a JSON Schema as a form, which is the right reach whenever
 the *shape* is data — a backend that describes its own settings, a protocol
 that hands you a schema. It understands `x-enumOptions` (label plus
-description per option), `x-show-if` for a field that depends on a sibling,
+description per option), `enumLabels` (a label for each `enum` value, as AHP
+sends them), `enumDynamic` (the `enum` is the first choices, so a held value
+outside it is not marked), `x-show-if` for a field that depends on a sibling,
 and `x-header` for an object rendered as a section. `formatRenderers` is how
 you take over one `format` without taking over the form.
 
