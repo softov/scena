@@ -1,11 +1,18 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { TabLayout } from '../../src/ui/layout/TabLayout.js';
 
 afterEach(cleanup);
+
+// jsdom draws no layout, so it has no scrollIntoView; each test sees where the strip scrolls through this spy.
+const scrolled = vi.fn();
+beforeEach(() => {
+  scrolled.mockReset();
+  Element.prototype.scrollIntoView = function (this: Element, options?: boolean | ScrollIntoViewOptions) { scrolled(this, options); };
+});
 
 function strip(scena: ReturnType<typeof createScena>, surface: string, mounts: unknown[] = []) {
   return render(
@@ -64,5 +71,42 @@ describe('TabLayout surface/title', () => {
     strip(scena, 'panel:bottom', [mount('log', 'LogPage'), mount('t1', 'TerminalPage')]);
     fireEvent.click(screen.getByRole('button', { name: 'Kill terminal' }));
     expect(ran).toBe('t1');
+  });
+});
+
+describe('TabLayout active tab', () => {
+  const mount = (key: string) => ({ key, surface: 'main', component: { component: 'Page' }, props: { title: key }, policy: {}, openedAt: 0 });
+  const layout = (scena: ReturnType<typeof createScena>, active: string) => (
+    <ScenaProvider scena={scena}>
+      <TabLayout
+        surface="main"
+        mounts={[mount('a'), mount('b'), mount('c')] as never}
+        state={{ visible: true, activeContainerKey: active }}
+        setState={() => {}}
+        renderMount={() => null}
+        onActivate={() => {}}
+        onClose={() => {}}
+        onReorder={() => {}}
+      />
+    </ScenaProvider>
+  );
+
+  it('scrolls the tab that becomes active into the strip\'s view', () => {
+    const scena = createScena();
+    const { rerender } = render(layout(scena, 'a'));
+    expect(scrolled).toHaveBeenCalledTimes(1);
+    expect((scrolled.mock.calls[0]?.[0] as HTMLElement).title).toBe('a');
+
+    rerender(layout(scena, 'c'));
+    expect(scrolled).toHaveBeenCalledTimes(2);
+    expect((scrolled.mock.calls[1]?.[0] as HTMLElement).title).toBe('c');
+    expect(scrolled.mock.calls[1]?.[1]).toEqual({ block: 'nearest', inline: 'nearest' });
+  });
+
+  it('leaves the strip alone when the active tab stays the same', () => {
+    const scena = createScena();
+    const { rerender } = render(layout(scena, 'b'));
+    rerender(layout(scena, 'b'));
+    expect(scrolled).toHaveBeenCalledTimes(1);
   });
 });
