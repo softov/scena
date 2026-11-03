@@ -215,7 +215,7 @@ export function SchemaForm({
     if (!Object.hasOwn(internal, key)) return undefined;
     if (allowed !== undefined && !allowed.includes(key)) return t('form/notAllowed', 'Not allowed here. Take it out.');
     const held = internal[key];
-    if (field.enum !== undefined && held !== undefined && held !== '' && !field.enum.includes(String(held))) {
+    if (field.enum !== undefined && field.enumDynamic !== true && held !== undefined && held !== '' && !field.enum.includes(String(held))) {
       return t('form/notAChoice', 'Not one of the choices here.');
     }
     return undefined;
@@ -491,9 +491,12 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
   // Enum / rich enum → ChoicePicker (owns its label via meta).
   if ((field.enum && field.enum.length > 0) || (field['x-enumOptions'] && field['x-enumOptions'].length > 0)) {
     const rich: EnumOption[] | undefined = field['x-enumOptions'];
+    const labels = field.enumLabels;
     const options: ChoiceOption[] = rich
       ? rich.map((o) => ({ value: o.value, label: o.description ? `${o.label} — ${o.description}` : o.label }))
-      : (field.enum ?? []);
+      : labels
+        ? (field.enum ?? []).map((one, at) => ({ value: one, label: labels[at] ?? one }))
+        : (field.enum ?? []);
     // A held value a narrowed enum left out stays a choice, so the picker shows
     // what the value is rather than another option; the form marks it.
     const held = value === undefined || value === '' ? '' : String(value);

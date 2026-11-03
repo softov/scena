@@ -23,6 +23,10 @@ export interface JsonSchemaField {
   const?: unknown;
   description?: string;
   enum?: string[];
+  /** A label for each `enum` value, at the same index, as AHP's `ConfigPropertySchema` sends them. */
+  enumLabels?: string[];
+  /** `enum` holds the first choices and not all of them: a held value outside it is not an error. */
+  enumDynamic?: boolean;
   /** Rich enum options: label + optional description per option. */
   'x-enumOptions'?: EnumOption[];
   minimum?: number;
@@ -116,14 +120,25 @@ export function allowedKeys(schema: JsonSchemaField): string[] | undefined {
   return undefined;
 }
 
+// The label a schema gives one of its own `enum` values, at the same index in
+// `enumLabels`. Undefined when the schema does not list the value or label it.
+function labelIn(schema: JsonSchemaField, value: string): string | undefined {
+  const at = schema.enum?.indexOf(value) ?? -1;
+  return at === -1 ? undefined : schema.enumLabels?.[at];
+}
+
 // Two schemas that must both hold, as one. Where both name a keyword they join:
-// enums intersect, required and properties combine, the keys an object allows
+// enums intersect with their labels, required and properties combine, the keys an object allows
 // are those both allow, bounds take the tighter. Elsewhere `a` wins. A
 // condition in `b` is kept under `allOf`, for the form of the object it sits on.
 function mergeSchemas(a: JsonSchemaField, b: JsonSchemaField): JsonSchemaField {
   const { if: test, then, else: otherwise, ...plain } = b;
   const merged: JsonSchemaField = { ...plain, ...a };
   if (a.enum !== undefined && b.enum !== undefined) merged.enum = a.enum.filter((one) => b.enum!.includes(one));
+  if (merged.enum !== undefined && (a.enumLabels !== undefined || b.enumLabels !== undefined)) {
+    const labelOf = (one: string): string => labelIn(a, one) ?? labelIn(b, one) ?? one;
+    merged.enumLabels = merged.enum.map(labelOf);
+  }
   if (a.required !== undefined && b.required !== undefined) merged.required = [...new Set([...a.required, ...b.required])];
   if (a.properties !== undefined && b.properties !== undefined) {
     const keys = [...new Set([...Object.keys(a.properties), ...Object.keys(b.properties)])];
