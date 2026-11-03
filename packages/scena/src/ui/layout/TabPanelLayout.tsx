@@ -894,8 +894,16 @@ export function TabTitle({
   const title = useStoreLabel(m?.props?.title ?? compProps?.title, '', m?.dataContext) || resourceKey;
   const icon = m?.props?.icon ?? compProps?.icon;
   const color = m?.props?.color ?? compProps?.color;
+  // A tab that becomes active scrolls into the strip's view; one in view already leaves the strip where it is.
+  // jsdom has no scrollIntoView, so a consumer's tests that draw tabs do not fail on it.
+  const tabRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const tab = tabRef.current;
+    if (isActive && typeof tab?.scrollIntoView === 'function') tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [isActive]);
   return (
     <div
+      ref={tabRef}
       className="tab-bar__tab"
       data-active={isActive}
       data-drag-over={dragOverTab === idx ? 'true' : undefined}
