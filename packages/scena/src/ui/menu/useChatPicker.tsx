@@ -96,6 +96,10 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
   const [stack, setStack] = useState<Frame[]>([]);
   const stackRef = useRef(stack);
   stackRef.current = stack;
+  const inputRef = useRef(input);
+  inputRef.current = input;
+  // What a button's openCommand found and wrote, so back can undo it.
+  const openedRef = useRef<{ before: string; caret: number; wrote: string } | null>(null);
 
   // Imperative handle on the visible ActionList. handleMenuKeyDown routes
   // navigation keys through it so only the focused panel's picker reacts —
@@ -220,7 +224,20 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
   // Hoisted out of the conditional so `onBack` keeps a stable identity. Inline,
   // it minted a new arrow every render and defeated the useCallback below that
   // depends on it.
-  const popStack = useCallback(() => setStack((cur) => cur.slice(0, -1)), []);
+  // Back from the first submenu a button opened undoes the button: the list
+  // closes and the input is what it was before, while the person has not
+  // edited the shortcut the button wrote. Anywhere else, back pops one frame.
+  const popStack = useCallback(() => {
+    const opened = openedRef.current;
+    if (opened !== null && stackRef.current.length === 2 && inputRef.current === opened.wrote) {
+      openedRef.current = null;
+      setStack([]);
+      setInput(opened.before);
+      onCaretChange?.(opened.caret);
+      return;
+    }
+    setStack((cur) => cur.slice(0, -1));
+  }, [setInput, onCaretChange]);
   const onBack = stack.length > 1 ? popStack : undefined;
 
   // Keyboard hook the host wires to its textarea onKeyDown. Returns true when
@@ -279,6 +296,7 @@ export function useChatPicker(params: UseChatPickerParams): UseChatPickerResult 
     if (sc) {
       const { next, caret } = insertShortcut(input, caretIndex, sc, prefixes);
       newCaret = caret;
+      openedRef.current = { before: input, caret: caretIndex ?? input.length, wrote: next };
       setInput(next);
       // Seed the root command frame first so a submenu the command pushes lands
       // at depth 2 — the token effect only replaces the root frame at depth ≤ 1
