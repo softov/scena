@@ -6,9 +6,10 @@
   --oo-badge-font-family: var(--oo-mono);
   --oo-badge-font-weight: 500;
   --oo-badge-line-height: 1.4;
-  --oo-badge-rgb: var(--oo-badge-color, var(--oo-rgb-muted));
-  --oo-badge-background: rgb(var(--oo-badge-rgb, var(--oo-rgb-muted)) / 0.15);
-  --oo-badge-color: rgb(var(--oo-badge-rgb, var(--oo-rgb-muted)));
+  /* The badge's colour as RGB channels: a tone sets it, and `color` sets it inline. */
+  --oo-badge-rgb: var(--oo-rgb-muted);
+  --oo-badge-background: rgb(var(--oo-badge-rgb) / 0.15);
+  --oo-badge-color: rgb(var(--oo-badge-rgb));
   
   display: inline-flex;
   align-items: center;
@@ -30,5 +31,5 @@
 .oo-badge[data-variant='info']    { --oo-badge-rgb: var(--oo-rgb-blue); }
 .oo-badge[data-outline='true'] {
   background: transparent;
-  border: 1px solid rgb(var(--oo-badge-color, var(--oo-rgb-muted)) / 0.5);
+  border: 1px solid rgb(var(--oo-badge-rgb) / 0.5);
 }

@@ -32,7 +32,7 @@ export function Badge({
   className,
 }: BadgeProps) {
   const inline: CSSProperties = color
-    ? ({ ['--oo-color' as string]: resolveColorVar(color), ...style } as CSSProperties)
+    ? ({ ['--oo-badge-rgb' as string]: resolveColorVar(color), ...style } as CSSProperties)
     : (style ?? {});
   return (
     <span
