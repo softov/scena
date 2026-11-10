@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import './Chip.css';
 
 /**
  * Whether a chip's value holds: `on`, held itself; `implied`, held through

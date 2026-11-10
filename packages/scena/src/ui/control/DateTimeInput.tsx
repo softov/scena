@@ -3,9 +3,7 @@ import { useWriteBack } from '../../react/mount-context.js';
 import { weightStyle } from '../_utils.js';
 import { Checks, type CheckRuleResolved } from './Checks.js';
 import { ControlLabel, ControlHint, ControlError } from './_field-parts.js';
-import './DateTimeInput.css';
 // DateTimeInput reuses .oo-field + .oo-input from TextField's CSS.
-import './TextField.css';
 
 // a2ui v0.10: required `value`. optional `enableDate` (bool def false),
 // `enableTime` (bool def false), `min`, `max`, `label`. scena's `mode` enum

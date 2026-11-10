@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { useStore, useStoreSetter } from '../../react/hooks/useStore.js';
 import { THEME_MODE_PATH, type ThemeModeChoice } from '../../styles/controller.js';
-import './ThemeModeToggle.css';
 import { useI18n } from '../../react/hooks/useI18n.js';
 
 const ORDER: ThemeModeChoice[] = ['light', 'dark', 'system'];

@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from 'react';
-import './Audio.css';
 
 // a2ui v0.10: required `url`, optional `description` (title/summary).
 // controls/autoPlay/loop are scena-only extensions. Legacy `src` accepted as

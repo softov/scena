@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { Markdown } from '../display/Markdown.js';
-import './_field-parts.css';
 
 // Shared field chrome for the controls. All <span>s so they are valid inside a
 // control's own <label> wrapper (a <label> cannot nest another <label>). The

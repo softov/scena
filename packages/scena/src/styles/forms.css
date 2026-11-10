@@ -1,0 +1,11 @@
+/* The look of the components in `src/ui/forms`. A component imports no CSS; an
+ * app imports this file, as it imports bar.css, or styles them itself. Its
+ * fields draw their label, hint and error with the parts in control.css. */
+@import '../ui/forms/Form.css';
+@import '../ui/forms/Field.css';
+@import '../ui/forms/FieldGroup.css';
+@import '../ui/forms/FormSection.css';
+@import '../ui/forms/FormActions.css';
+@import '../ui/forms/SchemaForm.css';
+@import '../ui/forms/SectionsView.css';
+@import '../ui/forms/LoginForm.css';

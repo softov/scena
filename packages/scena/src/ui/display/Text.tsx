@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react';
 import { appearance } from '../../styles/index.js';
-import './Text.css';
 
 export type TextTone = 'accent' | 'success' | 'warning' | 'danger';
 

@@ -1,5 +1,4 @@
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
-import './Breadcrumb.css';
 import { useI18n } from '../../react/hooks/useI18n.js';
 
 export interface BreadcrumbItem {

@@ -1,5 +1,4 @@
 import { createContext, useContext, type CSSProperties, type ReactNode } from 'react';
-import './Form.css';
 
 // Shared form context — Field reads `errors` (by field name) and `namespace`
 // (for label id prefixing) from here so callers don't thread them per-field.

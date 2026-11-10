@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import './Donut.css';
 
 // Hand-drawn donut — pure SVG, stacked stroke-dasharray arcs, no dependency.
 export interface DonutSlice {

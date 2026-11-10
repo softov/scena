@@ -3,7 +3,6 @@ import { useWriteBack } from '../../react/mount-context.js';
 import { weightStyle } from '../_utils.js';
 import { Checks, type CheckRuleResolved } from './Checks.js';
 import { ControlLabel, ControlHint, ControlError } from './_field-parts.js';
-import './TextField.css';
 
 export type InputType = React.HTMLInputTypeAttribute;
 // a2ui v0.10: required `label`. variant ∈ longText/number/shortText/obscured

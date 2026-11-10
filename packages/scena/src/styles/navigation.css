@@ -1,0 +1,7 @@
+/* The look of the components in `src/ui/navigation`. A component imports no CSS; an
+ * app imports this file, as it imports bar.css, or styles them itself. */
+@import '../ui/navigation/Breadcrumb.css';
+@import '../ui/navigation/Tabs.css';
+@import '../ui/navigation/Toolbar.css';
+@import '../ui/navigation/Link.css';
+@import '../ui/navigation/ActivityBarItem.css';

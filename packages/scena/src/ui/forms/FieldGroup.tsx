@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import './FieldGroup.css';
 
 export interface FieldGroupProps {
   legend?: string;

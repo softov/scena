@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { mapAlign, mapJustify, weightStyle, type StyleAlign, type StyleJustify } from '../_utils.js';
-import './Row.css';
 
 export interface RowProps {
   children?: ReactNode;

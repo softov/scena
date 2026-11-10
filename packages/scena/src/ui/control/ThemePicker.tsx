@@ -2,7 +2,6 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useStore, useStoreSetter } from '../../react/hooks/useStore.js';
 import { listThemes } from '../../styles/index.js';
 import { THEME_ID_PATH } from '../../styles/controller.js';
-import './ThemePicker.css';
 import { useI18n } from '../../react/hooks/useI18n.js';
 
 export interface ThemePickerProps {

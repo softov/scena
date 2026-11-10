@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
 import { appearance } from '../../styles/index.js';
 import { weightStyle } from '../_utils.js';
-import './Divider.css';
 
 // a2ui v0.10: optional `axis` ('horizontal' | 'vertical', def 'horizontal').
 // scena accepts legacy `orientation` as a transitional alias.

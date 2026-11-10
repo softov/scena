@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react';
 import { resolveColorRgb, SETTED_COLORS, type ResourceColor, type ScenaColor } from '../../sdk/colors.js';
-import './Icon.css';
 
 // a2ui v0.10: `name` is required and is either a known enum value (~58 names)
 // OR an object `{ path: <svg path> }` for custom SVG glyphs. scena also

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { Markdown } from '../display/Markdown.js';
 import { useFormContext } from './Form.js';
-import './Field.css';
 
 // FieldLabel / FieldError / FieldHint are internal parts of Field — the same
 // way Checks is an internal part of every control. They are exported for

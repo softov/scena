@@ -1,0 +1,5 @@
+/* The look of the components in `src/ui/chart`. A component imports no CSS; an
+ * app imports this file, as it imports bar.css, or styles them itself. */
+@import '../ui/chart/BarChart.css';
+@import '../ui/chart/LineChart.css';
+@import '../ui/chart/Donut.css';

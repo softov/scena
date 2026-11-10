@@ -1,5 +1,4 @@
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
-import './Markdown.css';
 
 // Markdown renderer. No external deps. Supports:
 //   - Headings (# to ######), paragraphs, soft breaks, thematic breaks (---)

@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import './LineChart.css';
 
 // Hand-drawn line chart — pure SVG, no dependency. Multiple series share one
 // auto-scaled y-axis. A 0..100 viewBox with non-scaling strokes keeps line

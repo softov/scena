@@ -1,0 +1,18 @@
+/* The look of the components in `src/ui/display`. A component imports no CSS; an
+ * app imports this file, as it imports bar.css, or styles them itself. */
+@import '../ui/display/Card.css';
+@import '../ui/display/Divider.css';
+@import '../ui/display/Text.css';
+@import '../ui/display/Image.css';
+@import '../ui/display/Icon.css';
+@import '../ui/display/Alert.css';
+@import '../ui/display/Badge.css';
+@import '../ui/display/DetailList.css';
+@import '../ui/display/DetailHeader.css';
+@import '../ui/display/StatusDot.css';
+@import '../ui/display/Avatar.css';
+@import '../ui/display/Divisor.css';
+@import '../ui/display/Markdown.css';
+@import '../ui/display/Progress.css';
+@import '../ui/display/Skeleton.css';
+@import '../ui/display/Spinner.css';

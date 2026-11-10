@@ -4,7 +4,6 @@ import { useStore } from '../react/hooks/useStore.js';
 import { SIGILLUM_PATHS } from './sigillum.js';
 import type { Session } from './provider.js';
 import { hasScope } from './match.js';
-import './PortaLock.css';
 
 // Inline lock. Wraps a region of the tree; when the current session lacks
 // `permission`, renders `fallback` (defaults to <LoginForm />) inside a

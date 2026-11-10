@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { mapAlign, weightStyle, type StyleAlign } from '../_utils.js';
-import './List.css';
 
 export type ListDirection = 'vertical' | 'horizontal';
 

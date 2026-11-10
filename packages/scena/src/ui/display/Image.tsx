@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import './Image.css';
 
 // a2ui v0.10: required `url`, optional `description` (a11y), `fit` (camelCase
 // enum), `variant`. Legacy `src`/`alt` accepted as transitional aliases;

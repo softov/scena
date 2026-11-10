@@ -1,4 +1,3 @@
-import './Checks.css';
 
 // Renders the messages of any failed check rules. Each rule is resolved by
 // the ViewMount prop resolver before reaching the component, so `condition`

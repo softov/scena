@@ -7,6 +7,17 @@ import '@softov/scena/styles/base.css';
 import '@softov/scena/styles/bar.css';
 import '@softov/scena/styles/scrollbar.css';
 import '@softov/scena/styles/surface.css';
+import '@softov/scena/styles/chart.css';
+import '@softov/scena/styles/control.css';
+import '@softov/scena/styles/data.css';
+import '@softov/scena/styles/display.css';
+import '@softov/scena/styles/forms.css';
+import '@softov/scena/styles/layout.css';
+import '@softov/scena/styles/media.css';
+import '@softov/scena/styles/menu.css';
+import '@softov/scena/styles/navigation.css';
+import '@softov/scena/styles/overlay.css';
+import '@softov/scena/styles/porta.css';
 
 import { applyTheme, resolveThemeMode, type ThemeModeChoice } from '@softov/scena/styles';
 import './app.css';

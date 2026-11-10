@@ -15,7 +15,6 @@ import type { BindingPath } from '../../sdk/component-graph.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
 import { canonicalShortcut } from './token.js';
-import './ActionList.css';
 import { resolveColorVar } from '../../sdk/colors.js';
 import { translate } from '../../core/i18n/registry.js';
 
