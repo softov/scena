@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { resolveColorRgb, SETTED_COLORS, type ResourceColor, type ScenaColor } from '../../sdk/colors.js';
 import './Icon.css';
 
 // a2ui v0.10: `name` is required and is either a known enum value (~58 names)
@@ -156,11 +157,18 @@ export interface IconProps {
   name?: IconName | string | { path: string };
   // scena extensions:
   size?: number;
-  color?: string;
+  // A scena colour name, such as `purple`, or any CSS colour.
+  color?: ResourceColor;
   style?: CSSProperties;
 }
 
-export function Icon({ name = '•', size = 16, color, style }: IconProps) {
+/** A scena colour name as its CSS colour; any other string is a CSS colour already. */
+function cssColor(color: ResourceColor | undefined): string | undefined {
+  return color !== undefined && SETTED_COLORS.has(color as ScenaColor) ? resolveColorRgb(color) : color;
+}
+
+export function Icon({ name = '•', size = 16, color: named, style }: IconProps) {
+  const color = cssColor(named);
   if (typeof name === 'object' && name && 'path' in name) {
     return (
       <span
