@@ -545,6 +545,25 @@ describe('SchemaForm', () => {
       expect(screen.getByText('That name is taken.')).toBeTruthy();
     });
 
+    it('draws a row whose name matches a pattern with that pattern\'s schema', () => {
+      const seen: Record<string, unknown>[] = [];
+      const schema = {
+        type: 'object',
+        properties: {
+          env: {
+            type: 'object',
+            additionalProperties: { type: 'string' },
+            patternProperties: { '(?:^|_)KEY$': { type: 'string', format: 'password' }, '([': { type: 'number' } },
+          },
+        },
+      };
+      render(<Held schema={schema} start={{ env: { BASE: 'https://a', API_KEY: 'sk-1' } }} seen={seen} />);
+      expect((screen.getByDisplayValue('https://a') as HTMLInputElement).type).toBe('text');
+      expect((screen.getByDisplayValue('sk-1') as HTMLInputElement).type).toBe('password');
+      fireEvent.change(screen.getByDisplayValue('API_KEY'), { target: { value: 'API_URL' } });
+      expect((screen.getByDisplayValue('sk-1') as HTMLInputElement).type).toBe('text');
+    });
+
     it('adds a row from a typed name, with the first branch\'s value', () => {
       const seen: Record<string, unknown>[] = [];
       render(<Held schema={ENV} start={{}} seen={seen} />);

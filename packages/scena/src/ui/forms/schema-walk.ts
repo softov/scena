@@ -38,6 +38,8 @@ export interface JsonSchemaField {
   required?: string[];
   /** `false` takes no other key; a schema is what each other key holds, as in a map. */
   additionalProperties?: boolean | JsonSchemaField;
+  /** What a key that matches one of these patterns holds, in place of `additionalProperties`. */
+  patternProperties?: Record<string, JsonSchemaField>;
   /** What an object's keys must match; an `enum` here names the only keys it allows. */
   propertyNames?: JsonSchemaField;
   /** Show this field only when a sibling field equals a value. */
@@ -50,7 +52,7 @@ export interface JsonSchemaField {
 }
 
 export interface JsonSchemaObject
-  extends Pick<JsonSchemaField, 'allOf' | 'if' | 'then' | 'else' | 'propertyNames' | 'additionalProperties'> {
+  extends Pick<JsonSchemaField, 'allOf' | 'if' | 'then' | 'else' | 'propertyNames' | 'additionalProperties' | 'patternProperties'> {
   type?: string;
   properties?: Record<string, JsonSchemaField>;
   required?: string[];
@@ -67,6 +69,7 @@ export function objectSchema(field: JsonSchemaField): JsonSchemaObject {
   if (field.else !== undefined) schema.else = field.else;
   if (field.propertyNames !== undefined) schema.propertyNames = field.propertyNames;
   if (field.additionalProperties !== undefined) schema.additionalProperties = field.additionalProperties;
+  if (field.patternProperties !== undefined) schema.patternProperties = field.patternProperties;
   return schema;
 }
 
@@ -223,6 +226,24 @@ export function normalizeUnionOptions(field: JsonSchemaField): JsonSchemaField[]
 // that is a schema, so the keys are the person's to name. Undefined otherwise.
 export function mapValueSchema(schema: JsonSchemaField | JsonSchemaObject): JsonSchemaField | undefined {
   return isObjectRecord(schema.additionalProperties) ? schema.additionalProperties as JsonSchemaField : undefined;
+}
+
+// The schema of one map entry, by its key: the first of `patternProperties`
+// whose pattern the key matches, else `valueSchema`. A pattern that is not a
+// valid regular expression matches no key.
+export function entrySchema(
+  key: string,
+  valueSchema: JsonSchemaField,
+  patterns: Record<string, JsonSchemaField> | undefined,
+): JsonSchemaField {
+  for (const [pattern, schema] of Object.entries(patterns ?? {})) {
+    try {
+      if (new RegExp(pattern, 'u').test(key)) return schema;
+    } catch {
+      // Not a pattern this engine reads; the key falls through to the next one.
+    }
+  }
+  return valueSchema;
 }
 
 // Whether a schema is `{}`, which is any JSON value: it names no type, choice,

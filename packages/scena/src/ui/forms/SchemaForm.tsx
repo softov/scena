@@ -18,6 +18,7 @@ import {
   isAnyValue,
   isObjectRecord,
   mapValueSchema,
+  entrySchema,
   normalizeUnionOptions,
   objectSchema,
   resolveArrayItemSchema,
@@ -382,6 +383,7 @@ export function SchemaForm({
   const mapRows = mapValue !== undefined && activeView.id === fieldsView.id ? (
     <MapControl
       valueSchema={mapValue}
+      patterns={resolved.patternProperties}
       value={internal}
       named={Object.keys(properties)}
       onChange={commit}
@@ -703,6 +705,8 @@ function ArrayControl({ field, value, onChange, namespace, formatRenderers, json
 
 interface MapControlProps {
   valueSchema: JsonSchemaField;
+  // What a key matching one of these patterns holds, in place of `valueSchema`.
+  patterns?: Record<string, JsonSchemaField>;
   // The whole object: the named keys stay as they are, the rest are rows.
   value: Record<string, unknown>;
   named: string[];
@@ -715,9 +719,10 @@ interface MapControlProps {
 }
 
 // The keys of an object that its schema does not name, one row each: a name,
-// a value drawn from `additionalProperties`, and remove. A new row starts from
-// a name typed below the rows.
-function MapControl({ valueSchema, value, named, onChange, namespace, formatRenderers, jsonEditor, views, jsonTextFields }: MapControlProps) {
+// a value drawn from the first `patternProperties` schema its name matches,
+// else from `additionalProperties`, and remove. A new row starts from a name
+// typed below the rows.
+function MapControl({ valueSchema, patterns, value, named, onChange, namespace, formatRenderers, jsonEditor, views, jsonTextFields }: MapControlProps) {
   const { t } = useI18n();
   const [draft, setDraft] = useState('');
   const entries = Object.keys(value).filter((key) => !named.includes(key));
@@ -737,7 +742,7 @@ function MapControl({ valueSchema, value, named, onChange, namespace, formatRend
   const draftError = draft !== '' && taken(draft) ? t('form/nameTaken', 'That name is taken.') : undefined;
   const add = (): void => {
     if (draft === '' || taken(draft)) return;
-    onChange({ ...value, [draft]: defaultValueForSchema(valueSchema) });
+    onChange({ ...value, [draft]: defaultValueForSchema(entrySchema(draft, valueSchema, patterns)) });
     setDraft('');
   };
 
@@ -748,7 +753,7 @@ function MapControl({ valueSchema, value, named, onChange, namespace, formatRend
           <MapName name={key} taken={(name) => name !== key && taken(name)} onRename={(to) => rename(key, to)} />
           <div className="oo-schema-form__map-value">
             <SchemaControl
-              field={valueSchema}
+              field={entrySchema(key, valueSchema, patterns)}
               value={value[key]}
               onChange={(next) => onChange({ ...value, [key]: next })}
               namespace={namespace}
