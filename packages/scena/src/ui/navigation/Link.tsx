@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { weightStyle } from '../_utils.js';
-import './Link.css';
 
 export type LinkKind = 'tel' | 'email' | 'web';
 

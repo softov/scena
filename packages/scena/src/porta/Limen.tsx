@@ -5,7 +5,6 @@ import type { Session } from './provider.js';
 // import { LoginForm } from './LoginForm.js';
 const LoginForm = lazy(() => import('../ui/forms/LoginForm.js').then(module => ({ default: module.LoginForm })));
 import { hasScope } from './match.js';
-import './Limen.css';
 import { SurfaceLoading } from '../react/SurfaceLoading.js';
 
 // Full-page wall. When the current session lacks `permission`, replaces the

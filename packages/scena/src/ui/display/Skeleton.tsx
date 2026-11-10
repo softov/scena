@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import './Skeleton.css';
 
 // Loading placeholder. Two modes:
 //   - lines (default): N horizontal bars stacked; last is shorter

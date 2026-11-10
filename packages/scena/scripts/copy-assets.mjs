@@ -1,13 +1,12 @@
 // tsc emits only .js/.d.ts, so every stylesheet under src/ is left behind —
 // while package.json ships `dist` alone. Two kinds matter and BOTH are needed:
 //
-//   src/styles/*.css          imported by the app  (@softov/scena/styles/base.css)
-//   src/ui/**/Foo.css         imported by the COMPONENT itself, co-located
+//   src/styles/*.css          imported by the app  (@softov/scena/styles/control.css)
+//   src/ui/**/Foo.css         co-located with its component, imported by none
 //
-// The second kind is the one that bites: `ui/navigation/Link.js` does
-// `import "./Link.css"`, so a consumer's bundler fails to resolve 38 modules
-// and the build dies. The playground never noticed because its vite alias
-// resolves @softov/scena to src, where the CSS is sitting right there.
+// A component imports no CSS. The app imports `styles/<folder>.css`, which
+// `@import`s the co-located files by relative path, so those must sit in dist
+// at the same place as in src.
 import { cpSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative, resolve } from 'node:path';

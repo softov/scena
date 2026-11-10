@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react';
 import { resolveColorVar, type ResourceColor } from '../../sdk/colors.js';
-import './Spinner.css';
 import { useI18n } from '../../react/hooks/useI18n.js';
 
 export interface SpinnerProps {

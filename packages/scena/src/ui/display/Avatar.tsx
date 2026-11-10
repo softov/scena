@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react';
 import { Icon, type IconName } from './Icon.js';
-import './Avatar.css';
 
 // A round, colored thumbnail for a person, contact, or any resource that
 // wants a recognisable badge. Three rendering modes, picked by which prop

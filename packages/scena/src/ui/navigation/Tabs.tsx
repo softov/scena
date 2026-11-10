@@ -1,7 +1,6 @@
 import { type CSSProperties, type ReactNode, useEffect, useState } from 'react';
 import { useWriteBack } from '../../react/mount-context.js';
 import { weightStyle } from '../_utils.js';
-import './Tabs.css';
 // a2ui v0.10: required `tabs[]` where each entry is `{ title, child }`.
 // scena accepts legacy `{ label, content }` as transitional aliases and adds
 // per-tab `disabled` + `value`/`defaultValue` for state binding (extensions).

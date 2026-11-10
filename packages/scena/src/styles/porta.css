@@ -1,0 +1,4 @@
+/* The look of the components in `src/porta`. A component imports no CSS; an
+ * app imports this file, as it imports bar.css, or styles them itself. */
+@import '../porta/PortaLock.css';
+@import '../porta/Limen.css';

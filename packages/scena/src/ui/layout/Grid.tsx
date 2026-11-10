@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { mapAlign, weightStyle, type StyleAlign } from '../_utils.js';
-import './Grid.css';
 
 // A 2-D wrapping grid. By default tracks are sized by `minColumnWidth` and
 // wrap to fit (auto-fit); pass `columns` for a fixed count. Like List, it is a

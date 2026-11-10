@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { weightStyle } from '../_utils.js';
-import './Card.css';
 
 // a2ui v0.10: Card has a single `child` (ComponentId). scena adds optional
 // `title`/`subtitle` as ergonomic UX shortcuts (the spec model would use a

@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from 'react';
-import './Alert.css';
 import { NAMED_GLYPH } from './Icon.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
 

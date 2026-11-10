@@ -2,7 +2,6 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useStore } from '../../react/hooks/useStore.js';
 import type { BindingPath } from '../../sdk/component-graph.js';
-import './ButtonBar.css';
 
 export type ButtonBarTone = 'default' | 'accent' | 'danger' | 'warning' | 'success' | 'muted';
 

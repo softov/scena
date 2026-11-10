@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from 'react';
-import './Toolbar.css';
 
 export interface ToolbarProps {
   // Optional extra class appended to `oo-toolbar` for app-specific overrides.

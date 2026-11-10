@@ -3,7 +3,6 @@ import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { useStore } from '../../react/hooks/useStore.js';
 import type { BindingPath } from '../../sdk/component-graph.js';
-import './ActivityBarItem.css';
 
 /**
  * What a badge means, which is not always "there are things".

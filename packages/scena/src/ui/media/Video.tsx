@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import './Video.css';
 
 // a2ui v0.10: required `url`, optional `posterUrl`. controls/autoPlay/loop/
 // muted/width/height are scena-only extensions. Legacy `src`/`poster` accepted

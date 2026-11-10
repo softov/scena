@@ -25,7 +25,6 @@ import {
   textareaRows,
   unionIndexOf,
 } from './schema-walk.js';
-import './SchemaForm.css';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { Markdown } from '../display/Markdown.js';
 import { JsonEditorBox, JsonError, JsonValidityContext, jsonProblem, useJsonValidity } from './json-text.js';

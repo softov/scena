@@ -1,5 +1,4 @@
 import { type PointerEvent, useRef } from 'react';
-import './Divisor.css';
 
 // Draggable resize handle shared by SplitLayout and TabPanelLayout. Reports
 // the cursor's position relative to `containerRef` as a 0..1 ratio.

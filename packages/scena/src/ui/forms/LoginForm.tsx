@@ -17,8 +17,6 @@ import type { AuthField, PortaProvider, ProviderLabel } from '../../porta/provid
 import type { BindingPath } from '../../sdk/component-graph.js';
 import type { UseI18nResult } from '../../react/hooks/useI18n.js';
 // import { Field } from '../ui/forms/Field.js';
-import '../control/_field-parts.css';
-import './LoginForm.css';
 
 type Fire = (commandId: string, args: Record<string, unknown>) => void;
 

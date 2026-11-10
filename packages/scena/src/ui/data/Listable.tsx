@@ -11,7 +11,6 @@ import {
 } from 'react';
 import type { BindingPath } from '../../sdk/component-graph.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
-import './Listable.css';
 
 // Generic responsive list/table for a flat `T[]`. Below `tableBreakpoint`
 // renders a stacked "list row" per item; above it switches to a CSS-grid

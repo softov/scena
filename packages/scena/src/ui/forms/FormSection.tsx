@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import './FormSection.css';
 
 export interface FormSectionProps {
   title: string;

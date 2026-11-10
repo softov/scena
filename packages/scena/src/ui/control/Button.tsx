@@ -2,7 +2,6 @@ import type { CSSProperties } from 'react';
 import type { SizeName } from '../../styles/index.js';
 import { appearance, resolveVariableFontSize, resolveVariableSize } from '../../styles/index.js';
 import { weightStyle } from '../_utils.js';
-import './Button.css';
 
 // a2ui v0.10: required `child` (ComponentId for label) + `action` (Action).
 // variants 'default'/'primary'/'borderless'. scena's `label`+`onClick` model

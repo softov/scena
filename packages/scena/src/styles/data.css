@@ -1,0 +1,5 @@
+/* The look of the components in `src/ui/data`. A component imports no CSS; an
+ * app imports this file, as it imports bar.css, or styles them itself. */
+@import '../ui/data/List.css';
+@import '../ui/data/Tree.css';
+@import '../ui/data/Listable.css';

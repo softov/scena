@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import './BarChart.css';
 
 // Hand-drawn bar chart — flexbox, no dependency. A bar is either a single
 // `value` or a list of `segments` (stacked, or side-by-side in grouped mode).

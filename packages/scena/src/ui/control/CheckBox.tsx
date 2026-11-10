@@ -4,7 +4,6 @@ import { useWriteBack } from '../../react/mount-context.js';
 import { weightStyle } from '../_utils.js';
 import { Checks, type CheckRuleResolved } from './Checks.js';
 import { ControlHint, ControlError } from './_field-parts.js';
-import './CheckBox.css';
 
 // a2ui v0.10: required `label`, `value`. `weight` from CatalogComponentCommon.
 export interface CheckBoxProps {

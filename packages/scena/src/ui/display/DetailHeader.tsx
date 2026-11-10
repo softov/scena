@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Avatar } from './Avatar.js';
 import { Badge, type BadgeTone } from './Badge.js';
-import './DetailHeader.css';
 
 // Header for a resource detail page: avatar + title + status + a row of small
 // facts (team, id, joined-on …) + optional right-aligned actions. Pairs with

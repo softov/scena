@@ -4,7 +4,6 @@ import type { Scena } from '../../sdk/scena.js';
 import type { WhenClause } from '../../sdk/when.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
-import './HeaderAction.css';
 
 // A button in a layout header: a section's (SectionHeader) or a stacked pane's
 // (StackLayout). Shared so both draw `when`, `active` and `busy` the same way.

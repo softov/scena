@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from 'react';
-import './DetailList.css';
 
 // Key → value detail block (the "DetailGrid" pattern). Used on resource detail
 // pages. `span` items take the full row width — good for long text (a resume,

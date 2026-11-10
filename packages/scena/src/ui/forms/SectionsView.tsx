@@ -2,7 +2,6 @@ import { Fragment, useState, type ReactNode } from 'react';
 import { useI18n } from '../../react/hooks/useI18n.js';
 import { cleanDescription, deepEqual } from './schema-walk.js';
 import type { SchemaFormView, SchemaFormViewProps } from './views.js';
-import './SectionsView.css';
 
 // A named run of a form's top-level keys.
 export interface SchemaFormSection {

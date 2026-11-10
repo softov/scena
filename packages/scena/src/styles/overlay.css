@@ -1,0 +1,3 @@
+/* The look of the components in `src/ui/overlay`. A component imports no CSS; an
+ * app imports this file, as it imports bar.css, or styles them itself. */
+@import '../ui/overlay/Modal.css';

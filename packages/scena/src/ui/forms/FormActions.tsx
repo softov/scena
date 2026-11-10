@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { Button, type ButtonProps } from '../control/Button.js';
-import './FormActions.css';
 
 // Action button row for a form footer (submit / reset / cancel …). Two modes:
 //   • children  — drop <Button>s in directly (most control, graph-friendly).

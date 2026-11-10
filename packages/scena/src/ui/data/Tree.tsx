@@ -14,7 +14,6 @@ import {
 import type { BindingPath } from '../../sdk/component-graph.js';
 import type { PickerAction } from '../../sdk/host.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
-import './Tree.css';
 import { resolveColorVar } from '../../sdk/colors.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
 
