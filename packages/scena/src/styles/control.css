@@ -2,7 +2,6 @@
  * app imports this file, as it imports bar.css, or styles them itself. */
 @import '../ui/control/_field-parts.css';
 @import '../ui/control/Button.css';
-@import '../ui/control/TextField.css';
 @import '../ui/control/CheckBox.css';
 @import '../ui/control/ChoicePicker.css';
 @import '../ui/control/Slider.css';
