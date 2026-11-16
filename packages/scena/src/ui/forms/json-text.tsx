@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useId } from 'react';
-import type { JsonEditor } from './SchemaForm.js';
+import type { JsonEditor, JsonEditorProps } from './SchemaForm.js';
 
 // Each JSON editor in a form reports under its own id whether its text parses;
 // the outermost SchemaForm holds the ones that do not and tells its consumer.
@@ -30,10 +30,10 @@ export function JsonError({ error }: { error: string | null }) {
 }
 
 // The consumer's JSON editor, in a box the form sizes.
-export function JsonEditorBox({ editor: Editor, value, onChange }: { editor: JsonEditor; value: string; onChange: (text: string) => void }) {
+export function JsonEditorBox({ editor: Editor, value, onChange, schema }: { editor: JsonEditor; value: string; onChange: (text: string) => void; schema?: JsonEditorProps['schema'] }) {
   return (
     <div className="oo-schema-form__json-editor">
-      <Editor value={value} onChange={onChange} />
+      <Editor value={value} onChange={onChange} {...(schema === undefined ? {} : { schema })} />
     </div>
   );
 }

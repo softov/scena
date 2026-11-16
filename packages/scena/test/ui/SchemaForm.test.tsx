@@ -7,8 +7,8 @@ import { fieldsView, jsonView, type SchemaFormViewProps } from '../../src/ui/for
 import { sectionsView } from '../../src/ui/forms/SectionsView.js';
 
 /** A stand-in for a consumer's code editor: a text box under a test id. */
-function TestEditor({ value, onChange }: JsonEditorProps) {
-  return <input data-testid="json-editor" value={value} onChange={(event) => onChange(event.currentTarget.value)} />;
+function TestEditor({ value, onChange, schema }: JsonEditorProps) {
+  return <input data-testid="json-editor" data-schema={JSON.stringify(schema)} value={value} onChange={(event) => onChange(event.currentTarget.value)} />;
 }
 
 describe('SchemaForm', () => {
@@ -104,6 +104,19 @@ describe('SchemaForm', () => {
     const toggles = screen.getAllByRole('button', { name: 'json' });
     fireEvent.click(toggles[1]!);
     expect(screen.getAllByTestId('json-editor')).toHaveLength(2);
+  });
+
+  it('hands the editor the schema its text is held to: the form\'s, a section\'s, a field\'s', () => {
+    const pair = { type: 'array', items: [{ type: 'string' }, { type: 'number' }] };
+    const inner = { type: 'object', properties: { on: { type: 'boolean' } } };
+    const schema = { type: 'object', properties: { inner, pair } as never };
+    render(<SchemaForm schema={schema} value={{ inner: { on: true }, pair: ['x', 1] }} onChange={() => {}} jsonEditor={TestEditor} />);
+    const schemas = (): unknown[] => screen.getAllByTestId('json-editor').map((one) => JSON.parse(one.getAttribute('data-schema') ?? 'null'));
+    expect(schemas()).toEqual([pair]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'json' })[1]!);
+    expect(schemas()).toEqual([expect.objectContaining(inner), pair]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'json' })[0]!);
+    expect(schemas()).toEqual([schema]);
   });
 
   it('reports JSON that does not parse, shows why, and reports again once it parses', () => {

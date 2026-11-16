@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface PopupProps {
   // Anchor position (typically a mouse event's clientX / clientY). The
@@ -28,11 +29,15 @@ export interface PopupProps {
 // in CustomShell and available to any layout / app that wants an anchored
 // floating panel.
 //
-// Decisions baked in (per PENDING):
-//   - No per-SurfaceArea portal. Caller renders <Popup> wherever it wants.
-//   - No graph-component registration. Popup is React-only for now — agent
-//     surfaces that want a graph-driven popup can wrap this in a built-in
-//     graph component later.
+// It draws into `document.body`, wherever the caller renders it: inside a
+// parent that makes its own stacking context (a sticky header with a
+// z-index, a transform, a filter), its z-index would count only inside that
+// parent, and what comes after the parent would draw over it. React context
+// and events still flow from where the caller renders it.
+//
+// No graph-component registration. Popup is React-only for now — agent
+// surfaces that want a graph-driven popup can wrap this in a built-in graph
+// component later.
 export function Popup({
   x,
   y,
@@ -105,7 +110,7 @@ export function Popup({
     return () => document.removeEventListener('keydown', onKey);
   }, [closeOnEscape, onClose]);
 
-  return (
+  return createPortal(
     <div
       ref={ref}
       className={['oo-popup', className].filter(Boolean).join(' ')}
@@ -122,6 +127,7 @@ export function Popup({
       onMouseDown={(e) => e.stopPropagation()}
     >
       {children}
-    </div>
+    </div>,
+    document.body,
   );
 }
