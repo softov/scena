@@ -2,7 +2,7 @@
 
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Markdown } from '../../src/ui/display/Markdown.js';
+import { Markdown, type MarkdownBlock } from '../../src/ui/display/Markdown.js';
 
 const md = (text: string): HTMLElement => render(<Markdown text={text} />).container.firstElementChild as HTMLElement;
 
@@ -88,5 +88,72 @@ describe('Markdown', () => {
     const root = md('Claim[^src].\n\n[^src]: The source.');
     expect(root.querySelector('sup')?.textContent).toBe('1');
     expect(root.querySelector('.oo-markdown__notes li')?.textContent).toBe('The source.');
+  });
+
+  describe('a block hook', () => {
+    /** The blocks the hook is given, drawing none of them. */
+    const offered = (text: string): MarkdownBlock[] => {
+      const seen: MarkdownBlock[] = [];
+      render(<Markdown text={text} block={(one) => { seen.push(one); return undefined; }} />);
+      return seen;
+    };
+
+    it('is given a fenced block with its language, the rest of its info and its body, and draws what it returns', () => {
+      expect(offered('```chart title="Usage"\na 1\n```')).toEqual([{ kind: 'code', lang: 'chart', meta: 'title="Usage"', body: 'a 1' }]);
+      const drawn = render(<Markdown text={'```mermaid\nA --> B\n```'} block={(one) => (one.kind === 'code' ? <svg data-lang={one.lang} /> : undefined)} />).container;
+      expect(drawn.querySelector('svg')?.getAttribute('data-lang')).toBe('mermaid');
+      expect(drawn.querySelector('pre')).toBeNull();
+    });
+
+    it('leaves a block to scena when it returns undefined', () => {
+      const root = render(<Markdown text={'```js\nconst a = 1;\n```'} block={() => undefined} />).container;
+      expect(root.querySelector('pre code')?.textContent).toBe('const a = 1;');
+    });
+
+    it('reads a leaf directive, its label and its attributes as HTML reads them', () => {
+      expect(offered('::gauge[Tokens]{#t .wide .big value=$/usage/tokens max="100000" label=\'a b\' hidden}')).toEqual([{
+        kind: 'directive', type: 'leaf', name: 'gauge', label: 'Tokens', body: '',
+        attributes: { id: 't', class: 'wide big', value: '$/usage/tokens', max: '100000', label: 'a b', hidden: '' },
+      }]);
+    });
+
+    it('nests containers with more colons outside, each with its body as written', () => {
+      const text = '::::card{title="Today"}\n:::row\n::datatable{rows=x-ahpd-kind://search-results}\n:::\n::::\nafter';
+      const blocks = offered(text);
+      expect(blocks.map((one) => (one.kind === 'directive' ? `${one.type}:${one.name}` : one.kind))).toEqual(['container:card', 'container:row', 'leaf:datatable']);
+      const card = blocks[0] as Extract<MarkdownBlock, { kind: 'directive' }>;
+      expect(card.attributes).toEqual({ title: 'Today' });
+      expect(card.body).toBe(':::row\n::datatable{rows=x-ahpd-kind://search-results}\n:::');
+    });
+
+    it('reads what a container holds when the hook leaves the container to scena', () => {
+      const names: string[] = [];
+      const root = render(
+        <Markdown
+          text={'::::card\n:::row\nSome **text**\n:::\n::::'}
+          block={(one) => { if (one.kind === 'directive') names.push(one.name); return undefined; }}
+        />,
+      ).container;
+      expect(names).toEqual(['card', 'row']);
+      expect(root.querySelector('strong')?.textContent).toBe('text');
+      expect(Array.from(root.querySelectorAll('p')).map((p) => p.textContent)).toEqual(['::::card', ':::row', 'Some text', ':::', '::::']);
+    });
+
+    it('does not close a container on colons inside a code fence, and runs one with no close to the end', () => {
+      const card = offered('::::card\n```\n::::\n```\n::::')[0] as Extract<MarkdownBlock, { kind: 'directive' }>;
+      expect(card.body).toBe('```\n::::\n```');
+      const open = offered(':::note\nstill inside')[0] as Extract<MarkdownBlock, { kind: 'directive' }>;
+      expect(open.body).toBe('still inside');
+    });
+
+    it('ends a paragraph at a directive, and reads one inside a list or a quote', () => {
+      expect(offered('text\n::gauge\n\n- item\n\n  ::chart\n\n> ::note').map((one) => (one.kind === 'directive' ? one.name : one.kind))).toEqual(['gauge', 'chart', 'note']);
+    });
+
+    it('is not used for directives without a hook: their lines stay text, as before', () => {
+      const root = md(':::card\ntext\n:::');
+      expect(root.querySelectorAll('p')).toHaveLength(1);
+      expect(root.textContent).toBe(':::card\ntext\n:::'.replace(/\n/g, ''));
+    });
   });
 });
