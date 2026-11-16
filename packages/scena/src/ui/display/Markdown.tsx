@@ -10,7 +10,45 @@ import { Fragment, type CSSProperties, type ReactNode } from 'react';
 //   - Tables (GitHub style), with column alignment
 //   - Links [text](url), autolinks <url> and bare https:// URLs, images ![alt](src)
 //   - Footnotes [^id] with [^id]: text definitions, listed at the end
+//   - With a `block` hook: directives, `:::name` containers and `::name` leaves
 // HTML in the source is shown as text, never rendered.
+
+/**
+ * A block the host may draw in place of scena: a fenced code block, or a
+ * directive. A directive is a component written in Markdown, as the generic
+ * directives proposal spells it:
+ *
+ *   ::::card{#today title="Today"}     a container, closed by a line of at least as many colons;
+ *   :::row                             one inside another has fewer colons than the one around it
+ *   ::gauge[Tokens]{value=$/usage/tokens}   a leaf, one line
+ *   :::
+ *   ::::
+ *
+ * `attributes` are read as HTML attributes are: `{#x}` is `id`, `{.x}` adds to
+ * `class`, and a value may be quoted or bare. What a name and its attributes
+ * mean is the host's.
+ */
+export type MarkdownBlock =
+  | {
+    kind: 'code';
+    /** The fence's language, lower case, or `''`. */
+    lang: string;
+    /** The rest of the fence's info string, after the language. */
+    meta: string;
+    body: string;
+  }
+  | {
+    kind: 'directive';
+    /** `container` for `:::name` ... `:::`, `leaf` for one `::name` line. */
+    type: 'container' | 'leaf';
+    name: string;
+    /** The text in `[...]`, as written, or `''`. */
+    label: string;
+    attributes: Readonly<Record<string, string>>;
+    /** A container's Markdown between its fences, as written; `''` for a leaf. */
+    body: string;
+  };
+
 export interface MarkdownProps {
   text?: string;
   style?: CSSProperties;
@@ -22,13 +60,21 @@ export interface MarkdownProps {
    * one that reads the image from where the file is.
    */
   image?: (src: string, alt: string) => ReactNode;
+  /**
+   * Draws a fenced code block or a directive, given as a `MarkdownBlock`. What
+   * it returns is drawn in the block's place; `undefined` leaves the block to
+   * scena. A container's `body` is Markdown, which the host may draw with a
+   * `Markdown` of its own. Without it, a directive is not read, and its lines
+   * are text.
+   */
+  block?: (block: MarkdownBlock) => ReactNode | undefined;
 }
 
-export function Markdown({ text = '', style, className, image }: MarkdownProps) {
+export function Markdown({ text = '', style, className, image, block }: MarkdownProps) {
   const notes = new Map<string, string>();
-  const blocks = parseBlocks(text.split(/\r?\n/), notes);
+  const blocks = parseBlocks(text.split(/\r?\n/), notes, block !== undefined);
   const order: string[] = [];
-  const ctx: Ctx = { notes, order, image };
+  const ctx: Ctx = { notes, order, image, block };
   const body = blocks.map((b, i) => renderBlock(b, i, ctx));
   return (
     <div
@@ -59,7 +105,8 @@ type Block =
   | { kind: 'p'; lines: string[] }
   | { kind: 'list'; ordered: boolean; start: number; items: ListItem[] }
   | { kind: 'quote'; blocks: Block[] }
-  | { kind: 'code'; lang: string; body: string }
+  | { kind: 'code'; lang: string; meta: string; body: string }
+  | { kind: 'directive'; directive: Extract<MarkdownBlock, { kind: 'directive' }>; open: string; close: string | null; blocks: Block[] }
   | { kind: 'hr' }
   | { kind: 'table'; head: string[]; align: Align[]; rows: string[][] };
 
@@ -68,10 +115,17 @@ interface Ctx {
   notes: Map<string, string>;
   order: string[];
   image?: (src: string, alt: string) => ReactNode;
+  block?: (block: MarkdownBlock) => ReactNode | undefined;
 }
 
 const HEADING = /^ {0,3}(#{1,6})\s+(.*?)(?:\s+#+)?\s*$/;
 const FENCE = /^ {0,3}(`{3,}|~{3,})\s*([^`\s]*)/;
+const FENCE_CLOSE = /^ {0,3}(`{3,}|~{3,})\s*$/;
+/** A directive's name, then its optional `[label]` and `{attributes}`, to the end of the line. */
+const DIRECTIVE_TAIL = String.raw`([A-Za-z][\w-]*)(?:\[([^\]]*)\])?(?:\{((?:[^}"']|"[^"]*"|'[^']*')*)\})?\s*$`;
+const CONTAINER = new RegExp(String.raw`^ {0,3}(:{3,})` + DIRECTIVE_TAIL);
+const CONTAINER_CLOSE = /^ {0,3}(:{3,})\s*$/;
+const LEAF = new RegExp(String.raw`^ {0,3}::` + DIRECTIVE_TAIL);
 const HR = /^ {0,3}([-*_])(?:\s*\1){2,}\s*$/;
 const QUOTE = /^ {0,3}>/;
 const LIST = /^(\s*)([-*+]|\d{1,9}[.)])\s+(.*)$/;
@@ -79,8 +133,9 @@ const NOTE = /^\[\^([^\]]+)\]:\s*(.*)$/;
 const DELIMITER = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
 
 /** Whether `line` starts a block other than a paragraph, so a paragraph ends before it. */
-function startsBlock(line: string, next: string | undefined): boolean {
+function startsBlock(line: string, next: string | undefined, directives = false): boolean {
   return (
+    (directives && (CONTAINER.test(line) || LEAF.test(line))) ||
     HEADING.test(line) ||
     FENCE.test(line) ||
     HR.test(line) ||
@@ -142,12 +197,77 @@ function alignOf(cell: string): Align {
   return null;
 }
 
-function parseBlocks(lines: string[], notes: Map<string, string>): Block[] {
+/**
+ * A directive's attributes, read as HTML attributes: `#x` is `id`, `.x` adds
+ * to `class`, `k=v`, `k="v"` and `k='v'` set `k`, and a bare `k` is `''`.
+ */
+function directiveAttributes(text: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  const classes: string[] = [];
+  const re = /([#.])([^\s#.="'{}]+)|([A-Za-z_:][\w:.-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`{}]+)))?/g;
+  for (const m of text.matchAll(re)) {
+    if (m[1] === '#') out.id = m[2]!;
+    else if (m[1] === '.') classes.push(m[2]!);
+    else out[m[3]!] = m[4] ?? m[5] ?? m[6] ?? '';
+  }
+  if (classes.length > 0) out.class = [out.class, ...classes].filter(Boolean).join(' ');
+  return out;
+}
+
+function parseBlocks(lines: string[], notes: Map<string, string>, directives = false): Block[] {
   const blocks: Block[] = [];
   let i = 0;
   while (i < lines.length) {
     const line = lines[i] ?? '';
     if (line.trim() === '') { i += 1; continue; }
+
+    const container = directives ? CONTAINER.exec(line) : null;
+    if (container) {
+      // Its body runs to a line of at least as many colons, outside any code fence, or to the end.
+      const colons = container[1]!.length;
+      const body: string[] = [];
+      let fence: string | null = null;
+      let close: string | null = null;
+      i += 1;
+      while (i < lines.length) {
+        const l = lines[i] ?? '';
+        if (fence === null) {
+          const end = CONTAINER_CLOSE.exec(l);
+          if (end && end[1]!.length >= colons) { close = l; i += 1; break; }
+          const open = FENCE.exec(l);
+          if (open) fence = open[1]!;
+        } else {
+          const end = FENCE_CLOSE.exec(l);
+          if (end && end[1]![0] === fence[0] && end[1]!.length >= fence.length) fence = null;
+        }
+        body.push(l);
+        i += 1;
+      }
+      blocks.push({
+        kind: 'directive',
+        directive: {
+          kind: 'directive', type: 'container', name: container[2]!, label: container[3] ?? '',
+          attributes: directiveAttributes(container[4] ?? ''), body: body.join('\n'),
+        },
+        open: line,
+        close,
+        blocks: parseBlocks(body, notes, true),
+      });
+      continue;
+    }
+
+    const leaf = directives ? LEAF.exec(line) : null;
+    if (leaf) {
+      blocks.push({
+        kind: 'directive',
+        directive: { kind: 'directive', type: 'leaf', name: leaf[1]!, label: leaf[2] ?? '', attributes: directiveAttributes(leaf[3] ?? ''), body: '' },
+        open: line,
+        close: null,
+        blocks: [],
+      });
+      i += 1;
+      continue;
+    }
 
     const fence = FENCE.exec(line);
     if (fence) {
@@ -157,13 +277,13 @@ function parseBlocks(lines: string[], notes: Map<string, string>): Block[] {
       i += 1;
       while (i < lines.length) {
         const l = lines[i] ?? '';
-        const close = /^ {0,3}(`{3,}|~{3,})\s*$/.exec(l);
+        const close = FENCE_CLOSE.exec(l);
         if (close && close[1]![0] === mark[0] && close[1]!.length >= mark.length) break;
         body.push(dedent(l, indent));
         i += 1;
       }
       i += 1; // consume closing fence
-      blocks.push({ kind: 'code', lang: (fence[2] ?? '').toLowerCase(), body: body.join('\n') });
+      blocks.push({ kind: 'code', lang: (fence[2] ?? '').toLowerCase(), meta: line.slice(fence[0].length).trim(), body: body.join('\n') });
       continue;
     }
 
@@ -184,7 +304,7 @@ function parseBlocks(lines: string[], notes: Map<string, string>): Block[] {
         inner.push(QUOTE.test(l) ? l.replace(/^ {0,3}> ?/, '') : l);
         i += 1;
       }
-      blocks.push({ kind: 'quote', blocks: parseBlocks(inner, notes) });
+      blocks.push({ kind: 'quote', blocks: parseBlocks(inner, notes, directives) });
       continue;
     }
 
@@ -228,10 +348,10 @@ function parseBlocks(lines: string[], notes: Map<string, string>): Block[] {
           const ind = indentOf(l);
           if (ind > base && ind >= Math.min(content, base + 2)) { body.push(dedent(l, Math.min(ind, content))); i += 1; continue; }
           // An unindented line that starts nothing new continues the item's paragraph.
-          if (ind <= base && !startsBlock(l, lines[i + 1])) { body.push(l.trim()); i += 1; continue; }
+          if (ind <= base && !startsBlock(l, lines[i + 1], directives)) { body.push(l.trim()); i += 1; continue; }
           break;
         }
-        items.push({ checked, blocks: parseBlocks(body, notes) });
+        items.push({ checked, blocks: parseBlocks(body, notes, directives) });
         // Blank lines between items of the same list.
         let j = i;
         while (j < lines.length && (lines[j] ?? '').trim() === '') j += 1;
@@ -248,7 +368,7 @@ function parseBlocks(lines: string[], notes: Map<string, string>): Block[] {
       const align = cellsOf(next).map(alignOf);
       const rows: string[][] = [];
       i += 2;
-      while (i < lines.length && (lines[i] ?? '').trim() !== '' && (lines[i] ?? '').includes('|') && !startsBlock(lines[i] ?? '', undefined)) {
+      while (i < lines.length && (lines[i] ?? '').trim() !== '' && (lines[i] ?? '').includes('|') && !startsBlock(lines[i] ?? '', undefined, directives)) {
         rows.push(cellsOf(lines[i] ?? ''));
         i += 1;
       }
@@ -259,7 +379,7 @@ function parseBlocks(lines: string[], notes: Map<string, string>): Block[] {
     // Paragraph: consecutive non-empty lines that start no other block.
     const pl: string[] = [line];
     i += 1;
-    while (i < lines.length && (lines[i] ?? '').trim() !== '' && !startsBlock(lines[i] ?? '', lines[i + 1]) && !NOTE.test(lines[i] ?? '')) {
+    while (i < lines.length && (lines[i] ?? '').trim() !== '' && !startsBlock(lines[i] ?? '', lines[i + 1], directives) && !NOTE.test(lines[i] ?? '')) {
       pl.push(lines[i] ?? '');
       i += 1;
     }
@@ -291,6 +411,10 @@ function renderLines(lines: string[], ctx: Ctx): ReactNode {
 }
 
 function renderBlock(b: Block, key: number, ctx: Ctx): ReactNode {
+  if (ctx.block !== undefined && (b.kind === 'code' || b.kind === 'directive')) {
+    const drawn = ctx.block(b.kind === 'code' ? { kind: 'code', lang: b.lang, meta: b.meta, body: b.body } : b.directive);
+    if (drawn !== undefined) return <Fragment key={key}>{drawn}</Fragment>;
+  }
   switch (b.kind) {
     case 'h': {
       const Tag = (`h${b.level}`) as 'h1';
@@ -300,6 +424,15 @@ function renderBlock(b: Block, key: number, ctx: Ctx): ReactNode {
       return <p key={key}>{renderLines(b.lines, ctx)}</p>;
     case 'hr':
       return <hr key={key} />;
+    case 'directive':
+      // Left to scena: its fences as text, and its body as Markdown.
+      return (
+        <Fragment key={key}>
+          <p>{b.open.trim()}</p>
+          {b.blocks.map((c, j) => renderBlock(c, j, ctx))}
+          {b.close === null ? null : <p>{b.close.trim()}</p>}
+        </Fragment>
+      );
     case 'quote':
       return <blockquote key={key}>{b.blocks.map((c, j) => renderBlock(c, j, ctx))}</blockquote>;
     case 'list': {

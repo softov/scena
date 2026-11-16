@@ -35,7 +35,7 @@ export type { SpinnerProps } from './display/Spinner.js';
 export { Skeleton } from './display/Skeleton.js';
 export type { SkeletonProps } from './display/Skeleton.js';
 export { Markdown } from './display/Markdown.js';
-export type { MarkdownProps } from './display/Markdown.js';
+export type { MarkdownBlock, MarkdownProps } from './display/Markdown.js';
 export { HtmlEmbed } from './embed/index.js';
 export type { HtmlEmbedProps } from './embed/index.js';
 export { Svg } from './display/Svg.js';
