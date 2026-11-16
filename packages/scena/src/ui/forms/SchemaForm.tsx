@@ -53,6 +53,8 @@ export type FormatRenderer = ComponentType<FormatRendererProps>;
 export interface JsonEditorProps {
   value: string;
   onChange: (text: string) => void;
+  // The schema the text is held to: the form's in its JSON view, a field's in its own JSON text.
+  schema?: JsonSchemaObject | JsonSchemaField;
 }
 export type JsonEditor = ComponentType<JsonEditorProps>;
 
@@ -481,7 +483,7 @@ function SchemaControl({ field, value, onChange, meta, required, error, namespac
 
   // `{}` is any JSON value, so only its JSON text can hold it.
   if (isAnyValue(field)) {
-    return <JsonText value={value} fits={() => true} shape="JSON" onChange={onChange} jsonEditor={jsonEditor} fitRows />;
+    return <JsonText value={value} fits={() => true} shape="JSON" onChange={onChange} jsonEditor={jsonEditor} schema={field} fitRows />;
   }
 
   const type = effectiveType(field);
@@ -611,11 +613,13 @@ interface JsonTextProps {
   shape: string;
   onChange: (next: unknown) => void;
   jsonEditor?: JsonEditor;
+  /** The schema of the field the text holds, handed to the JSON editor. */
+  schema: JsonSchemaField;
   /** Grow the text box with its lines, up to five, instead of five always. */
   fitRows?: boolean;
 }
 
-function JsonText({ value, fits, shape, onChange, jsonEditor, fitRows }: JsonTextProps) {
+function JsonText({ value, fits, shape, onChange, jsonEditor, schema, fitRows }: JsonTextProps) {
   const shown = value === undefined ? '' : JSON.stringify(value, null, 2);
   const [text, setText] = useState(shown);
   const [error, setError] = useState<string | null>(null);
@@ -638,7 +642,7 @@ function JsonText({ value, fits, shape, onChange, jsonEditor, fitRows }: JsonTex
   };
   return (
     <>
-      {jsonEditor ? <JsonEditorBox editor={jsonEditor} value={text} onChange={edit} /> : <TextField multiline rows={fitRows ? Math.min(5, text.split('\n').length) : 5} value={text} onChange={edit} />}
+      {jsonEditor ? <JsonEditorBox editor={jsonEditor} value={text} onChange={edit} schema={schema} /> : <TextField multiline rows={fitRows ? Math.min(5, text.split('\n').length) : 5} value={text} onChange={edit} />}
       <JsonError error={error} />
     </>
   );
@@ -663,7 +667,7 @@ function ArrayControl({ field, value, onChange, namespace, formatRenderers, json
   const itemSchema = resolveArrayItemSchema(field);
 
   // Tuple arrays — edited as raw JSON.
-  if (!itemSchema) return <JsonText value={items} fits={Array.isArray} shape="an array" onChange={onChange} jsonEditor={jsonEditor} />;
+  if (!itemSchema) return <JsonText value={items} fits={Array.isArray} shape="an array" onChange={onChange} jsonEditor={jsonEditor} schema={field} />;
 
   return (
     <div className="oo-schema-form__array">

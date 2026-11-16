@@ -38,7 +38,7 @@ function FieldsView({ keys, renderField, header }: SchemaFormViewProps) {
 // The value as JSON text. It holds the text it shows, so a draft that does not
 // parse stays on screen with its error; a value it did not send replaces the
 // text, as a consumer's reset or the host's own change.
-function JsonView({ value, onChange, jsonEditor }: SchemaFormViewProps) {
+function JsonView({ schema, value, onChange, jsonEditor }: SchemaFormViewProps) {
   const shown = JSON.stringify(value, null, 2);
   const [text, setText] = useState(shown);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +61,7 @@ function JsonView({ value, onChange, jsonEditor }: SchemaFormViewProps) {
   return (
     <>
       {jsonEditor ? (
-        <JsonEditorBox editor={jsonEditor} value={text} onChange={edit} />
+        <JsonEditorBox editor={jsonEditor} value={text} onChange={edit} schema={schema} />
       ) : (
         <textarea className="oo-schema-form__json" value={text} spellCheck={false} rows={16} onChange={(event) => edit(event.target.value)} />
       )}
