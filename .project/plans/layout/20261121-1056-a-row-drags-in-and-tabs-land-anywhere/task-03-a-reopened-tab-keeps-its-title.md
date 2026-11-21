@@ -1,6 +1,6 @@
 ---
 title: A reopened tab keeps its title
-status: todo
+status: done
 depends: []
 layer: "scena sdk and core"
 refs:
@@ -31,3 +31,5 @@ A session snapshot keeps each mount's props, and a restore passes them back, so 
 - `pnpm test` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 4. The test also restores a snapshot that went through JSON, as a stored one does.

@@ -41,6 +41,7 @@ export function createSessionAPI(deps: Deps): SessionAPI & {
           key: m.key,
           surface: m.surface,
           component: m.component,
+          ...(m.props ? { props: m.props } : {}),
           state: {},
           openedAt: m.openedAt,
         });
@@ -74,6 +75,7 @@ export function createSessionAPI(deps: Deps): SessionAPI & {
         surface: sm.surface,
         key: sm.key,
         resource: sm.component,
+        ...(sm.props ? { props: sm.props } : {}),
       });
       // `open` leaves a mount that is already open where it is. A restore puts
       // it back where the snapshot had it, as the app registered it elsewhere

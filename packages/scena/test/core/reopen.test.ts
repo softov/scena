@@ -67,4 +67,23 @@ describe('opening a mount again', () => {
     expect(where()).toBe('sidebar:right');
     expect(restored[0]?.surface).toBe('sidebar:right');
   });
+
+  it('keeps the title, icon and colour through a snapshot and a restore', async () => {
+    const first = createScena();
+    first.surfaces.open({ surface: 'sidebar:right', key: 'user:1', resource: { component: 'UserDetail' }, props: { title: 'Ada', icon: 'A', color: 'blue' } });
+    const snap = first.session.snapshot();
+    expect(snap.mounts[0]?.props).toEqual({ title: 'Ada', icon: 'A', color: 'blue' });
+
+    const second = createScena();
+    second.components.register({ component: 'UserDetail', renderer: { kind: 'react', load: async () => ({ default: () => null }) } });
+    await second.session.restore(JSON.parse(JSON.stringify(snap)) as SessionSnapshot);
+    expect(second.surfaces.listAt('sidebar:right')[0]?.props).toEqual({ title: 'Ada', icon: 'A', color: 'blue' });
+  });
+
+  it('restores a snapshot saved with no props', async () => {
+    const scena = createScena();
+    scena.components.register({ component: 'UserDetail', renderer: { kind: 'react', load: async () => ({ default: () => null }) } });
+    await scena.session.restore({ version: 1, capturedAt: 0, surfaces: {}, mounts: [{ key: 'user:1', surface: 'main', component: { component: 'UserDetail' }, state: {}, openedAt: 0 }] });
+    expect(scena.surfaces.listAt('main').map((m) => m.key)).toEqual(['user:1']);
+  });
 });

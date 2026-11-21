@@ -1,12 +1,15 @@
 import type { ComponentNode, BindingPath } from './component-graph.js';
 import type { Disposable } from './disposable.js';
-import type { SurfaceName, MountHandle } from './mount-surface.js';
+import type { SurfaceName, MountDisplay, MountHandle } from './mount-surface.js';
 import type { ContextValue } from './when.js';
 
 export interface SessionMount {
   key: string;
   surface: SurfaceName;
   component: ComponentNode;
+  // The tab's title, icon and colour, so a reopened tab shows them before its
+  // page names itself. A snapshot saved before this has none.
+  props?: MountDisplay;
   state: Record<string, unknown>;
   openedAt: number;
 }
