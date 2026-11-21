@@ -488,7 +488,8 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   );
 }
 
-function DropPreview({ zone }: { zone: DropZone }) {
+/** Where a drop would land in a group: its whole body, or the half of an edge. The `tab` layout draws the centre one. */
+export function DropPreview({ zone }: { zone: DropZone }) {
   const base: CSSProperties = {
     position: 'absolute',
     pointerEvents: 'none',
