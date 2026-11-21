@@ -105,6 +105,11 @@ export function moveTabHere(
   return true;
 }
 
+// A surface whose state says `drops: false` takes no tab or row.
+function refusesDrops(scena: Scena, surface: SurfaceName): boolean {
+  return scena.layout.get().surfaces[surface]?.drops === false;
+}
+
 // The surface that has `key` open, if any.
 export function surfaceOf(scena: Scena, key: string): SurfaceName | undefined {
   return scena.surfaces.listSurfaces().find((s) => scena.surfaces.listAt(s).some((m) => m.key === key));
@@ -119,6 +124,13 @@ export function judgeDrag(
   types: readonly string[],
   surface: SurfaceName,
 ): 'take' | 'refuse' | 'pass' {
+  if (refusesDrops(scena, surface)) {
+    // A tab from another surface or a row: refused, so a layout does not read
+    // it as its own drag. A drag inside the surface passes, as before.
+    const foreign = (types.includes(TAB_DRAG_MIME) && current && current.surface !== surface)
+      || (types.includes(OPEN_DRAG_MIME) && currentOpen);
+    return foreign ? 'refuse' : 'pass';
+  }
   if (types.includes(TAB_DRAG_MIME) && current && current.surface !== surface) {
     return canTakeTab(scena, current, surface) ? 'take' : 'refuse';
   }
@@ -141,6 +153,7 @@ export function dropHere(
   surface: SurfaceName,
   place: (key: string) => Partial<SurfaceLayoutState> | null,
 ): boolean {
+  if (refusesDrops(scena, surface)) return false;
   const tab = readTabDrag(data);
   if (tab) {
     if (tab.surface === surface) return false;

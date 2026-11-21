@@ -115,6 +115,9 @@ export interface SurfaceLayoutState {
   // Set: the surface is drawn in a browser window of its own, at this place
   // and size (see window-surface.ts). A window surface is named `window:<id>`.
   window?: WindowBounds;
+  // false: the surface takes no dropped tab or row, as a sidebar that holds an
+  // app's own sections. A drop area inside it still takes its drops.
+  drops?: boolean;
   // `tab-panel` layout state. Recursive binary tree; see TabPanelNode.
   tabPanel?: {
     tree: TabPanelNode;
