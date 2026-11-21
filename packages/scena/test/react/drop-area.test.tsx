@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { SurfaceArea } from '../../src/react/SurfaceArea.js';
@@ -105,5 +105,60 @@ describe('a drop area', () => {
     });
     expect(dropped).not.toHaveBeenCalled();
     expect(scena.surfaces.listAt('main').map((m) => m.key)).toContain('user:1');
+  });
+
+  it('answers move while Shift is held, so the drop is not cancelled, and keeps the tab', async () => {
+    const scena = await setup();
+    const composer = screen.getByTestId('composer');
+    expect(composer.hasAttribute('data-scena-drop-area')).toBe(true);
+    const dt = tabDrag({ surface: 'sidebar:right', key: 'user:1' });
+    // jsdom has no DragEvent, so Shift is set on the event itself.
+    const withShift = (ev: Event) => Object.defineProperty(ev, 'shiftKey', { value: true });
+    const over = createEvent.dragOver(composer, { dataTransfer: dt });
+    withShift(over);
+    fireEvent(composer, over);
+    expect(dt.dropEffect).toBe('move');
+    fireEvent.dragOver(composer, { dataTransfer: dt });
+    expect(dt.dropEffect).toBe('copy');
+    act(() => {
+      const drop = createEvent.drop(composer, { dataTransfer: dt });
+      withShift(drop);
+      fireEvent(composer, drop);
+    });
+    expect(dropped).toHaveBeenCalledTimes(1);
+    expect(scena.surfaces.listAt('sidebar:right').map((m) => m.key)).toContain('user:1');
+  });
+
+  it('clears the tab group\'s drop preview while a drag is over the area', async () => {
+    dropped.mockReset();
+    const scena = createScena();
+    registerBuiltinLayouts(scena);
+    scena.components.register({ component: 'Page', renderer: { kind: 'react', load: async () => ({ default: Page }) } });
+    scena.components.register({ component: 'Other', renderer: { kind: 'react', load: async () => ({ default: () => <div>other</div> }) } });
+    scena.layout.setSurface('main', { visible: true, layout: 'tab-panel' });
+    scena.surfaces.open({ surface: 'main', key: 'page', resource: { component: 'Page' } });
+    scena.surfaces.open({ surface: 'sidebar:right', key: 'user:1', resource: { component: 'Other' } });
+    const { container } = render(
+      <ScenaProvider scena={scena}>
+        <SurfaceArea surface="main" role="main" />
+        <SurfaceArea surface="sidebar:right" role="panel" layout="tab" />
+      </ScenaProvider>,
+    );
+    await waitFor(() => expect(screen.getByTestId('composer')).toBeTruthy());
+    const body = container.querySelector('[data-surface="main"] div[style*="position: relative"]') as HTMLElement;
+    body.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100, x: 0, y: 0, toJSON: () => ({}) });
+    const dt = tabDrag({ surface: 'sidebar:right', key: 'user:1' });
+    // jsdom has no DragEvent, so the point is set on the event itself.
+    const over = createEvent.dragOver(screen.getByText('the page'), { dataTransfer: dt });
+    Object.defineProperty(over, 'clientX', { value: 50 });
+    Object.defineProperty(over, 'clientY', { value: 50 });
+    act(() => {
+      fireEvent(screen.getByText('the page'), over);
+    });
+    expect(body.querySelector('.oo-tab-panel-drop-preview')).not.toBeNull();
+    act(() => {
+      fireEvent.dragOver(screen.getByTestId('composer'), { dataTransfer: dt });
+    });
+    expect(body.querySelector('.oo-tab-panel-drop-preview')).toBeNull();
   });
 });

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
-import { SurfaceWindows } from '../../src/react/SurfaceWindows.js';
+import { listSurfaceWindows, SurfaceWindows } from '../../src/react/SurfaceWindows.js';
 import { registerBuiltinLayouts } from '../../src/ui/layout/register.js';
 
 type TestScena = ReturnType<typeof createScena>;
@@ -109,6 +109,15 @@ describe('SurfaceWindows', () => {
     });
     await waitFor(() => expect(scena.layout.get().surfaces['window:1']).toBeUndefined());
     expect(win.close).toHaveBeenCalled();
+  });
+
+  it('lists the open windows, for a listener that starts late', () => {
+    const scena = setup();
+    expect(listSurfaceWindows(scena)).toEqual([{ surface: 'window:1', window: opens[0]!.window }]);
+    act(() => {
+      opens[0]!.window.dispatchEvent(new Event('pagehide'));
+    });
+    expect(listSurfaceWindows(scena)).toEqual([]);
   });
 
   it('writes the place and size back when the window resizes', () => {

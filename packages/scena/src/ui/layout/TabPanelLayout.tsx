@@ -390,6 +390,11 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
 
       <div
         ref={bodyRef}
+        // A drop area inside the page takes the drag and stops it, so the body
+        // never hears it leave: drop the preview as the drag reaches the area.
+        onDragOverCapture={(e) => {
+          if ((e.target as Element | null)?.closest?.('[data-scena-drop-area]')) setZone(null);
+        }}
         onDragOver={onBodyDragOver}
         onDragLeave={onBodyDragLeave}
         onDrop={onBodyDrop}

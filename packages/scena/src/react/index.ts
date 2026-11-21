@@ -29,7 +29,7 @@ export { useI18n } from './hooks/useI18n.js';
 export type { UseI18nResult } from './hooks/useI18n.js';
 export { useLabel } from './hooks/useLabel.js';
 export { OwnerDocumentProvider, useOwnerDocument } from './OwnerDocument.js';
-export { SurfaceWindows, closeWindowSurface } from './SurfaceWindows.js';
+export { SurfaceWindows, closeWindowSurface, listSurfaceWindows } from './SurfaceWindows.js';
 export type { SurfaceWindowsProps } from './SurfaceWindows.js';
 export { BlockedWindows } from './BlockedWindows.js';
 export type { BlockedWindowsProps } from './BlockedWindows.js';
