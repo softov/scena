@@ -135,6 +135,10 @@ export interface MountSurfaceRegistry {
   // `CheckedNode<T>` equal to T, which is no constraint at all - so this is
   // additive and every existing mount still compiles.
   mount<T extends MountTarget>(decl: MountDeclaration<T & CheckedNode<T>>): Disposable;
+  // Opens a mount, or focuses it when its key is already open. `surface` is
+  // where a first open goes: an open mount stays where it is, wherever a
+  // person moved it, and the returned handle names that surface. A closed
+  // key opens at `surface` again. To move an open mount, call `move`.
   open<T extends MountTarget>(opts: {
     surface: SurfaceName;
     key: string;
