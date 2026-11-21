@@ -86,6 +86,22 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   const titleEntries = activeKey !== undefined && activeKey === focused
     ? scena.commands.list({ slot: 'view/title', enabled: true })
     : [];
+  // The surface's own buttons (`surface/title`), judged by this group's active
+  // tab, as a `tab` strip judges them by its own: each group draws them.
+  const activeComponent = ctx.mounts.find((m) => m.key === activeKey)?.component.component;
+  const stripContext = {
+    '$/surface/name': ctx.surface,
+    '$/tab/key': activeKey,
+    '$/tab/component': typeof activeComponent === 'string' ? activeComponent : undefined,
+  };
+  const surfaceEntries = scena.commands
+    .list({ slot: 'surface/title' })
+    .filter((cmd) => cmd.when === undefined || scena.when.evaluate(cmd.when, stripContext));
+  const runStrip = (id: string): void => {
+    scena.store.set('$/surface/name', ctx.surface);
+    scena.store.set('$/tab/key', activeKey);
+    void scena.commands.execute(id);
+  };
   // const activeMount = ctx.mounts.find((m) => m.key === activeKey);
 
   const [dragOverTab, setDragOverTab] = useState<number | null>(null);
@@ -352,6 +368,14 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
               <button key={cmd.id} onClick={() => void scena.commands.execute(cmd.id)} title={label}>
                 {cmd.icon ? `${cmd.icon} ` : ''}
                 {label}
+              </button>
+            );
+          })}
+          {surfaceEntries.map((cmd) => {
+            const label = String(typeof cmd.title === 'function' ? cmd.title() : cmd.title);
+            return (
+              <button key={`surface:${cmd.id}`} onClick={() => runStrip(cmd.id)} title={label} aria-label={label}>
+                {cmd.icon ?? label}
               </button>
             );
           })}

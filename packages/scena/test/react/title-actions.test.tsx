@@ -72,4 +72,25 @@ describe('tab title actions follow focus', () => {
     await waitFor(() => expect(inSurface('sidebar:right')).toContain('Preview'));
     expect(inSurface('main')).not.toContain('Preview');
   });
+
+  it('draws the surface buttons in each tab group, judged by its own tab', async () => {
+    const { scena, inGroup } = await setup();
+    let ran: unknown;
+    scena.commands.register({
+      id: 'switch',
+      title: 'Switch',
+      icon: 'S',
+      slots: ['surface/title'],
+      when: (ctx) => ctx['$/surface/name'] === 'main' && ctx['$/tab/key'] === 'file:b',
+      run: (ctx) => { ran = ctx.store.get('$/tab/key'); },
+    });
+    // A group reads its commands as it draws; a focus change draws it again.
+    act(() => scena.surfaces.focus('file:a'));
+    await waitFor(() => expect(inGroup('g2')).toContain('S'));
+    expect(inGroup('g1')).not.toContain('S');
+    act(() => {
+      screen.getByRole('button', { name: 'Switch' }).click();
+    });
+    expect(ran).toBe('file:b');
+  });
 });
