@@ -18,6 +18,14 @@ export function registerDragDemo(scena: Scena): Disposable {
           children: [
             { component: 'Text', text: 'Drag this tab', variant: 'h3' },
             { component: 'Text', text: 'Drop it on a main tab strip, or on a group body to join or split it.', muted: true },
+            // A drop area in a JSON page: a tab or a row dropped here runs
+            // `demo.tookDrop`, and stays where it was.
+            {
+              component: 'DropArea',
+              command: 'demo.tookDrop',
+              label: 'Drop a tab or a row here. It stays where it is.',
+              children: [{ component: 'Text', text: { path: '$/demo/lastDrop' }, muted: true }],
+            },
           ],
         },
       },
@@ -39,6 +47,21 @@ export function registerDragDemo(scena: Scena): Disposable {
       },
     }),
   );
+
+  subs.push(
+    scena.commands.register({
+      id: 'demo.tookDrop',
+      title: 'Show the dropped thing',
+      run: (ctx, args) => {
+        const drop = (args as { drop?: { key: string; title?: unknown; from: string; surface?: string } }).drop;
+        if (!drop) return;
+        const title = typeof drop.title === 'string' ? drop.title : drop.key;
+        const where = drop.surface ? ` from ${drop.surface}` : '';
+        ctx.store.set('$/demo/lastDrop', `Took the ${drop.from} "${title}"${where}.`);
+      },
+    }),
+  );
+  scena.store.set('$/demo/lastDrop', 'Drop a tab or a row here. It stays where it is.');
 
   const side = scena.layout.get().surfaces['sidebar:right'];
   scena.layout.setSurface('sidebar:right', { ...side, layout: 'tab' });

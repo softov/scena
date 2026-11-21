@@ -7,9 +7,16 @@ import type { BindingPath, DataProviderDefinition, ReactiveStore } from '@softov
 
 export type SessionStatus = 'idle' | 'running' | 'done';
 
+// A tab or a row dropped on the composer: what the message refers to.
+export interface ChatReference {
+  key: string;
+  title: string;
+}
+
 export interface ChatMessage {
   role: 'user' | 'agent';
   text: string;
+  refs?: ChatReference[];
 }
 
 export interface Session {

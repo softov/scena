@@ -173,7 +173,15 @@ A **list row drags in** the same way. A row calls `startOpenDrag` with what
 `surfaces.open` needs (a key, a component node, a title), under
 `OPEN_DRAG_MIME`. A surface that takes it opens the key there; a key already
 open on another surface moves its tab there instead. `dropHere` and
-`judgeDrag` in `react/surface-drop.ts` are the one path both drags take. `policy.movable: false` keeps a mount on its surface: the drag shows
+`judgeDrag` in `react/surface-drop.ts` are the one path both drags take.
+
+A **drop area** is an element inside a page that takes a tab or a row before
+the surface does: a composer that makes a dropped session a reference, say.
+It learns a `DroppedThing` (the key, the component node, the title, and for a
+tab its surface) and does what it does with it. The tab stays where it was: an
+area links, and a surface moves. A component marks one with `useDropArea`; a
+graph page holds a `DropArea`, which runs a command with the dropped thing as
+`drop`. A thing the area does not accept passes on to the surface. `policy.movable: false` keeps a mount on its surface: the drag shows
 it cannot land, and no move happens. The pure tree moves are in
 `sdk/tab-panel.ts`, so code outside a layout edits a tree the same way.
 

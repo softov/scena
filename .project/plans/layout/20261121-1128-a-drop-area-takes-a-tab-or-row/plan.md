@@ -1,7 +1,7 @@
 ---
 title: A drop area takes a tab or a row
 domain: layout
-status: active
+status: built
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -84,7 +84,7 @@ drop on the area -> read the payload -> describe it -> onDrop(thing) -> stop the
 | --- | --- | --- |
 | [01 - a component marks a drop area](task-01-a-component-marks-a-drop-area.md) | done | - |
 | [02 - a graph page has a drop area](task-02-a-graph-page-has-a-drop-area.md) | done | 01 |
-| [03 - the composer takes a reference](task-03-the-composer-takes-a-reference.md) | doing | 01, 02 |
+| [03 - the composer takes a reference](task-03-the-composer-takes-a-reference.md) | done | 01, 02 |
 
 ## Risks and tradeoffs
 
@@ -95,14 +95,14 @@ drop on the area -> read the payload -> describe it -> onDrop(thing) -> stop the
 
 ## Resume state
 
-- **Done so far:** task 01 and 02 done 2026-11-21. Task 03 started 2026-11-21.
-- **Next action:** [task-03-the-composer-takes-a-reference.md](task-03-the-composer-takes-a-reference.md).
+- **Done so far:** every task done 2026-11-21. [implemented.md](implemented.md) says what exists, and that the playground check is left.
+- **Next action:** the check by hand in task 03's *Validation*.
 - **Open questions:** none.
 - **Watch out for:** a drop an area takes must stop its event, or the surface moves the tab too.
 
 ## Final verification checklist
 
-- [ ] `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.
+- [x] `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.
 - [ ] In the playground, a session tab dropped on another session's composer adds a reference, and the tab stays.
 - [ ] A session row, a user tab and a file tab do the same.
 - [ ] A drop beside the composer, on the page, still moves the tab to that surface.

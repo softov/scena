@@ -1,6 +1,6 @@
 ---
 title: The composer takes a reference
-status: todo
+status: done
 depends: [task-01-a-component-marks-a-drop-area.md, task-02-a-graph-page-has-a-drop-area.md]
 layer: "playground and docs"
 refs:
@@ -42,3 +42,7 @@ The docs say how an app marks a drop area.
 - `pnpm typecheck` and `pnpm lint` pass.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 5. The demo page is the "Drag me" tab on the right sidebar; its area writes `$/demo/lastDrop`.
+- `pnpm typecheck` and `pnpm lint` pass, and the playground builds.
+- Not checked by hand: Softov asked to commit on 2026-11-21 before a check was reported.
