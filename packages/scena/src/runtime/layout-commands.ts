@@ -1,5 +1,5 @@
 import type { Scena } from '../sdk/scena.js';
-import { besideWindow, openTabWindow } from './open-tab-window.js';
+import { besideTab, openTabWindow } from './open-tab-window.js';
 import {
   collectLeaves as collectAllLeaves,
   collectLeavesById,
@@ -198,7 +198,8 @@ export function registerLayoutCommands(scena: Scena): Disposable {
       run: (ctx) => {
         const key = ctxTab(ctx);
         if (!key || typeof window === 'undefined') return;
-        openTabWindow(ctx.scena, key, besideWindow(window));
+        // Beside the window the tab is in, which is not `main` for a tab in a popup.
+        openTabWindow(ctx.scena, key, besideTab(ctx.scena, key, window));
         ctx.host?.closeMenu();
       },
     }),

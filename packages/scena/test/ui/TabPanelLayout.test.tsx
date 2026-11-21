@@ -141,6 +141,31 @@ describe('TabPanelLayout takes a tab from another surface', () => {
     expect(leavesOf(tree(scena, 'main'))[0]?.tabs).toEqual(['a', 'b', 'x']);
   });
 
+  it('hides its drop box when an area inside the page takes the drop and stops it', () => {
+    setup();
+    const el = body('main');
+    el.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100, x: 0, y: 0, toJSON: () => ({}) });
+    const dt = dragFrom({ surface: 'sidebar:right', key: 'x' });
+    const over = createEvent.dragOver(el, { dataTransfer: dt });
+    Object.defineProperty(over, 'clientX', { value: 50 });
+    Object.defineProperty(over, 'clientY', { value: 50 });
+    act(() => {
+      fireEvent(el, over);
+    });
+    const preview = () => el.querySelector('div[style*="z-index: 5"]');
+    expect(preview()).not.toBeNull();
+    // A composer in the page: it takes the drop and stops it, so no bubbling listener hears it.
+    const area = screen.getByText('page a');
+    area.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    act(() => {
+      fireEvent.drop(area, { dataTransfer: dt });
+    });
+    expect(preview()).toBeNull();
+  });
+
   it('splits the group on a drop on an edge of the body', () => {
     const scena = setup();
     const el = body('main');

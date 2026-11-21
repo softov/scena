@@ -8,7 +8,7 @@
 
 import type { Scena } from '../sdk/scena.js';
 import type { ResolvedMount, SurfaceName } from '../sdk/mount-surface.js';
-import { canMoveTo } from '../sdk/tab-drag.js';
+import { canMoveTo, type OpenDragPayload } from '../sdk/tab-drag.js';
 import { makeLeaf, removeTab } from '../sdk/tab-panel.js';
 import { newWindowSurface, type WindowBounds } from '../sdk/window-surface.js';
 
@@ -43,6 +43,38 @@ export function openTabWindow(scena: Scena, key: string, bounds: WindowBounds): 
   });
   scena.surfaces.focus(key);
   return surface;
+}
+
+// Opens what a list row's drag carries in a new window: the key's tab moves
+// there when it is open somewhere, else the key opens there. The new
+// surface's name, or null when an open tab may not move.
+export function openInWindow(scena: Scena, payload: OpenDragPayload, bounds: WindowBounds): SurfaceName | null {
+  if (findMount(scena, payload.key)) return openTabWindow(scena, payload.key, bounds);
+  const surface = newWindowSurface(scena.layout.get());
+  scena.surfaces.open({
+    surface,
+    key: payload.key,
+    resource: payload.resource,
+    ...(payload.props ? { props: payload.props } : {}),
+    ...(payload.policy ? { policy: payload.policy } : {}),
+  });
+  scena.layout.setSurface(surface, {
+    visible: true,
+    layout: 'tab-panel',
+    window: bounds,
+    tabPanel: { tree: makeLeaf([payload.key], payload.key) },
+  });
+  scena.surfaces.focus(payload.key);
+  return surface;
+}
+
+// Where a tab's new window goes: beside the window the tab is in, from that
+// surface's place, or beside `main` for a tab on the main page.
+export function besideTab(scena: Scena, key: string, main: Window): WindowBounds {
+  const mount = findMount(scena, key);
+  const bounds = mount ? scena.layout.get().surfaces[mount.surface]?.window : undefined;
+  if (!bounds) return besideWindow(main);
+  return { left: bounds.left + 40, top: bounds.top + 40, ...NEW_WINDOW_SIZE };
 }
 
 // Where a new window goes when nothing better is known: over `win`, offset a

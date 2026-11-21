@@ -15,6 +15,6 @@ export {
 export { createInMemorySocket } from './runtime/in-memory-socket.js';
 export type { InMemorySocket } from './runtime/in-memory-socket.js';
 export { registerLayoutCommands } from './runtime/layout-commands.js';
-export { openTabWindow, besideWindow, droppedAt, NEW_WINDOW_SIZE } from './runtime/open-tab-window.js';
+export { openTabWindow, openInWindow, besideWindow, besideTab, droppedAt, endedOutside, NEW_WINDOW_SIZE } from './runtime/open-tab-window.js';
 export { registerOpenerCommands } from './runtime/opener-commands.js';
 export type { RegisterOpenerCommandsOptions } from './runtime/opener-commands.js';

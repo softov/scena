@@ -189,6 +189,32 @@ describe('TabLayout takes a tab from another surface', () => {
     expect(keysOn(scena, 'sidebar:right')).toEqual(['s2']);
   });
 
+  const pageOf = (surface: SurfaceName) => screen.getByTestId(surface).querySelector('.oo-layout--tab > div[style*="position: relative"]') as HTMLElement;
+  const box = (surface: SurfaceName) => screen.getByTestId(surface).querySelector('.oo-tab-panel-drop-preview');
+
+  it('shows a drop box over its page, and puts a tab dropped there at the end', () => {
+    const scena = setup();
+    const dt = dragFrom({ surface: 'main', key: 'm1', leafId: 'any' });
+    act(() => {
+      fireEvent.dragOver(pageOf('sidebar:right'), { dataTransfer: dt });
+    });
+    expect(box('sidebar:right')).not.toBeNull();
+    act(() => {
+      fireEvent.drop(pageOf('sidebar:right'), { dataTransfer: dt });
+    });
+    expect(box('sidebar:right')).toBeNull();
+    expect(order(scena)).toEqual(['s1', 's2', 'm1']);
+    expect(keysOn(scena, 'main')).not.toContain('m1');
+  });
+
+  it('shows no drop box for a mount with movable false', () => {
+    setup();
+    act(() => {
+      fireEvent.dragOver(pageOf('sidebar:right'), { dataTransfer: dragFrom({ surface: 'main', key: 'fixed' }) });
+    });
+    expect(box('sidebar:right')).toBeNull();
+  });
+
   it('refuses a mount with movable false', () => {
     const scena = setup();
     const dt = dragFrom({ surface: 'main', key: 'fixed' });

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createScena } from '../../src/core/scena.js';
-import { besideWindow, droppedAt, endedOutside, openTabWindow } from '../../src/runtime/open-tab-window.js';
+import { besideTab, besideWindow, droppedAt, endedOutside, openInWindow, openTabWindow } from '../../src/runtime/open-tab-window.js';
 
 const BOUNDS = { left: 10, top: 20, width: 800, height: 600 };
 
@@ -77,5 +77,38 @@ describe('where a window goes', () => {
     expect(endedOutside(win, { dataTransfer: none, clientX: 10, clientY: 10 })).toBe(false);
     expect(endedOutside(win, { dataTransfer: { dropEffect: 'move' }, clientX: -5, clientY: 10 })).toBe(false);
     expect(endedOutside(win, { dataTransfer: null, clientX: -5, clientY: 10 })).toBe(false);
+  });
+});
+
+describe('openInWindow', () => {
+  it('opens a key that is not open in a new window, with its props', () => {
+    const scena = setup();
+    expect(openInWindow(scena, { key: 'row', resource: { component: 'Page' }, props: { title: 'Row' } }, BOUNDS)).toBe('window:1');
+    const mount = scena.surfaces.listAt('window:1')[0];
+    expect(mount?.key).toBe('row');
+    expect(mount?.props).toMatchObject({ title: 'Row' });
+    expect(scena.layout.get().surfaces['window:1']).toMatchObject({ window: BOUNDS, tabPanel: { tree: { kind: 'leaf', tabs: ['row'] } } });
+  });
+
+  it('moves the tab of a key that is open, and leaves one that may not move', () => {
+    const scena = setup();
+    expect(openInWindow(scena, { key: 'a', resource: { component: 'Page' } }, BOUNDS)).toBe('window:1');
+    expect(scena.surfaces.listAt('main').map((m) => m.key)).not.toContain('a');
+    expect(openInWindow(scena, { key: 'fixed', resource: { component: 'Page' } }, BOUNDS)).toBeNull();
+  });
+});
+
+describe('besideTab', () => {
+  const main = { screenX: 100, screenY: 50 } as Window;
+
+  it('places a new window beside the window the tab is in', () => {
+    const scena = setup();
+    openTabWindow(scena, 'a', BOUNDS);
+    expect(besideTab(scena, 'a', main)).toEqual({ left: 50, top: 60, width: 800, height: 600 });
+  });
+
+  it('places it beside main for a tab on the main page', () => {
+    const scena = setup();
+    expect(besideTab(scena, 'b', main)).toEqual(besideWindow(main));
   });
 });

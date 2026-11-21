@@ -10,7 +10,7 @@ import type { LayoutProps } from '../../sdk/layout.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
-import { TabTitle } from './TabPanelLayout.js';
+import { DropPreview, TabTitle } from './TabPanelLayout.js';
 import { type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
 import { dropHere, endTabDrag, judgeDrag, startTabDrag } from '../../react/surface-drop.js';
 import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
@@ -86,6 +86,23 @@ export function TabLayout({
     void scena.commands.execute(id);
   };
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  // A tab from another surface, or a list row, over the page: it lands at the
+  // end of the strip, and the page shows the box a tab group's centre shows.
+  const [bodyOver, setBodyOver] = useState(false);
+  // A drop or a drag end anywhere ends the box, in the capture phase, so a
+  // drop area inside the page that stops its drop still ends it.
+  useEffect(() => {
+    const clear = (): void => {
+      setBodyOver(false);
+      setDragOverIdx(null);
+    };
+    ownerWin.addEventListener('dragend', clear, true);
+    ownerWin.addEventListener('drop', clear, true);
+    return () => {
+      ownerWin.removeEventListener('dragend', clear, true);
+      ownerWin.removeEventListener('drop', clear, true);
+    };
+  }, [ownerWin]);
 
   // Per-tab context menu state. The capability paths injected via
   // ContextMenu.context drive which commands show up in the picker.
@@ -199,6 +216,25 @@ export function TabLayout({
     }
   }
 
+  function onBodyDragOver(e: ReactDragEvent<HTMLDivElement>) {
+    if (judgeDrag(scena, e.dataTransfer.types, surface) !== 'take') return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    setBodyOver(true);
+  }
+  function onBodyDragLeave(e: ReactDragEvent<HTMLDivElement>) {
+    const next = e.relatedTarget as Node | null;
+    if (!next || !(e.currentTarget as Node).contains(next)) setBodyOver(false);
+  }
+  function onBodyDrop(e: ReactDragEvent<HTMLDivElement>) {
+    setBodyOver(false);
+    if (judgeDrag(scena, e.dataTransfer.types, surface) !== 'take') return;
+    if (!takeForeign(e, orderedMounts.length)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
   // Capability paths shared by every menu opened from this layout. The
   // per-menu builder adds the mount-specific overrides on top.
   const baseContext = {
@@ -301,7 +337,16 @@ export function TabLayout({
       <div
         style={{ flex: 1, minHeight: 0, position: 'relative' }}
         onContextMenu={onBgContextMenu}
+        // A drop area inside the page takes the drag and stops it: drop the
+        // box as the drag reaches the area.
+        onDragOverCapture={(e) => {
+          if ((e.target as Element | null)?.closest?.('[data-scena-drop-area]')) setBodyOver(false);
+        }}
+        onDragOver={onBodyDragOver}
+        onDragLeave={onBodyDragLeave}
+        onDrop={onBodyDrop}
       >
+        {bodyOver ? <DropPreview zone="center" /> : null}
         {orderedMounts.length === 0 ? (
           (renderEmpty?.() ?? null) as ReactNode
         ) : (
