@@ -1,5 +1,12 @@
 import type { Scena } from '../sdk/scena.js';
 import { besideWindow, openTabWindow } from './open-tab-window.js';
+import {
+  collectLeaves as collectAllLeaves,
+  collectLeavesById,
+  mapLeaves,
+  newLeafId,
+  replaceLeaf,
+} from '../sdk/tab-panel.js';
 import type { Disposable } from '../sdk/disposable.js';
 import type { CommandContext } from '../sdk/command.js';
 import type {
@@ -89,50 +96,12 @@ export function registerLayoutCommands(scena: Scena): Disposable {
     });
   }
 
-  // Walk the tab-panel tree to find a leaf by id; returns the leaf + the
-  // ordered list of tab keys in it (so commands can find siblings).
-  function findLeaf(tree: TabPanelNode, leafId: string): TabPanelLeaf | null {
-    if (tree.kind === 'leaf') return tree.id === leafId ? tree : null;
-    return findLeaf(tree.first, leafId) ?? findLeaf(tree.second, leafId);
-  }
-
-  // Collect all leaves so commands like `tab.moveToGroup` can list them.
-  function collectLeaves(tree: TabPanelNode, out: TabPanelLeaf[] = []): TabPanelLeaf[] {
-    if (tree.kind === 'leaf') {
-      out.push(tree);
-      return out;
-    }
-    collectLeaves(tree.first, out);
-    collectLeaves(tree.second, out);
+  // Every leaf, as an array, so commands like `tab.moveToGroup` can list them.
+  // The tree helpers themselves are sdk/tab-panel.ts's.
+  function collectLeaves(tree: TabPanelNode): TabPanelLeaf[] {
+    const out: TabPanelLeaf[] = [];
+    collectAllLeaves(tree, out);
     return out;
-  }
-
-  function replaceLeaf(
-    node: TabPanelNode,
-    leafId: string,
-    replacement: TabPanelNode,
-  ): TabPanelNode {
-    if (node.kind === 'leaf') return node.id === leafId ? replacement : node;
-    return {
-      ...node,
-      first: replaceLeaf(node.first, leafId, replacement),
-      second: replaceLeaf(node.second, leafId, replacement),
-    };
-  }
-
-  function mapLeaves(
-    node: TabPanelNode,
-    fn: (leaf: TabPanelLeaf) => TabPanelNode | null,
-  ): TabPanelNode | null {
-    if (node.kind === 'leaf') return fn(node);
-    const first = mapLeaves(node.first, fn);
-    const second = mapLeaves(node.second, fn);
-    if (first && second) return { ...node, first, second };
-    return first ?? second;
-  }
-
-  function newLeafId(): string {
-    return `g_${Math.random().toString(36).slice(2, 10)}`;
   }
 
   // ── Mount-level commands ─────────────────────────────────────────────────
@@ -406,7 +375,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
         const state = surfaceState(ctx);
         const tree = state?.tabPanel?.tree;
         if (!tree || !leafId) return;
-        const target = findLeaf(tree, leafId);
+        const target = collectLeavesById(tree, leafId);
         if (!target) return;
         // Close every tab not in target leaf, except pinned ones.
         const keep = new Set(target.tabs);
@@ -438,7 +407,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
         const state = surfaceState(ctx);
         const tree = state?.tabPanel?.tree;
         if (!tree || !leafId) return;
-        const target = findLeaf(tree, leafId);
+        const target = collectLeavesById(tree, leafId);
         if (!target) return;
         const pinned = pinnedKeys(ctx);
         for (const k of target.tabs) if (!pinned.has(k)) ctx.surfaces.requestClose(k);
@@ -500,7 +469,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
       const state = ctx.scena.layout.get().surfaces[surface];
       const tree = state?.tabPanel?.tree;
       if (tree) {
-        const leaf = findLeaf(tree, leafId);
+        const leaf = collectLeavesById(tree, leafId);
         if (leaf) return [...leaf.tabs];
       }
     }
@@ -521,7 +490,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
     const state = surfaceState(ctx);
     const tree = state?.tabPanel?.tree;
     if (!tree) return;
-    const sourceLeaf = findLeaf(tree, leafId);
+    const sourceLeaf = collectLeavesById(tree, leafId);
     if (!sourceLeaf) return;
     // Remove the tab from its source leaf.
     const remaining = sourceLeaf.tabs.filter((k) => k !== key);
@@ -565,7 +534,7 @@ export function registerLayoutCommands(scena: Scena): Disposable {
     const state = surfaceState(ctx);
     const tree = state?.tabPanel?.tree;
     if (!tree) return;
-    const leaf = findLeaf(tree, leafId);
+    const leaf = collectLeavesById(tree, leafId);
     if (!leaf) return;
     const empty: TabPanelLeaf = {
       kind: 'leaf',

@@ -221,3 +221,9 @@ export interface OpenResourceArgs {
   options?: OpenResourceOptions;
   extraProps?: Record<string, unknown>;  // merged into the mounted component's props
 }
+
+// The key of the mount that has focus, on whatever surface; unset once it
+// closes. A tab strip draws its tab title actions (`view/title`) only when its
+// active tab is this one: those commands decide by app state that follows
+// focus, such as `$/resource/kind`.
+export const FOCUSED_MOUNT_PATH = '$/focus/key';

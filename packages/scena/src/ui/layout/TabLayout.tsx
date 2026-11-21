@@ -11,12 +11,14 @@ import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { TabTitle } from './TabPanelLayout.js';
-import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
-import { currentTabDrag, endTabDrag, startTabDrag } from './tab-drag.js';
-import { canTakeTab, moveTabHere } from './move-tab.js';
+import { type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
+import { dropHere, endTabDrag, judgeDrag, startTabDrag } from '../../react/surface-drop.js';
 import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
 import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
+import { useStore } from '../../react/hooks/useStore.js';
+import { FOCUSED_MOUNT_PATH } from '../../sdk/mount-surface.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 
 // Tab strip + active mount. Tabs are draggable for reorder (HTML5 DnD).
 // Right-click on a tab opens slot `tab:context`. The [...] trailing button
@@ -60,7 +62,10 @@ export function TabLayout({
   // the pin runs `tab.unpin` to flip the state back.
   const pinned = new Set(state.split?.pinned ?? []);
 
-  const titleEntries = active
+  // The tab title actions follow focus: they decide by app state that the
+  // focused tab sets, so only the strip whose active tab has focus draws them.
+  const focused = useStore<string | null>(FOCUSED_MOUNT_PATH as BindingPath);
+  const titleEntries = active && active.key === focused
     ? scena.commands.list({ slot: 'view/title', enabled: true })
     : [];
   // This surface's own buttons, shown on an empty strip too. A command's
@@ -143,27 +148,23 @@ export function TabLayout({
   // carries the shared one, and may be refused by its policy. A refused drag
   // gets `dropEffect: none` and no preventDefault, so no drop fires.
   function takesDrag(e: ReactDragEvent<HTMLDivElement>): boolean {
-    const types = e.dataTransfer.types;
-    const drag = currentTabDrag();
-    if (drag && drag.surface !== surface && types.includes(TAB_DRAG_MIME)) {
-      if (canTakeTab(scena, drag, surface)) return true;
+    const judged = judgeDrag(scena, e.dataTransfer.types, surface);
+    if (judged === 'take') return true;
+    if (judged === 'refuse') {
       e.dataTransfer.dropEffect = 'none';
       return false;
     }
-    return types.includes(DRAG_MIME);
+    return e.dataTransfer.types.includes(DRAG_MIME);
   }
 
-  // Moves a tab from another surface to `toIdx` of this strip. False for a
-  // drop from this strip, which the index reorder handles.
+  // Lands a tab from another surface, or a list row, at `toIdx` of this
+  // strip. False for a drop from this strip, which the index reorder handles.
   function takeForeign(e: ReactDragEvent<HTMLDivElement>, toIdx: number): boolean {
-    const shared = readTabDrag(e.dataTransfer);
-    if (!shared || shared.surface === surface) return false;
-    moveTabHere(scena, shared, surface, () => {
-      const order = orderedMounts.map((m) => m.key);
-      order.splice(Math.max(0, Math.min(toIdx, order.length)), 0, shared.key);
+    return dropHere(scena, e.dataTransfer, surface, (key) => {
+      const order = orderedMounts.map((m) => m.key).filter((k) => k !== key);
+      order.splice(Math.max(0, Math.min(toIdx, order.length)), 0, key);
       return { split: { ...state.split, order } };
     });
-    return true;
   }
 
   // A tab dropped outside the browser window, where no surface took it, opens
@@ -225,24 +226,7 @@ export function TabLayout({
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >
       <div className="tab-bar">
-        <div
-          className="tab-bar__strip"
-          ref={tabsRef}
-          // The strip past the last tab, and an empty strip, take a tab from
-          // another surface at the end. A tab's own handlers stop the event
-          // before it gets here.
-          onDragOver={(e) => {
-            const drag = currentTabDrag();
-            if (!drag || drag.surface === surface || !takesDrag(e)) return;
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-          }}
-          onDrop={(e) => {
-            if (!takesDrag(e)) return;
-            e.preventDefault();
-            takeForeign(e, orderedMounts.length);
-          }}
-        >
+        <div className="tab-bar__strip" ref={tabsRef}>
           {orderedMounts.map((m, idx) => {
             // Per-field merge: mount.props wins where defined; otherwise
             // fall through to the component's registered default

@@ -5,7 +5,8 @@
 // from, so a layout on ANOTHER surface can take the tab: it calls
 // `surfaces.move` and places the key in its own state.
 
-import type { MountPolicy, SurfaceName } from './mount-surface.js';
+import type { MountDisplay, MountPolicy, SurfaceName } from './mount-surface.js';
+import type { ComponentNode } from './component-graph.js';
 
 export const TAB_DRAG_MIME = 'application/x-scena-tab';
 
@@ -59,4 +60,41 @@ export function canMoveTo(
 ): boolean {
   if (mount.surface === toSurface) return true;
   return mount.policy?.movable !== false;
+}
+
+// The drag of something that may not be open yet: a row of a list, such as a
+// session in an explorer. It carries what `surfaces.open` needs. A surface
+// that takes it opens the key there; a key already open elsewhere moves
+// there, as its tab would.
+export const OPEN_DRAG_MIME = 'application/x-scena-open';
+
+export interface OpenDragPayload {
+  key: string;
+  resource: ComponentNode;
+  props?: MountDisplay;
+  policy?: MountPolicy;
+}
+
+export function writeOpenDrag(to: TabDragWriter, payload: OpenDragPayload): void {
+  to.setData(OPEN_DRAG_MIME, JSON.stringify(payload));
+}
+
+// Null for a drag with no payload of this type, or one that does not parse.
+export function readOpenDrag(from: TabDragReader): OpenDragPayload | null {
+  const raw = from.getData(OPEN_DRAG_MIME);
+  if (!raw) return null;
+  try {
+    const obj = JSON.parse(raw) as Partial<OpenDragPayload>;
+    if (typeof obj.key !== 'string') return null;
+    const resource = obj.resource as { component?: unknown } | undefined;
+    if (!resource || typeof resource !== 'object' || typeof resource.component !== 'string') return null;
+    return {
+      key: obj.key,
+      resource: obj.resource as ComponentNode,
+      ...(obj.props && typeof obj.props === 'object' ? { props: obj.props } : {}),
+      ...(obj.policy && typeof obj.policy === 'object' ? { policy: obj.policy } : {}),
+    };
+  } catch {
+    return null;
+  }
 }

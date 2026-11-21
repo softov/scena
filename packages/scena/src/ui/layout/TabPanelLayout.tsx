@@ -24,9 +24,8 @@ import {
   treesEqual,
   type TabPanelDropZone,
 } from '../../sdk/tab-panel.js';
-import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
-import { currentTabDrag, endTabDrag, startTabDrag } from './tab-drag.js';
-import { canTakeTab, moveTabHere } from './move-tab.js';
+import { type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
+import { dropHere, endTabDrag, judgeDrag, startTabDrag } from '../../react/surface-drop.js';
 import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useOwnerDocument } from '../../react/OwnerDocument.js';
@@ -36,6 +35,9 @@ import { resolveColorRgb } from '../../sdk/colors.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { useStoreLabel } from '../../react/hooks/useStoreLabel.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
+import { useStore } from '../../react/hooks/useStore.js';
+import { FOCUSED_MOUNT_PATH } from '../../sdk/mount-surface.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 
 // Multi-group tabs. Recursive binary tree: a leaf is one Tab strip; a split
 // holds two children with a draggable divider. Drag a tab onto another
@@ -78,6 +80,12 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   const scena = useScena();
   const { window: ownerWin } = useOwnerDocument();
   const activeKey = leaf.activeKey ?? leaf.tabs[0];
+  // The tab title actions follow focus, as on a `tab` strip: only the group
+  // whose active tab has focus draws them.
+  const focused = useStore<string | null>(FOCUSED_MOUNT_PATH as BindingPath);
+  const titleEntries = activeKey !== undefined && activeKey === focused
+    ? scena.commands.list({ slot: 'view/title', enabled: true })
+    : [];
   // const activeMount = ctx.mounts.find((m) => m.key === activeKey);
 
   const [dragOverTab, setDragOverTab] = useState<number | null>(null);
@@ -155,21 +163,13 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   // A refused drag gets `dropEffect: none` and no preventDefault, so the
   // browser shows it cannot land and no drop fires.
   function takesDrag(e: ReactDragEvent<HTMLDivElement>): boolean {
-    const types = e.dataTransfer.types;
-    const drag = currentTabDrag();
-    if (drag && drag.surface !== ctx.surface && types.includes(TAB_DRAG_MIME)) {
-      if (canTakeTab(scena, drag, ctx.surface)) return true;
+    const judged = judgeDrag(scena, e.dataTransfer.types, ctx.surface);
+    if (judged === 'take') return true;
+    if (judged === 'refuse') {
       e.dataTransfer.dropEffect = 'none';
       return false;
     }
-    return types.includes(DRAG_MIME);
-  }
-
-  // The shared payload of a drop from another surface, or null for a drop
-  // from this one.
-  function foreignDrop(e: ReactDragEvent<HTMLDivElement>): TabDragPayload | null {
-    const shared = readTabDrag(e.dataTransfer);
-    return shared && shared.surface !== ctx.surface ? shared : null;
+    return e.dataTransfer.types.includes(DRAG_MIME);
   }
 
   function onTabStripDragOver(
@@ -178,6 +178,7 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   ) {
     if (!takesDrag(e)) return;
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     setDragOverTab(idx);
   }
@@ -190,15 +191,14 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   ) {
     if (!takesDrag(e)) return;
     e.preventDefault();
+    e.stopPropagation();
     setDragOverTab(null);
-    const foreign = foreignDrop(e);
-    if (foreign) {
-      moveTabHere(scena, foreign, ctx.surface, () => {
-        const tree = placeTab(ctx.tree, foreign.key, leaf.id, toIdx);
-        return tree ? { tabPanel: { tree } } : null;
-      });
-      return;
-    }
+    // A tab from another surface, or a list row: placed at this index.
+    const landed = dropHere(scena, e.dataTransfer, ctx.surface, (key) => {
+      const tree = placeTab(ctx.tree, key, leaf.id, toIdx);
+      return tree ? { tabPanel: { tree } } : null;
+    });
+    if (landed) return;
     const payload = readPayload(e);
     if (!payload) return;
     insertTab(ctx, payload, leaf.id, toIdx);
@@ -223,6 +223,7 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
       setZone(null);
       return;
     }
+    e.stopPropagation();
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setZone(computeZone(e));
@@ -239,18 +240,17 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   function onBodyDrop(e: ReactDragEvent<HTMLDivElement>) {
     if (!takesDrag(e)) return;
     e.preventDefault();
+    e.stopPropagation();
     const z = computeZone(e);
     setZone(null);
-    const foreign = foreignDrop(e);
-    if (foreign && z) {
-      moveTabHere(scena, foreign, ctx.surface, () => {
-        const tree = z === 'center'
-          ? placeTab(ctx.tree, foreign.key, leaf.id, leaf.tabs.length)
-          : splitAt(ctx.tree, foreign.key, leaf.id, z);
-        return tree ? { tabPanel: { tree } } : null;
-      });
-      return;
-    }
+    // A tab from another surface, or a list row: joins or splits the group.
+    const landed = z !== null && dropHere(scena, e.dataTransfer, ctx.surface, (key) => {
+      const tree = z === 'center'
+        ? placeTab(ctx.tree, key, leaf.id, leaf.tabs.length)
+        : splitAt(ctx.tree, key, leaf.id, z);
+      return tree ? { tabPanel: { tree } } : null;
+    });
+    if (landed) return;
     const payload = readPayload(e);
     if (!payload || !z) return;
     if (z === 'center') {
@@ -345,6 +345,15 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
           })}
         </div>
         <div className="tab-bar__extras">
+          {titleEntries.map((cmd) => {
+            const label = String(typeof cmd.title === 'function' ? cmd.title() : cmd.title);
+            return (
+              <button key={cmd.id} onClick={() => void scena.commands.execute(cmd.id)} title={label}>
+                {cmd.icon ? `${cmd.icon} ` : ''}
+                {label}
+              </button>
+            );
+          })}
           <button
             className="tab-bar__more"
             title={t('layout/groupActions', 'Group actions')}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canMoveTo, readTabDrag, TAB_DRAG_MIME, writeTabDrag } from '../../src/sdk/tab-drag.js';
+import { canMoveTo, OPEN_DRAG_MIME, readOpenDrag, readTabDrag, TAB_DRAG_MIME, writeOpenDrag, writeTabDrag } from '../../src/sdk/tab-drag.js';
 
 function transfer() {
   const data = new Map<string, string>();
@@ -47,5 +47,26 @@ describe('canMoveTo', () => {
 
   it('always lets a mount move inside its own surface', () => {
     expect(canMoveTo({ surface: 'main', policy: { movable: false } }, 'main')).toBe(true);
+  });
+});
+
+describe('the open drag payload', () => {
+  it('reads back what a row wrote', () => {
+    const dt = transfer();
+    const payload = { key: 'session:s_1', resource: { component: 'SessionView', sessionId: 's_1' }, props: { title: 'Refine' } };
+    writeOpenDrag(dt, payload);
+    expect(readOpenDrag(dt)).toEqual(payload);
+  });
+
+  it.each([
+    ['nothing', undefined],
+    ['text that does not parse', '{'],
+    ['no key', JSON.stringify({ resource: { component: 'X' } })],
+    ['no resource', JSON.stringify({ key: 'k' })],
+    ['a resource with no component', JSON.stringify({ key: 'k', resource: {} })],
+  ])('reads %s as null', (_name, raw) => {
+    const dt = transfer();
+    if (raw !== undefined) dt.setData(OPEN_DRAG_MIME, raw);
+    expect(readOpenDrag(dt)).toBeNull();
   });
 });

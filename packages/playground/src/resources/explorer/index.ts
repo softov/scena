@@ -185,7 +185,14 @@ export function registerExplorer(scena: Scena) {
     // kind='explorer', not the kind the openers gate on (`explorer-file`).
     scena.events.on('scena:mount:focused', (raw) => {
       const ev = raw as { key: string; surface: string };
-      if (ev.surface !== 'main' || !ev.key.startsWith('explorer:')) return;
+      // Any surface: the tab title actions follow focus wherever the tab is.
+      // Another tab's focus clears a file resource, so its actions go.
+      if (!ev.key.startsWith('explorer:')) {
+        if (scena.store.get('$/resource/kind') === 'explorer-file') {
+          scena.store.patchMany({ '$/resource/kind': null, '$/resource/id': null, '$/resource/ext': null });
+        }
+        return;
+      }
       // Drop the leading `explorer:` prefix, then drop the viewer segment;
       // the rest is the path (which itself starts with `/` and may contain
       // additional colons in theory — splitting on the first `:` after the
