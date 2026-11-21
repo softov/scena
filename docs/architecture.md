@@ -194,7 +194,9 @@ window surface, copies the page's style sheets and theme into it and follows
 their changes, and draws the surface there through a portal from the page
 itself. So the window shares the one scena, and a tab drags between it and
 `main` as between any two surfaces. A component drawn there reads its window
-from `useOwnerDocument`, not from the global `document`.
+from `useOwnerDocument`, not from the global `document`. The `overlay` surface
+follows focus: while a window has it, a palette or a dialog draws in that
+window, where the person pressed the key; `$/focus/window` names it.
 
 The layout state is the only record of the windows, so they come back after a
 reload. A person who closes a window sends its tabs to `main`; a reload keeps

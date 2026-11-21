@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { listSurfaceWindows, SurfaceWindows } from '../../src/react/SurfaceWindows.js';
+import { SurfaceArea } from '../../src/react/SurfaceArea.js';
 import { registerBuiltinLayouts } from '../../src/ui/layout/register.js';
 
 type TestScena = ReturnType<typeof createScena>;
@@ -118,6 +119,36 @@ describe('SurfaceWindows', () => {
       opens[0]!.window.dispatchEvent(new Event('pagehide'));
     });
     expect(listSurfaceWindows(scena)).toEqual([]);
+  });
+
+  it('draws the overlay in the window with focus, and back in the page when the page takes it', async () => {
+    const scena = createScena();
+    registerBuiltinLayouts(scena);
+    scena.components.register({ component: 'Page', renderer: { kind: 'react', load: async () => ({ default: () => <div>a page</div> }) } });
+    scena.components.register({ component: 'Palette', renderer: { kind: 'react', load: async () => ({ default: () => <div>the palette</div> }) } });
+    scena.layout.setSurface('window:1', { visible: true, layout: 'tab-panel', window: BOUNDS });
+    scena.surfaces.open({ surface: 'window:1', key: 'a', resource: { component: 'Page' } });
+    scena.surfaces.open({ surface: 'overlay', key: 'palette', resource: { component: 'Palette' } });
+    render(
+      <ScenaProvider scena={scena}>
+        <SurfaceArea surface="overlay" role="overlay" layout="floating" />
+        <SurfaceWindows />
+      </ScenaProvider>,
+    );
+    const doc = opens[0]!.window.document;
+    await waitFor(() => expect(doc.body.textContent).toContain('the palette'));
+    expect(document.body.textContent).not.toContain('the palette');
+
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    await waitFor(() => expect(document.body.textContent).toContain('the palette'));
+    expect(doc.body.textContent).not.toContain('the palette');
+
+    act(() => {
+      opens[0]!.window.dispatchEvent(new Event('focus'));
+    });
+    await waitFor(() => expect(doc.body.textContent).toContain('the palette'));
   });
 
   it('writes the place and size back when the window resizes', () => {
