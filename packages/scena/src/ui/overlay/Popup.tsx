@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useOwnerDocument } from '../../react/OwnerDocument.js';
 
 export interface PopupProps {
   // Anchor position (typically a mouse event's clientX / clientY). The
@@ -29,7 +30,7 @@ export interface PopupProps {
 // in CustomShell and available to any layout / app that wants an anchored
 // floating panel.
 //
-// It draws into `document.body`, wherever the caller renders it: inside a
+// It draws into the `body` of its owner document (useOwnerDocument), wherever the caller renders it: inside a
 // parent that makes its own stacking context (a sticky header with a
 // z-index, a transform, a filter), its z-index would count only inside that
 // parent, and what comes after the parent would draw over it. React context
@@ -49,6 +50,7 @@ export function Popup({
   children,
 }: PopupProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const { document: doc, window: win } = useOwnerDocument();
   const [pos, setPos] = useState({ left: x, top: y });
 
   // Clamp to the viewport, and again whenever the popup or the window changes
@@ -59,21 +61,23 @@ export function Popup({
     const margin = 4;
     const clamp = () => {
       const rect = el.getBoundingClientRect();
-      const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
-      const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
+      const maxX = Math.max(margin, win.innerWidth - rect.width - margin);
+      const maxY = Math.max(margin, win.innerHeight - rect.height - margin);
       const left = Math.max(margin, Math.min(x, maxX));
       const top = Math.max(margin, Math.min(y, maxY));
       setPos((cur) => (cur.left === left && cur.top === top ? cur : { left, top }));
     };
     clamp();
-    window.addEventListener('resize', clamp);
-    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(clamp);
+    win.addEventListener('resize', clamp);
+    // The owner window's own observer: each window runs its own rendering loop.
+    const Observer = win.ResizeObserver ?? (typeof ResizeObserver === 'undefined' ? undefined : ResizeObserver);
+    const observer = Observer === undefined ? null : new Observer(clamp);
     observer?.observe(el);
     return () => {
-      window.removeEventListener('resize', clamp);
+      win.removeEventListener('resize', clamp);
       observer?.disconnect();
     };
-  }, [x, y]);
+  }, [x, y, win]);
 
   // Outside-click close. We defer adding the listener one tick so the click
   // that opened the popup doesn't immediately close it (the click handler
@@ -88,14 +92,14 @@ export function Popup({
       onClose?.();
     }
     const id = setTimeout(() => {
-      if (mounted) document.addEventListener('mousedown', onMouseDown);
+      if (mounted) doc.addEventListener('mousedown', onMouseDown);
     }, 0);
     return () => {
       mounted = false;
       clearTimeout(id);
-      document.removeEventListener('mousedown', onMouseDown);
+      doc.removeEventListener('mousedown', onMouseDown);
     };
-  }, [closeOnOutsideClick, onClose]);
+  }, [closeOnOutsideClick, onClose, doc]);
 
   // Escape close.
   useEffect(() => {
@@ -106,9 +110,9 @@ export function Popup({
       e.preventDefault();
       onClose?.();
     }
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [closeOnEscape, onClose]);
+    doc.addEventListener('keydown', onKey);
+    return () => doc.removeEventListener('keydown', onKey);
+  }, [closeOnEscape, onClose, doc]);
 
   return createPortal(
     <div
@@ -128,6 +132,6 @@ export function Popup({
     >
       {children}
     </div>,
-    document.body,
+    doc.body,
   );
 }

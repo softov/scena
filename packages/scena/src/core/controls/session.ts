@@ -70,13 +70,16 @@ export function createSessionAPI(deps: Deps): SessionAPI & {
         });
         continue;
       }
-      restored.push(
-        surfaces.open({
-          surface: sm.surface,
-          key: sm.key,
-          resource: sm.component,
-        }),
-      );
+      const handle = surfaces.open({
+        surface: sm.surface,
+        key: sm.key,
+        resource: sm.component,
+      });
+      // `open` leaves a mount that is already open where it is. A restore puts
+      // it back where the snapshot had it, as the app registered it elsewhere
+      // before the restore ran.
+      if (handle.surface !== sm.surface) surfaces.move({ key: sm.key, toSurface: sm.surface });
+      restored.push({ ...handle, surface: sm.surface });
     }
     return { restored, skipped };
   }

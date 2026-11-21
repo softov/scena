@@ -10,6 +10,9 @@ export type ScenaSystemEvent =
   | 'scena:mount:blurred'
   | 'scena:mount:close-asked'
   | 'scena:surface:empty-changed'
+  | 'scena:window:opened'
+  | 'scena:window:closed'
+  | 'scena:window:blocked'
   | 'scena:registry:changed'
   | 'scena:store:changed'
   | 'scena:menu:changed'
@@ -32,6 +35,14 @@ export interface ScenaEventMap {
   'scena:mount:close-asked': CloseAsk | null;
   // A surface's empty view was set or cleared.
   'scena:surface:empty-changed': { surface: SurfaceName };
+  // A window surface got its browser window. An app adds its key listener to
+  // `window`, as it did to its own: the keybindings registry does not listen.
+  'scena:window:opened': { surface: SurfaceName; window: Window };
+  // A window surface's browser window closed, or the surface left the layout.
+  'scena:window:closed': { surface: SurfaceName; window: Window };
+  // The browser refused to open a window surface's window (a popup blocker).
+  // The surface stays, and a click can open it.
+  'scena:window:blocked': { surface: SurfaceName };
   'scena:registry:changed': {
     registry:
       | 'components'

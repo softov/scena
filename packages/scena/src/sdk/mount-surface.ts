@@ -55,6 +55,9 @@ export interface MountPolicy {
   // false: a layout draws no close for it. A pane an app declares for a section
   // (an explorer's Open Editors) is part of the section, not a page to close.
   closable?: boolean;
+  // false: the mount stays on its surface. A tab layout on another surface
+  // refuses its drag, and it opens in no other place. Unset is movable.
+  movable?: boolean;
   // true: a stack pane takes the height of its content, up to half the stack,
   // instead of an equal share (an Open Editors list with one row). A divider
   // drag gives it a size of its own like any pane.
@@ -132,6 +135,10 @@ export interface MountSurfaceRegistry {
   // `CheckedNode<T>` equal to T, which is no constraint at all - so this is
   // additive and every existing mount still compiles.
   mount<T extends MountTarget>(decl: MountDeclaration<T & CheckedNode<T>>): Disposable;
+  // Opens a mount, or focuses it when its key is already open. `surface` is
+  // where a first open goes: an open mount stays where it is, wherever a
+  // person moved it, and the returned handle names that surface. A closed
+  // key opens at `surface` again. To move an open mount, call `move`.
   open<T extends MountTarget>(opts: {
     surface: SurfaceName;
     key: string;

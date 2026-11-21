@@ -149,13 +149,42 @@ A **mount** is one component in one surface, under a key, with:
 - a `MountTarget` — an inline node, or a binding whose value is a node
 - `MountDisplay` — title, icon, colour, header actions; per mount, so two
   instances of one component can be "Chat A" and "Chat B"
-- `MountPolicy` — editable, persistent, transient, customizable
+- `MountPolicy` — editable, persistent, transient, customizable, closable,
+  movable
 
 A **layout** decides how a surface's several mounts are shown: `Tab`,
 `TabPanel`, `Single`, `Split`, `Stack`, `Spatial`, `Rail`, `Inline`, `Bar`,
 `Floating`. Which layout a surface uses is store state, so it is switchable at
 runtime and persistable per user — `LayoutStorage` is the interface, and
 `createLocalStorageLayoutStorage` the obvious implementation.
+
+A **tab moves between surfaces** by a drag. Every tab layout writes one shared
+payload under `TAB_DRAG_MIME` beside its own drag type: the source surface,
+the mount key and, from a `TabPanel`, the group. A `Tab` or `TabPanel` layout
+on another surface takes the drop: it calls `surfaces.move` first, then writes
+its own state with the key placed where it fell and the source's tree with the
+key gone, so a group the tab leaves empty closes. A `TabPanel` takes it on a
+strip, on a group's centre or on an edge to split; a `Tab` strip at an index or
+at the end. `policy.movable: false` keeps a mount on its surface: the drag shows
+it cannot land, and no move happens. The pure tree moves are in
+`sdk/tab-panel.ts`, so code outside a layout edits a tree the same way.
+
+A **window surface** is a surface drawn in a browser window of its own. Its
+name is `window:<id>`, and its state has `window`, the place and size of that
+window. A tab dropped outside the browser window, where no surface took it,
+opens in a new one at the drop point; the tab menu's *Move into new window*
+does the same beside the page. `SurfaceWindows` opens `about:blank` for each
+window surface, copies the page's style sheets and theme into it and follows
+their changes, and draws the surface there through a portal from the page
+itself. So the window shares the one scena, and a tab drags between it and
+`main` as between any two surfaces. A component drawn there reads its window
+from `useOwnerDocument`, not from the global `document`.
+
+The layout state is the only record of the windows, so they come back after a
+reload. A person who closes a window sends its tabs to `main`; a reload keeps
+them. A browser opens a window only from a click, so one it blocks waits in a
+notice, `BlockedWindows`, whose button opens it. `DefaultShell` renders
+`SurfaceWindows`.
 
 What a surface shows while it holds **no mount** is the app's, never scena's.
 `surfaces.setEmpty('main', { component: 'StartPage' })` gives a surface an

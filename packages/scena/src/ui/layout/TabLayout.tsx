@@ -11,6 +11,11 @@ import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { TabTitle } from './TabPanelLayout.js';
+import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
+import { currentTabDrag, endTabDrag, startTabDrag } from './tab-drag.js';
+import { canTakeTab, moveTabHere } from './move-tab.js';
+import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
+import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Tab strip + active mount. Tabs are draggable for reorder (HTML5 DnD).
@@ -38,6 +43,7 @@ export function TabLayout({
 }: LayoutProps) {
   const { t } = useI18n();
   const scena = useScena();
+  const { window: ownerWin } = useOwnerDocument();
   const persistedOrder = state.split?.order ?? [];
   const orderSet = new Set(persistedOrder);
   const orderedKnown = persistedOrder
@@ -125,11 +131,53 @@ export function TabLayout({
 
   function onTabDragStart(e: ReactDragEvent<HTMLDivElement>, idx: number) {
     e.dataTransfer.setData(DRAG_MIME, String(idx));
+    const key = orderedMounts[idx]?.key;
+    if (key !== undefined) {
+      const shared: TabDragPayload = { surface, key };
+      writeTabDrag(e.dataTransfer, shared);
+      startTabDrag(shared);
+    }
     e.dataTransfer.effectAllowed = 'move';
   }
+  // A tab from this strip carries the index type; a tab from another surface
+  // carries the shared one, and may be refused by its policy. A refused drag
+  // gets `dropEffect: none` and no preventDefault, so no drop fires.
+  function takesDrag(e: ReactDragEvent<HTMLDivElement>): boolean {
+    const types = e.dataTransfer.types;
+    const drag = currentTabDrag();
+    if (drag && drag.surface !== surface && types.includes(TAB_DRAG_MIME)) {
+      if (canTakeTab(scena, drag, surface)) return true;
+      e.dataTransfer.dropEffect = 'none';
+      return false;
+    }
+    return types.includes(DRAG_MIME);
+  }
+
+  // Moves a tab from another surface to `toIdx` of this strip. False for a
+  // drop from this strip, which the index reorder handles.
+  function takeForeign(e: ReactDragEvent<HTMLDivElement>, toIdx: number): boolean {
+    const shared = readTabDrag(e.dataTransfer);
+    if (!shared || shared.surface === surface) return false;
+    moveTabHere(scena, shared, surface, () => {
+      const order = orderedMounts.map((m) => m.key);
+      order.splice(Math.max(0, Math.min(toIdx, order.length)), 0, shared.key);
+      return { split: { ...state.split, order } };
+    });
+    return true;
+  }
+
+  // A tab dropped outside the browser window, where no surface took it, opens
+  // in a window of its own at the drop point.
+  function onTabDragEnd(e: ReactDragEvent<HTMLDivElement>, tabKey: string) {
+    endTabDrag();
+    if (!endedOutside(ownerWin, e)) return;
+    openTabWindow(scena, tabKey, droppedAt(ownerWin, e.screenX, e.screenY));
+  }
+
   function onTabDragOver(e: ReactDragEvent<HTMLDivElement>, idx: number) {
-    if (!e.dataTransfer.types.includes(DRAG_MIME)) return;
+    if (!takesDrag(e)) return;
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     setDragOverIdx(idx);
   }
@@ -137,8 +185,11 @@ export function TabLayout({
     setDragOverIdx(null);
   }
   function onTabDrop(e: ReactDragEvent<HTMLDivElement>, toIdx: number) {
-    if (!e.dataTransfer.types.includes(DRAG_MIME)) return;
+    if (!takesDrag(e)) return;
     e.preventDefault();
+    e.stopPropagation();
+    setDragOverIdx(null);
+    if (takeForeign(e, toIdx)) return;
     const fromIdx = Number(e.dataTransfer.getData(DRAG_MIME));
     setDragOverIdx(null);
     if (Number.isFinite(fromIdx) && fromIdx !== toIdx) {
@@ -174,7 +225,24 @@ export function TabLayout({
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >
       <div className="tab-bar">
-        <div className="tab-bar__strip" ref={tabsRef}>
+        <div
+          className="tab-bar__strip"
+          ref={tabsRef}
+          // The strip past the last tab, and an empty strip, take a tab from
+          // another surface at the end. A tab's own handlers stop the event
+          // before it gets here.
+          onDragOver={(e) => {
+            const drag = currentTabDrag();
+            if (!drag || drag.surface === surface || !takesDrag(e)) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          }}
+          onDrop={(e) => {
+            if (!takesDrag(e)) return;
+            e.preventDefault();
+            takeForeign(e, orderedMounts.length);
+          }}
+        >
           {orderedMounts.map((m, idx) => {
             // Per-field merge: mount.props wins where defined; otherwise
             // fall through to the component's registered default
@@ -190,6 +258,7 @@ export function TabLayout({
                 isActive={m === active}
                 dragOverTab={dragOverIdx}
                 onDragStart={(e) => onTabDragStart(e, idx)}
+                onDragEnd={(e) => onTabDragEnd(e, m.key)}
                 onDragOver={(e) => onTabDragOver(e, idx)}
                 onDragLeave={onTabDragLeave}
                 onDrop={(e) => onTabDrop(e, idx)}
@@ -279,6 +348,7 @@ export function TabLayout({
             '$/tab/index': tabMenu.tabIdx,
             '$/tab/isActive': tabMenu.tabKey === active?.key,
             '$/tab/isPinned': pinned.has(tabMenu.tabKey),
+            '$/tab/movable': mounts.find((m) => m.key === tabMenu.tabKey)?.policy.movable !== false,
             '$/group/tabCount': orderedMounts.length,
           }}
         />

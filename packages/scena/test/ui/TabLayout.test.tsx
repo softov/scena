@@ -4,6 +4,13 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { TabLayout } from '../../src/ui/layout/TabLayout.js';
+import { TabPanelLayout } from '../../src/ui/layout/TabPanelLayout.js';
+import { useLayout } from '../../src/react/hooks/useLayout.js';
+import { useMounts } from '../../src/react/hooks/useMounts.js';
+import { TAB_DRAG_MIME, type TabDragPayload } from '../../src/sdk/tab-drag.js';
+import { endTabDrag, startTabDrag } from '../../src/ui/layout/tab-drag.js';
+import type { SurfaceName } from '../../src/sdk/mount-surface.js';
+import { act } from '@testing-library/react';
 
 afterEach(cleanup);
 
@@ -108,5 +115,121 @@ describe('TabLayout active tab', () => {
     const { rerender } = render(layout(scena, 'b'));
     rerender(layout(scena, 'b'));
     expect(scrolled).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('TabLayout takes a tab from another surface', () => {
+  afterEach(endTabDrag);
+  type TestScena = ReturnType<typeof createScena>;
+
+  // `sidebar:right` draws with the `tab` layout, `main` with `tab-panel`, as ahpw does.
+  function Surfaces({ scena }: { scena: TestScena }) {
+    const layout = useLayout();
+    const side = useMounts('sidebar:right');
+    const main = useMounts('main');
+    const common = (surface: SurfaceName) => ({
+      surface,
+      state: layout.surfaces[surface] ?? { visible: true },
+      setState: (patch: object) => scena.layout.setSurface(surface, patch),
+      renderMount: () => null,
+      onActivate: (key: string) => scena.surfaces.focus(key),
+      onClose: (key: string) => scena.surfaces.close(key),
+      onReorder: () => {},
+    });
+    return (
+      <>
+        <div data-testid="sidebar:right"><TabLayout {...common('sidebar:right')} mounts={side} /></div>
+        <div data-testid="main"><TabPanelLayout {...common('main')} mounts={main} /></div>
+      </>
+    );
+  }
+
+  function setup(): TestScena {
+    const scena = createScena();
+    const open = (surface: SurfaceName, key: string, movable = true) =>
+      scena.surfaces.open({ surface, key, resource: { component: 'Page' }, props: { title: key }, ...(movable ? {} : { policy: { movable: false } }) });
+    open('sidebar:right', 's1');
+    open('sidebar:right', 's2');
+    open('main', 'm1');
+    open('main', 'fixed', false);
+    scena.layout.setSurface('main', { visible: true, layout: 'tab-panel' });
+    render(<ScenaProvider scena={scena}><Surfaces scena={scena} /></ScenaProvider>);
+    return scena;
+  }
+
+  function dragFrom(payload: TabDragPayload) {
+    startTabDrag(payload);
+    const data = new Map<string, string>([[TAB_DRAG_MIME, JSON.stringify(payload)]]);
+    return { types: [...data.keys()], getData: (t: string) => data.get(t) ?? '', setData: () => {}, dropEffect: 'move', effectAllowed: 'move' };
+  }
+  const tabOn = (surface: SurfaceName, title: string) => {
+    const el = Array.from(screen.getByTestId(surface).querySelectorAll('[draggable="true"]')).find((n) => n.textContent?.includes(title));
+    if (!el) throw new Error(`no tab ${title} on ${surface}`);
+    return el as HTMLElement;
+  };
+  const order = (scena: TestScena) => scena.layout.get().surfaces['sidebar:right']?.split?.order;
+  const keysOn = (scena: TestScena, surface: SurfaceName) => scena.surfaces.listAt(surface).map((m) => m.key);
+
+  it('puts a tab from main at the index it fell on, and moves the mount', () => {
+    const scena = setup();
+    act(() => {
+      fireEvent.drop(tabOn('sidebar:right', 's2'), { dataTransfer: dragFrom({ surface: 'main', key: 'm1', leafId: 'any' }) });
+    });
+    expect(order(scena)).toEqual(['s1', 'm1', 's2']);
+    expect(keysOn(scena, 'sidebar:right')).toContain('m1');
+    expect(keysOn(scena, 'main')).not.toContain('m1');
+  });
+
+  it('puts a tab dropped past the last tab at the end', () => {
+    const scena = setup();
+    const strip = screen.getByTestId('sidebar:right').querySelector('.tab-bar__strip') as HTMLElement;
+    act(() => {
+      fireEvent.drop(strip, { dataTransfer: dragFrom({ surface: 'main', key: 'm1' }) });
+    });
+    expect(order(scena)).toEqual(['s1', 's2', 'm1']);
+  });
+
+  it('gives a tab back to main, on a tab-panel strip', () => {
+    const scena = setup();
+    act(() => {
+      fireEvent.drop(tabOn('main', 'm1'), { dataTransfer: dragFrom({ surface: 'sidebar:right', key: 's1' }) });
+    });
+    expect(keysOn(scena, 'main')).toContain('s1');
+    expect(keysOn(scena, 'sidebar:right')).toEqual(['s2']);
+  });
+
+  it('refuses a mount with movable false', () => {
+    const scena = setup();
+    const dt = dragFrom({ surface: 'main', key: 'fixed' });
+    fireEvent.dragOver(tabOn('sidebar:right', 's1'), { dataTransfer: dt });
+    expect(dt.dropEffect).toBe('none');
+    act(() => {
+      fireEvent.drop(tabOn('sidebar:right', 's1'), { dataTransfer: dragFrom({ surface: 'main', key: 'fixed' }) });
+    });
+    expect(keysOn(scena, 'main')).toContain('fixed');
+  });
+
+  it('still reorders inside its own strip', () => {
+    const reorders: [number, number][] = [];
+    const scena = createScena();
+    const mounts = ['a', 'b'].map((key) => ({ key, surface: 'main', component: { component: 'Page' }, props: { title: key }, policy: {}, openedAt: 0 }));
+    render(
+      <ScenaProvider scena={scena}>
+        <TabLayout surface="main" mounts={mounts as never} state={{ visible: true }} setState={() => {}} renderMount={() => null}
+          onActivate={() => {}} onClose={() => {}} onReorder={(from, to) => reorders.push([from, to])} />
+      </ScenaProvider>,
+    );
+    const data = new Map<string, string>();
+    const dt = {
+      types: [] as string[],
+      setData: (t: string, v: string) => { data.set(t, v); dt.types = [...data.keys()]; },
+      getData: (t: string) => data.get(t) ?? '',
+      dropEffect: 'move',
+      effectAllowed: 'move',
+    };
+    const tabs = Array.from(document.querySelectorAll('[draggable="true"]')) as HTMLElement[];
+    fireEvent.dragStart(tabs[0]!, { dataTransfer: dt });
+    fireEvent.drop(tabs[1]!, { dataTransfer: dt });
+    expect(reorders).toEqual([[0, 1]]);
   });
 });

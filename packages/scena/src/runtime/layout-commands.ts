@@ -1,4 +1,5 @@
 import type { Scena } from '../sdk/scena.js';
+import { besideWindow, openTabWindow } from './open-tab-window.js';
 import type { Disposable } from '../sdk/disposable.js';
 import type { CommandContext } from '../sdk/command.js';
 import type {
@@ -213,6 +214,22 @@ export function registerLayoutCommands(scena: Scena): Disposable {
           const k = keys[i];
           if (k && !pinned.has(k)) ctx.surfaces.requestClose(k);
         }
+        ctx.host?.closeMenu();
+      },
+    }),
+
+    scena.commands.register({
+      id: 'tab.moveToNewWindow',
+      title: () => translate('tabs/moveToNewWindow', 'Move into new window'),
+      icon: '⧉',
+      slots: ['tab:context'],
+      // The tab layouts set `$/tab/movable`; the others leave it unset, and
+      // a tab there does not offer a window.
+      when: '$/tab/movable == true',
+      run: (ctx) => {
+        const key = ctxTab(ctx);
+        if (!key || typeof window === 'undefined') return;
+        openTabWindow(ctx.scena, key, besideWindow(window));
         ctx.host?.closeMenu();
       },
     }),

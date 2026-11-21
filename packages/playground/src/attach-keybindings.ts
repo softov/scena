@@ -42,6 +42,25 @@ export function attachKeybindings(scena: Scena): Disposable {
     }
   }
 
+  // Each window a surface opens in listens too: its keys reach its own
+  // `window`, not this one.
+  const windows = new Set<Window>([window]);
   window.addEventListener('keydown', onKeyDown);
-  return { dispose: () => window.removeEventListener('keydown', onKeyDown) };
+  const opened = scena.events.on('scena:window:opened', (raw) => {
+    const { window: win } = raw as { window: Window };
+    windows.add(win);
+    win.addEventListener('keydown', onKeyDown);
+  });
+  const closed = scena.events.on('scena:window:closed', (raw) => {
+    const { window: win } = raw as { window: Window };
+    windows.delete(win);
+    win.removeEventListener('keydown', onKeyDown);
+  });
+  return {
+    dispose: () => {
+      opened.dispose();
+      closed.dispose();
+      for (const win of windows) win.removeEventListener('keydown', onKeyDown);
+    },
+  };
 }

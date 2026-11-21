@@ -139,7 +139,10 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
   }): MountHandle {
     const existing = mountsByKey.get(opts.key);
     if (existing) {
-      existing.surface = opts.surface;
+      // Already open: focus it where it is. `surface` is where a FIRST open
+      // goes; a tab a person dragged elsewhere stays there, and an app that
+      // wants it elsewhere calls `move`. Once closed, the next open is a first
+      // open again, and goes to `surface`.
       existing.policy = opts.policy ?? existing.policy;
       existing.dataContext = opts.dataContext ?? existing.dataContext;
       // Re-opening an existing mount with a fresh display overrides;
@@ -168,7 +171,7 @@ export function createMountSurfaceRegistry(deps: Deps): MountSurfaceRegistry {
     }
     return {
       key: opts.key,
-      surface: opts.surface,
+      surface: mountsByKey.get(opts.key)?.surface ?? opts.surface,
       close: (closeOpts) => close(opts.key, closeOpts),
       focus: () => focus(opts.key),
     };

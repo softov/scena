@@ -13,6 +13,7 @@ import type {
   SpatialViewport,
 } from '../../sdk/layout.js';
 import { useScena } from '../../react/ScenaProvider.js';
+import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { CampusView } from '../campus/CampusView.js';
 import type { CampusNodeTypes } from '../campus/CampusView.js';
@@ -101,6 +102,7 @@ export function SpatialLayout({
 }: LayoutProps) {
   const { t } = useI18n();
   const scena = useScena();
+  const { document: ownerDoc, window: ownerWin } = useOwnerDocument();
 
   // Background + per-card context menus.
   const [bgMenu, setBgMenu] = useState<{ x: number; y: number } | null>(null);
@@ -281,15 +283,15 @@ export function SpatialLayout({
       const key = spatialRef.current.selectedKey;
       if (key === undefined) return;
       const target = e.target instanceof Element ? e.target : null;
-      const onPage = target === null || target === document.body;
+      const onPage = target === null || target === ownerDoc.body;
       if (!onPage && !rootRef.current?.contains(target)) return;
       if (target?.closest(ESC_KEEPS)) return;
       e.preventDefault();
       closeRef.current(key);
     }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    ownerWin.addEventListener('keydown', onKey);
+    return () => ownerWin.removeEventListener('keydown', onKey);
+  }, [ownerDoc, ownerWin]);
 
   useEffect(() => {
     const subs = [

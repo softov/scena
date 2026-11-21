@@ -195,6 +195,20 @@ app with no sidebar still ends up carrying `sidebar:left` in layout state, in
 the store, and in whatever `layoutStorage` persists. `surfaceDefaults` is the
 one that replaces, and it is what says *these are my surfaces*.
 
+**Keeping a copy of a mount's surface.** A person can drag a tab to another
+surface, and the mount moves with its key, resource and props. A page that
+read its surface once, to lay itself out beside something, is then wrong. `surfaces.move` emits `scena:mount:opened` with the new surface; read
+it there, or set `policy.movable: false` on a mount that must stay put.
+
+**A shell of its own, and keys in a window.** `DefaultShell` renders
+`SurfaceWindows`, which draws the windows a tab opens in. A shell of your own
+renders it once, as it renders `CloseConfirm`. The keybindings registry does
+not listen for keys; your app does, on its own `window`. A second window gets
+its keys on its own `window`, so add the listener on `scena:window:opened` and
+take it off on `scena:window:closed`. To reopen the windows' tabs after a
+reload, restore the mounts of each surface `isWindowSurface` names, beside
+`main`.
+
 **Sweeping surfaces with a list of names.** A surface is whatever an app mounts
 to, so any list written down goes stale the moment somebody adds one. Ask
 `surfaces.listSurfaces()`.

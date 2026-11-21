@@ -13,6 +13,7 @@ import type { PickerAction, HostCtx, ListSpec } from '../../sdk/host.js';
 import type { Command, CommandContext } from '../../sdk/command.js';
 import type { BindingPath } from '../../sdk/component-graph.js';
 import { useScena } from '../../react/ScenaProvider.js';
+import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
 import { canonicalShortcut } from './token.js';
 import { resolveColorVar } from '../../sdk/colors.js';
@@ -98,6 +99,7 @@ export function ActionList({
   ref,
 }: ActionListProps) {
   const scena = useScena();
+  const { document: ownerDoc } = useOwnerDocument();
   // The footer hints follow the locale; `picker/*` keys, English as the fallback.
   const { t } = useI18n('picker');
   const [selected, setSelected] = useState(0);
@@ -447,9 +449,9 @@ export function ActionList({
       } as unknown as ReactKeyboardEvent<HTMLDivElement>;
       handleKeyDown(synth);
     }
-    document.addEventListener('keydown', onDocKey);
-    return () => document.removeEventListener('keydown', onDocKey);
-  }, [handleKeyDown, manageKeys]);
+    ownerDoc.addEventListener('keydown', onDocKey);
+    return () => ownerDoc.removeEventListener('keydown', onDocKey);
+  }, [handleKeyDown, manageKeys, ownerDoc]);
 
   // Imperative controller — only consumed when `manageKeys: false`.
   useImperativeHandle(
