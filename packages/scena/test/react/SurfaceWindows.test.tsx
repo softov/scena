@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { SurfaceWindows } from '../../src/react/SurfaceWindows.js';
@@ -130,5 +130,57 @@ describe('SurfaceWindows', () => {
     render(<ScenaProvider scena={scena}><SurfaceWindows /></ScenaProvider>);
     expect(blocked).toHaveBeenCalledWith({ surface: 'window:1' });
     expect(scena.layout.get().surfaces['window:1']).toBeDefined();
+  });
+
+  describe('the notice for blocked windows', () => {
+    function blockedSetup(windows: string[]): TestScena {
+      refuse = true;
+      const scena = createScena();
+      registerBuiltinLayouts(scena);
+      scena.components.register({ component: 'Page', renderer: { kind: 'react', load: async () => ({ default: () => <div>a page</div> }) } });
+      for (const name of windows) {
+        scena.layout.setSurface(name, { visible: true, layout: 'tab-panel', window: BOUNDS });
+        scena.surfaces.open({ surface: name, key: `tab-of-${name}`, resource: { component: 'Page' } });
+      }
+      render(<ScenaProvider scena={scena}><SurfaceWindows /></ScenaProvider>);
+      return scena;
+    }
+
+    it('shows, and its button opens the window and goes', () => {
+      blockedSetup(['window:1']);
+      expect(screen.getByRole('alert').textContent).toContain('blocked a window');
+      refuse = false;
+      fireEvent.click(screen.getByRole('button', { name: 'Open window' }));
+      expect(opens).toHaveLength(1);
+      expect(screen.queryByRole('alert')).toBeNull();
+    });
+
+    it('stays for the windows a click could not open', () => {
+      blockedSetup(['window:1', 'window:2']);
+      expect(screen.getByRole('alert').textContent).toContain('2 windows');
+      // A browser lets one window through per click.
+      let allowed = 1;
+      vi.mocked(window.open).mockImplementation((url?: string | URL, _target?: string, features?: string) => {
+        if (allowed-- <= 0) return null;
+        const frame = document.createElement('iframe');
+        document.body.appendChild(frame);
+        const win = frame.contentWindow as Window;
+        opens.push({ url: String(url), features: features ?? '', window: win });
+        return win;
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Open windows' }));
+      expect(opens).toHaveLength(1);
+      expect(screen.getByRole('alert').textContent).toContain('blocked a window');
+    });
+
+    it('sends the tabs to main when dismissed', () => {
+      const scena = blockedSetup(['window:1']);
+      act(() => {
+        fireEvent.click(screen.getByRole('button', { name: 'Move tabs to the main area' }));
+      });
+      expect(scena.surfaces.listAt('main').map((m) => m.key)).toEqual(['tab-of-window:1']);
+      expect(scena.layout.get().surfaces['window:1']).toBeUndefined();
+      expect(screen.queryByRole('alert')).toBeNull();
+    });
   });
 });

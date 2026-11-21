@@ -104,8 +104,8 @@ reload -> layout loads window surfaces -> SurfaceWindows opens each -> blocked o
 | [01 - the UI acts in its own document](task-01-the-ui-acts-in-its-own-document.md) | done | - |
 | [02 - a window surface keeps its place](task-02-a-window-surface-keeps-its-place.md) | done | - |
 | [03 - a window surface is drawn in a window](task-03-a-window-surface-is-drawn.md) | done | 01, 02 |
-| [04 - a blocked window opens from a notice](task-04-a-blocked-window-opens-from-a-notice.md) | doing | 03 |
-| [05 - a tab dragged out opens a window](task-05-a-tab-dragged-out-opens-a-window.md) | todo | 03 |
+| [04 - a blocked window opens from a notice](task-04-a-blocked-window-opens-from-a-notice.md) | done | 03 |
+| [05 - a tab dragged out opens a window](task-05-a-tab-dragged-out-opens-a-window.md) | doing | 03 |
 | [06 - the playground opens windows](task-06-the-playground-opens-windows.md) | todo | 04, 05 |
 
 ## Risks and tradeoffs
@@ -121,8 +121,8 @@ reload -> layout loads window surfaces -> SurfaceWindows opens each -> blocked o
 
 ## Resume state
 
-- **Done so far:** plan 1 built 2026-11-21. Task 01, 02 and 03 done 2026-11-21. Task 04 started 2026-11-21.
-- **Next action:** [task-04-a-blocked-window-opens-from-a-notice.md](task-04-a-blocked-window-opens-from-a-notice.md).
+- **Done so far:** plan 1 built 2026-11-21. Task 01 to 04 done 2026-11-21. Task 05 started 2026-11-21.
+- **Next action:** [task-05-a-tab-dragged-out-opens-a-window.md](task-05-a-tab-dragged-out-opens-a-window.md).
 - **Open questions:** none.
 - **Watch out for:** a reload of the main window closes each window too, so that close must not send its tabs to `main`. Which `pagehide` fires first is not checked.
 

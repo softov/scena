@@ -1,6 +1,6 @@
 ---
 title: A blocked window opens from a notice
-status: todo
+status: done
 depends: [task-03-a-window-surface-is-drawn.md]
 layer: "scena react"
 refs:
@@ -37,3 +37,8 @@ A person can also dismiss the notice, and the tabs of the blocked windows go to 
 - `pnpm test` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 6. `SurfaceWindows` draws `BlockedWindows` unless `renderBlocked` draws another notice.
+- The styles are in `styles/surface.css`, beside those of `CloseConfirm`, not in a file of their own. The react layer keeps its styles there.
+- A browser lets one window through per click. The notice stays for the windows a click could not open, so a second click opens the next.
+- `pnpm test` (411 tests, 3 new), `pnpm typecheck` and `pnpm lint` pass.

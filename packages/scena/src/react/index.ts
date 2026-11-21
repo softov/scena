@@ -31,6 +31,8 @@ export { useLabel } from './hooks/useLabel.js';
 export { OwnerDocumentProvider, useOwnerDocument } from './OwnerDocument.js';
 export { SurfaceWindows, closeWindowSurface } from './SurfaceWindows.js';
 export type { SurfaceWindowsProps } from './SurfaceWindows.js';
+export { BlockedWindows } from './BlockedWindows.js';
+export type { BlockedWindowsProps } from './BlockedWindows.js';
 export { mirrorStyles } from './window-styles.js';
 export type { OwnerDocument } from './OwnerDocument.js';
 export { Translate, Translate as T } from './Translate.js';

@@ -6,6 +6,7 @@ import { useMounts } from './hooks/useMounts.js';
 import { OwnerDocumentProvider } from './OwnerDocument.js';
 import { SurfaceArea } from './SurfaceArea.js';
 import { mirrorStyles } from './window-styles.js';
+import { BlockedWindows } from './BlockedWindows.js';
 import type { Scena } from '../sdk/scena.js';
 import type { SurfaceName } from '../sdk/mount-surface.js';
 import { isWindowSurface, removeSurface, type WindowBounds } from '../sdk/window-surface.js';
@@ -69,12 +70,12 @@ export function closeWindowSurface(scena: Scena, surface: SurfaceName): void {
 }
 
 export interface SurfaceWindowsProps {
-  // Draws the notice for windows the browser blocked. Defaults to none; the
-  // blocked windows still wait for `openBlocked`.
+  // Draws the notice for windows the browser blocked, in place of
+  // BlockedWindows. `openBlocked` must run in a click handler.
   renderBlocked?: (blocked: SurfaceName[], openBlocked: () => void, dismiss: () => void) => ReactNode;
 }
 
-export function SurfaceWindows({ renderBlocked }: SurfaceWindowsProps = {}) {
+export function SurfaceWindows({ renderBlocked = defaultBlocked }: SurfaceWindowsProps = {}) {
   const scena = useScena();
   const layout = useLayout();
   const opened = useRef(new Map<SurfaceName, Opened>());
@@ -246,9 +247,13 @@ export function SurfaceWindows({ renderBlocked }: SurfaceWindowsProps = {}) {
           surface,
         ),
       )}
-      {blocked.length > 0 && renderBlocked ? renderBlocked(blocked, openBlocked, dismiss) : null}
+      {blocked.length > 0 ? renderBlocked(blocked, openBlocked, dismiss) : null}
     </>
   );
+}
+
+function defaultBlocked(blocked: SurfaceName[], openBlocked: () => void, dismiss: () => void): ReactNode {
+  return <BlockedWindows blocked={blocked} onOpen={openBlocked} onDismiss={dismiss} />;
 }
 
 // One window's surface. It names the window after its active tab, and
