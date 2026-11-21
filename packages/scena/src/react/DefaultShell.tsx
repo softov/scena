@@ -7,6 +7,7 @@ import { useScena } from './ScenaProvider.js';
 import { useLayout } from './hooks/useLayout.js';
 import { useStore } from './hooks/useStore.js';
 import { SurfaceArea } from './SurfaceArea.js';
+import { SurfaceWindows } from './SurfaceWindows.js';
 import { CloseConfirm } from './CloseConfirm.js';
 import { useI18n } from './hooks/useI18n.js';
 
@@ -255,6 +256,7 @@ export function DefaultShell({ presentation, dismissOnScrim = true }: DefaultShe
       />
 
       <CloseConfirm />
+      <SurfaceWindows />
     </div>
   );
 }

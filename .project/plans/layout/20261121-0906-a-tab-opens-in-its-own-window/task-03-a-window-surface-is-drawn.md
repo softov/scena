@@ -1,6 +1,6 @@
 ---
 title: A window surface is drawn in a window
-status: todo
+status: done
 depends: [task-01-the-ui-acts-in-its-own-document.md, task-02-a-window-surface-keeps-its-place.md]
 layer: "scena react"
 refs:
@@ -53,3 +53,11 @@ A window a person closes sends its tabs to `main`, and a reload keeps them.
 - `pnpm test` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 14. `closeWindowSurface` is exported, and task 04 calls it on dismiss.
+- The saved size is `innerWidth` and `innerHeight`, not the outer size. `window.open` takes the inner size, so an outer size would grow the window on each reload.
+- The one-second check also sees a window that closed with no `pagehide`.
+- An unmount closes the windows a tick later. React's development remount would otherwise close and reopen them, and the reopen has no click to let it through.
+- A removed surface whose layout was still drawn wrote its tree back, and `setSurface` made the surface again. An effect now removes each window surface with no `window` and no open window.
+- `SurfaceWindows` takes `renderBlocked`, for the notice of task 04.
+- `pnpm test` (408 tests, 7 new in `test/react/SurfaceWindows.test.tsx`), `pnpm typecheck` and `pnpm lint` pass.

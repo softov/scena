@@ -9,7 +9,9 @@
 import type { ScenaLayout } from './layout.js';
 import type { SurfaceName } from './mount-surface.js';
 
-// In screen pixels: `screenX`, `screenY`, `outerWidth`, `outerHeight`.
+// In screen pixels. `left` and `top` are the window's `screenX` and `screenY`;
+// `width` and `height` are its `innerWidth` and `innerHeight`, the size that
+// `window.open` takes, so a window reopens at the size it had.
 export interface WindowBounds {
   left: number;
   top: number;
