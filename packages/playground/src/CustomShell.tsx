@@ -1,6 +1,7 @@
 import {
   ShellSplitter,
   SurfaceArea,
+  SurfaceWindows,
   useLayout,
   useSurfacePresentation,
 } from '@softov/scena/react';
@@ -98,6 +99,7 @@ export default function CustomShell() {
         {scrimVisible ? <div className="oo-surface-scrim" /> : null}
       </div>
       {statusVisible ? <SurfaceArea surface="statusbar" role="bar" edge="block-start" /> : null}
+      <SurfaceWindows />
     </div>
   );
 }

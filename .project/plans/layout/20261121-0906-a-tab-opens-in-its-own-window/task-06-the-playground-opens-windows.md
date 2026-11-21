@@ -1,6 +1,6 @@
 ---
 title: The playground opens windows
-status: todo
+status: done
 depends: [task-04-a-blocked-window-opens-from-a-notice.md, task-05-a-tab-dragged-out-opens-a-window.md]
 layer: "playground and docs"
 refs:
@@ -45,3 +45,10 @@ The docs say how an app gets windows.
 - `pnpm typecheck` and `pnpm lint` pass.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 4.
+- The playground's `tab-storage.ts` also reopens the mounts of each window surface, so a window comes back with its tabs.
+- The root export has `openTabWindow`, `besideWindow`, `droppedAt` and `NEW_WINDOW_SIZE`, for an app such as ahpw.
+- The playground draws only `CustomShell`, so the last check of *Validation* is the same as the others.
+- `pnpm typecheck` and `pnpm lint` pass, and the playground builds.
+- Softov checked the playground on 2026-11-21, and it worked.

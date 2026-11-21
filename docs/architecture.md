@@ -169,6 +169,23 @@ at the end. `policy.movable: false` keeps a mount on its surface: the drag shows
 it cannot land, and no move happens. The pure tree moves are in
 `sdk/tab-panel.ts`, so code outside a layout edits a tree the same way.
 
+A **window surface** is a surface drawn in a browser window of its own. Its
+name is `window:<id>`, and its state has `window`, the place and size of that
+window. A tab dropped outside the browser window, where no surface took it,
+opens in a new one at the drop point; the tab menu's *Move into new window*
+does the same beside the page. `SurfaceWindows` opens `about:blank` for each
+window surface, copies the page's style sheets and theme into it and follows
+their changes, and draws the surface there through a portal from the page
+itself. So the window shares the one scena, and a tab drags between it and
+`main` as between any two surfaces. A component drawn there reads its window
+from `useOwnerDocument`, not from the global `document`.
+
+The layout state is the only record of the windows, so they come back after a
+reload. A person who closes a window sends its tabs to `main`; a reload keeps
+them. A browser opens a window only from a click, so one it blocks waits in a
+notice, `BlockedWindows`, whose button opens it. `DefaultShell` renders
+`SurfaceWindows`.
+
 What a surface shows while it holds **no mount** is the app's, never scena's.
 `surfaces.setEmpty('main', { component: 'StartPage' })` gives a surface an
 empty view, as an editor's watermark; the layout draws it where its mounts would

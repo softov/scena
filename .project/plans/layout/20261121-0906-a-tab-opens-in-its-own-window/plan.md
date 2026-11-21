@@ -1,7 +1,7 @@
 ---
 title: A tab opens in its own window
 domain: layout
-status: active
+status: built
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -106,7 +106,7 @@ reload -> layout loads window surfaces -> SurfaceWindows opens each -> blocked o
 | [03 - a window surface is drawn in a window](task-03-a-window-surface-is-drawn.md) | done | 01, 02 |
 | [04 - a blocked window opens from a notice](task-04-a-blocked-window-opens-from-a-notice.md) | done | 03 |
 | [05 - a tab dragged out opens a window](task-05-a-tab-dragged-out-opens-a-window.md) | done | 03 |
-| [06 - the playground opens windows](task-06-the-playground-opens-windows.md) | doing | 04, 05 |
+| [06 - the playground opens windows](task-06-the-playground-opens-windows.md) | done | 04, 05 |
 
 ## Risks and tradeoffs
 
@@ -121,18 +121,18 @@ reload -> layout loads window surfaces -> SurfaceWindows opens each -> blocked o
 
 ## Resume state
 
-- **Done so far:** plan 1 built 2026-11-21. Task 01 to 05 done 2026-11-21. Task 06 started 2026-11-21.
-- **Next action:** [task-06-the-playground-opens-windows.md](task-06-the-playground-opens-windows.md).
+- **Done so far:** plan 1 built 2026-11-21. Every task done 2026-11-21. [implemented.md](implemented.md) says what exists.
+- **Next action:** none. The ahpw side is a plan in ahpw.
 - **Open questions:** none.
 - **Watch out for:** a reload of the main window closes each window too, so that close must not send its tabs to `main`. Which `pagehide` fires first is not checked.
 
 ## Final verification checklist
 
-- [ ] `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.
-- [ ] In the playground, a tab dragged out of the browser opens a window at the drop point.
-- [ ] Tabs drag between the window and `main`, and the window splits into groups.
-- [ ] A menu, a popup and a key in the window act in the window.
-- [ ] The window has the theme, and a theme change reaches it.
-- [ ] Closing the window sends its tabs to `main`.
-- [ ] Ctrl+F5 opens the window again at its place and size, with its tabs.
-- [ ] With popups blocked, the notice shows, and its button opens the window.
+- [x] `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.
+- [x] In the playground, a tab dragged out of the browser opens a window at the drop point.
+- [x] Tabs drag between the window and `main`, and the window splits into groups.
+- [x] A menu, a popup and a key in the window act in the window.
+- [x] The window has the theme, and a theme change reaches it.
+- [x] Closing the window sends its tabs to `main`.
+- [x] Ctrl+F5 opens the window again at its place and size, with its tabs.
+- [x] With popups blocked, the notice shows, and its button opens the window.
