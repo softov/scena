@@ -144,4 +144,18 @@ describe('a surface takes a tab dropped anywhere on it', () => {
       expect(scena.surfaces.listSurfaces().some((s) => keysOn(scena, s).includes('r1'))).toBe(false);
     });
   });
+
+  it('takes no drop on a surface whose state says drops: false', async () => {
+    const { scena, el } = await setup('stack');
+    act(() => scena.layout.setSurface('sidebar:right', { drops: false }));
+    const dt = dragFrom({ surface: 'main', key: 'm1' });
+    fireEvent.dragOver(el('sidebar:right'), { dataTransfer: dt });
+    // Refused: the browser shows it cannot land there.
+    expect(dt.dropEffect).toBe('none');
+    act(() => {
+      fireEvent.drop(el('sidebar:right'), { dataTransfer: dt });
+    });
+    expect(keysOn(scena, 'main')).toContain('m1');
+    expect(keysOn(scena, 'sidebar:right')).not.toContain('m1');
+  });
 });
