@@ -24,8 +24,9 @@ import {
   treesEqual,
   type TabPanelDropZone,
 } from '../../sdk/tab-panel.js';
-import { type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
-import { endTabDrag, startTabDrag } from './tab-drag.js';
+import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
+import { currentTabDrag, endTabDrag, startTabDrag } from './tab-drag.js';
+import { canTakeTab, moveTabHere } from './move-tab.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { Divisor } from '../display/Divisor.js';
@@ -138,11 +139,33 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   }
 
   // ----- Tab-strip drop (reorder within strip OR move into this leaf) -----
+  // A tab from this surface carries the layout's own type; a tab from
+  // another surface carries the shared one, and may be refused by its policy.
+  // A refused drag gets `dropEffect: none` and no preventDefault, so the
+  // browser shows it cannot land and no drop fires.
+  function takesDrag(e: ReactDragEvent<HTMLDivElement>): boolean {
+    const types = e.dataTransfer.types;
+    const drag = currentTabDrag();
+    if (drag && drag.surface !== ctx.surface && types.includes(TAB_DRAG_MIME)) {
+      if (canTakeTab(scena, drag, ctx.surface)) return true;
+      e.dataTransfer.dropEffect = 'none';
+      return false;
+    }
+    return types.includes(DRAG_MIME);
+  }
+
+  // The shared payload of a drop from another surface, or null for a drop
+  // from this one.
+  function foreignDrop(e: ReactDragEvent<HTMLDivElement>): TabDragPayload | null {
+    const shared = readTabDrag(e.dataTransfer);
+    return shared && shared.surface !== ctx.surface ? shared : null;
+  }
+
   function onTabStripDragOver(
     e: ReactDragEvent<HTMLDivElement>,
     idx: number,
   ) {
-    if (!e.dataTransfer.types.includes(DRAG_MIME)) return;
+    if (!takesDrag(e)) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverTab(idx);
@@ -154,9 +177,17 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
     e: ReactDragEvent<HTMLDivElement>,
     toIdx: number,
   ) {
-    if (!e.dataTransfer.types.includes(DRAG_MIME)) return;
+    if (!takesDrag(e)) return;
     e.preventDefault();
     setDragOverTab(null);
+    const foreign = foreignDrop(e);
+    if (foreign) {
+      moveTabHere(scena, foreign, ctx.surface, () => {
+        const tree = placeTab(ctx.tree, foreign.key, leaf.id, toIdx);
+        return tree ? { tabPanel: { tree } } : null;
+      });
+      return;
+    }
     const payload = readPayload(e);
     if (!payload) return;
     insertTab(ctx, payload, leaf.id, toIdx);
@@ -177,7 +208,10 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
     return 'center';
   }
   function onBodyDragOver(e: ReactDragEvent<HTMLDivElement>) {
-    if (!e.dataTransfer.types.includes(DRAG_MIME)) return;
+    if (!takesDrag(e)) {
+      setZone(null);
+      return;
+    }
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setZone(computeZone(e));
@@ -192,10 +226,20 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
     }
   }
   function onBodyDrop(e: ReactDragEvent<HTMLDivElement>) {
-    if (!e.dataTransfer.types.includes(DRAG_MIME)) return;
+    if (!takesDrag(e)) return;
     e.preventDefault();
     const z = computeZone(e);
     setZone(null);
+    const foreign = foreignDrop(e);
+    if (foreign && z) {
+      moveTabHere(scena, foreign, ctx.surface, () => {
+        const tree = z === 'center'
+          ? placeTab(ctx.tree, foreign.key, leaf.id, leaf.tabs.length)
+          : splitAt(ctx.tree, foreign.key, leaf.id, z);
+        return tree ? { tabPanel: { tree } } : null;
+      });
+      return;
+    }
     const payload = readPayload(e);
     if (!payload || !z) return;
     if (z === 'center') {

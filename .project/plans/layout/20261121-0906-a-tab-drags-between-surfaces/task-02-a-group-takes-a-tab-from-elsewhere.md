@@ -1,6 +1,6 @@
 ---
 title: A tab group takes a tab from another surface
-status: todo
+status: done
 depends: [task-01-the-tab-drag-names-its-surface.md]
 layer: "scena ui/layout"
 refs:
@@ -43,3 +43,9 @@ A mount that cannot move shows no drop zone.
 - `pnpm test` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 8. Step 1 was already true at `95c7574`.
+- `moveTabHere` and `canTakeTab` are in `ui/layout/move-tab.ts`. It removes the key from any source surface that has a tab-panel tree, whatever its layout id.
+- `moveTabHere` also clears the drag in progress, because the source tab leaves the page and may get no `dragend`.
+- jsdom has no `DragEvent`, so the test sets `clientX` and `clientY` on the drop event itself.
+- `pnpm test` (389 tests, 6 new), `pnpm typecheck` and `pnpm lint` pass.
