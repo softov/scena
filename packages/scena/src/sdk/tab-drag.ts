@@ -98,3 +98,14 @@ export function readOpenDrag(from: TabDragReader): OpenDragPayload | null {
     return null;
   }
 }
+
+// What a drop area learns about a dragged tab or row: one shape for both.
+// For a tab, the resource and the title are its mount's; for a row, the
+// payload's. `surface` is where a tab is open; a row has none.
+export interface DroppedThing {
+  from: 'tab' | 'row';
+  key: string;
+  resource: ComponentNode;
+  title?: MountDisplay['title'];
+  surface?: SurfaceName;
+}

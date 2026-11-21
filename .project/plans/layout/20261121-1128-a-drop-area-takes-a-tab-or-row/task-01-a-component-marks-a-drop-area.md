@@ -1,6 +1,6 @@
 ---
 title: A component marks a drop area
-status: todo
+status: done
 depends: []
 layer: "scena sdk, react and ui/layout"
 refs:
@@ -43,3 +43,6 @@ A tab or a row dropped on it calls `onDrop` with a `DroppedThing`, and the surfa
 - `pnpm test` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 8. `describeDrop` is exported for an app that reads a drop itself.
+- `test/react/drop-area.test.tsx` has 4 cases; `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.

@@ -82,8 +82,8 @@ drop on the area -> read the payload -> describe it -> onDrop(thing) -> stop the
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - a component marks a drop area](task-01-a-component-marks-a-drop-area.md) | todo | - |
-| [02 - a graph page has a drop area](task-02-a-graph-page-has-a-drop-area.md) | todo | 01 |
+| [01 - a component marks a drop area](task-01-a-component-marks-a-drop-area.md) | done | - |
+| [02 - a graph page has a drop area](task-02-a-graph-page-has-a-drop-area.md) | doing | 01 |
 | [03 - the composer takes a reference](task-03-the-composer-takes-a-reference.md) | todo | 01, 02 |
 
 ## Risks and tradeoffs
@@ -95,8 +95,8 @@ drop on the area -> read the payload -> describe it -> onDrop(thing) -> stop the
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-a-component-marks-a-drop-area.md](task-01-a-component-marks-a-drop-area.md).
+- **Done so far:** task 01 done 2026-11-21. Task 02 started 2026-11-21.
+- **Next action:** [task-02-a-graph-page-has-a-drop-area.md](task-02-a-graph-page-has-a-drop-area.md).
 - **Open questions:** none.
 - **Watch out for:** a drop an area takes must stop its event, or the surface moves the tab too.
 

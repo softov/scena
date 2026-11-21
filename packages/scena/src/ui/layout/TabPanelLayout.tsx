@@ -146,7 +146,8 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
     const shared: TabDragPayload = { surface: ctx.surface, key: tabKey, leafId: leaf.id };
     writeTabDrag(e.dataTransfer, shared);
     startTabDrag(shared);
-    e.dataTransfer.effectAllowed = 'move';
+    // A surface moves the tab; a drop area links it, with a copy effect.
+    e.dataTransfer.effectAllowed = 'copyMove';
   }
 
   // A tab dropped outside the browser window, where no surface took it, opens
