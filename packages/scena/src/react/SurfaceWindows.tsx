@@ -34,6 +34,24 @@ import { isWindowSurface, removeSurface, type WindowBounds } from '../sdk/window
 // DefaultShell renders this. An app with its own shell renders it once.
 
 const CHECK_MS = 1000;
+
+// The windows open now, by scena: an app that starts listening after a window
+// opened (keys, after a reload) reads them here, then follows the events.
+const openByScena = new WeakMap<Scena, Map<SurfaceName, Window>>();
+
+export function listSurfaceWindows(scena: Scena): { surface: SurfaceName; window: Window }[] {
+  return [...(openByScena.get(scena) ?? new Map<SurfaceName, Window>()).entries()].map(([surface, window]) => ({ surface, window }));
+}
+
+function noteWindow(scena: Scena, surface: SurfaceName, win: Window | null): void {
+  let map = openByScena.get(scena);
+  if (!map) {
+    map = new Map();
+    openByScena.set(scena, map);
+  }
+  if (win) map.set(surface, win);
+  else map.delete(surface);
+}
 const MIN_SIZE = 200;
 
 interface Opened {
@@ -99,6 +117,7 @@ export function SurfaceWindows({ renderBlocked = defaultBlocked }: SurfaceWindow
     opened.current.delete(surface);
     one.dispose();
     if (!one.window.closed) one.window.close();
+    noteWindow(scena, surface, null);
     scena.events.emit('scena:window:closed', { surface, window: one.window });
   }, [scena]);
 
@@ -157,6 +176,7 @@ export function SurfaceWindows({ renderBlocked = defaultBlocked }: SurfaceWindow
         win.removeEventListener('pagehide', onGone);
       },
     });
+    noteWindow(scena, surface, win);
     scena.events.emit('scena:window:opened', { surface, window: win });
     rerender();
     return true;

@@ -224,6 +224,9 @@ export interface DropArea {
     onDragOver: (e: ReactDragEvent<HTMLElement>) => void;
     onDragLeave: (e: ReactDragEvent<HTMLElement>) => void;
     onDrop: (e: ReactDragEvent<HTMLElement>) => void;
+    // Marks the element, so a tab group around it drops its own drop preview
+    // while a drag is over the area.
+    'data-scena-drop-area': true;
   };
 }
 
@@ -247,7 +250,11 @@ export function useDropArea(options: DropAreaOptions): DropArea {
     if (!takes(describeDragInProgress(scena, e.dataTransfer.types))) return;
     e.preventDefault();
     e.stopPropagation();
-    e.dataTransfer.dropEffect = 'copy';
+    // Copy, unless the person holds Shift, which a browser reads as asking to
+    // move: an answer that differs from the ask cancels the drop. The tab stays
+    // where it was either way; an area links.
+    const allowed = e.dataTransfer.effectAllowed;
+    e.dataTransfer.dropEffect = e.shiftKey && (allowed === 'move' || allowed === 'copyMove' || allowed === 'linkMove' || allowed === 'all') ? 'move' : 'copy';
     setOver(true);
   }, [scena, takes]);
 
@@ -266,5 +273,5 @@ export function useDropArea(options: DropAreaOptions): DropArea {
     opts.current.onDrop(thing);
   }, [scena, takes]);
 
-  return { over, props: { onDragOver, onDragLeave, onDrop } };
+  return { over, props: { onDragOver, onDragLeave, onDrop, 'data-scena-drop-area': true } };
 }
