@@ -66,6 +66,7 @@ drop elsewhere on the surface (SurfaceArea) -> key open? move : open -> at the e
 | A row of a key that is open elsewhere moves the tab to the drop | "Move it there (Recommended)", Softov, 2026-11-21 | 02 |
 | A row of a key that is not open opens it where it fell | Softov, 2026-11-21: "I want to be able to drag the session from the explorer also." | 02 |
 | A snapshot keeps each mount's props, and a restore passes them back | "Yes, include it (Recommended)", Softov, 2026-11-21 | 03 |
+| Only the strip or group whose active tab has focus draws the tab title actions; scena keeps the focused key at `$/focus/key` | "Only the focused tab's strip (Recommended)", Softov, 2026-11-21, after the right sidebar drew the actions of a tab on `main` | 05 |
 | `layout-commands.ts` imports the tree helpers from `sdk/tab-panel.ts` | (defaulted: the plan of the drag left it for later, and code is written once) | 04 |
 | A row dropped outside the window does not open a window | (defaulted: the row's drag end is the app's; `openTabWindow` is exported for an app that wants it) | - |
 
@@ -100,7 +101,7 @@ drop elsewhere on the surface (SurfaceArea) -> key open? move : open -> at the e
 
 ## Resume state
 
-- **Done so far:** task 01 to 04 done 2026-11-21. Task 05 started 2026-11-21.
+- **Done so far:** task 01 to 04 done 2026-11-21. Task 05 built 2026-11-21; its check by hand is left.
 - **Next action:** [task-05-the-playground-drags-a-row.md](task-05-the-playground-drags-a-row.md).
 - **Open questions:** none.
 - **Watch out for:** a drop that a layout places must stop its event, or `SurfaceArea` takes it a second time.

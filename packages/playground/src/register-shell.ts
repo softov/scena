@@ -164,7 +164,6 @@ export function registerShell(scena: Scena): Disposable {
   subs.push(
     scena.events.on('scena:mount:focused', (raw) => {
       const ev = raw as { key: string; surface: string };
-      if (ev.surface !== 'main') return;
       const { kind, id } = parseActiveContext(ev.key);
       scena.store.patchMany({ '$/active/kind': kind, '$/active/id': id });
     }),

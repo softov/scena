@@ -80,7 +80,12 @@ export function registerUsers(scena: Scena) {
     // `:` and the kind segment is already `user`.
     scena.events.on('scena:mount:focused', (raw) => {
       const ev = raw as { key: string; surface: string };
-      if (ev.surface !== 'main' || !ev.key.startsWith('user:')) return;
+      // Any surface: the tab title actions follow focus wherever the tab is.
+      // Another tab's focus clears a user resource, so its actions go.
+      if (!ev.key.startsWith('user:')) {
+        if (scena.store.get('$/resource/kind') === 'user') scena.store.patchMany({ '$/resource/kind': null, '$/resource/id': null });
+        return;
+      }
       const userId = ev.key.slice('user:'.length);
       scena.store.patchMany({
         '$/resource/kind': 'user',

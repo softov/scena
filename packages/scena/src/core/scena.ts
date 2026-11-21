@@ -1,7 +1,7 @@
 import type { BindingPath } from '../sdk/component-graph.js';
 import type { CreateScena, CreateScenaOptions, Scena } from '../sdk/scena.js';
 import type { SocketBridge } from '../sdk/reactive-store.js';
-import type { SurfaceName } from '../sdk/mount-surface.js';
+import { FOCUSED_MOUNT_PATH, type SurfaceName } from '../sdk/mount-surface.js';
 
 import { createEventBus } from './controls/events.js';
 import { createWhenEngine } from './controls/when.js';
@@ -94,6 +94,13 @@ export const createScena: CreateScena = (
   events.on('scena:mount:focused', (payload) => {
     const ev = payload as { key: string; surface: SurfaceName };
     layout.setSurface(ev.surface, { activeContainerKey: ev.key });
+    store.set(FOCUSED_MOUNT_PATH as BindingPath, ev.key);
+  });
+  events.on('scena:mount:closed', (payload) => {
+    const ev = payload as { key: string; reason?: string };
+    // A move closes and opens the same key; it keeps the focus.
+    if (ev.reason?.startsWith('move:')) return;
+    if (store.get(FOCUSED_MOUNT_PATH as BindingPath) === ev.key) store.set(FOCUSED_MOUNT_PATH as BindingPath, null);
   });
 
   const scena: Scena = {

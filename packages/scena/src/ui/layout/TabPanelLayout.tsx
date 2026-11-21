@@ -35,6 +35,9 @@ import { resolveColorRgb } from '../../sdk/colors.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { useStoreLabel } from '../../react/hooks/useStoreLabel.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
+import { useStore } from '../../react/hooks/useStore.js';
+import { FOCUSED_MOUNT_PATH } from '../../sdk/mount-surface.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 
 // Multi-group tabs. Recursive binary tree: a leaf is one Tab strip; a split
 // holds two children with a draggable divider. Drag a tab onto another
@@ -77,6 +80,12 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   const scena = useScena();
   const { window: ownerWin } = useOwnerDocument();
   const activeKey = leaf.activeKey ?? leaf.tabs[0];
+  // The tab title actions follow focus, as on a `tab` strip: only the group
+  // whose active tab has focus draws them.
+  const focused = useStore<string | null>(FOCUSED_MOUNT_PATH as BindingPath);
+  const titleEntries = activeKey !== undefined && activeKey === focused
+    ? scena.commands.list({ slot: 'view/title', enabled: true })
+    : [];
   // const activeMount = ctx.mounts.find((m) => m.key === activeKey);
 
   const [dragOverTab, setDragOverTab] = useState<number | null>(null);
@@ -336,6 +345,15 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
           })}
         </div>
         <div className="tab-bar__extras">
+          {titleEntries.map((cmd) => {
+            const label = String(typeof cmd.title === 'function' ? cmd.title() : cmd.title);
+            return (
+              <button key={cmd.id} onClick={() => void scena.commands.execute(cmd.id)} title={label}>
+                {cmd.icon ? `${cmd.icon} ` : ''}
+                {label}
+              </button>
+            );
+          })}
           <button
             className="tab-bar__more"
             title={t('layout/groupActions', 'Group actions')}

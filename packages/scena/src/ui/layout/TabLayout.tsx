@@ -16,6 +16,9 @@ import { dropHere, endTabDrag, judgeDrag, startTabDrag } from '../../react/surfa
 import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
 import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
+import { useStore } from '../../react/hooks/useStore.js';
+import { FOCUSED_MOUNT_PATH } from '../../sdk/mount-surface.js';
+import type { BindingPath } from '../../sdk/component-graph.js';
 
 // Tab strip + active mount. Tabs are draggable for reorder (HTML5 DnD).
 // Right-click on a tab opens slot `tab:context`. The [...] trailing button
@@ -59,7 +62,10 @@ export function TabLayout({
   // the pin runs `tab.unpin` to flip the state back.
   const pinned = new Set(state.split?.pinned ?? []);
 
-  const titleEntries = active
+  // The tab title actions follow focus: they decide by app state that the
+  // focused tab sets, so only the strip whose active tab has focus draws them.
+  const focused = useStore<string | null>(FOCUSED_MOUNT_PATH as BindingPath);
+  const titleEntries = active && active.key === focused
     ? scena.commands.list({ slot: 'view/title', enabled: true })
     : [];
   // This surface's own buttons, shown on an empty strip too. A command's
