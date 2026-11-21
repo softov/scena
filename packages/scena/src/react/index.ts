@@ -28,6 +28,8 @@ export { useStore, useStoreSetter } from './hooks/useStore.js';
 export { useI18n } from './hooks/useI18n.js';
 export type { UseI18nResult } from './hooks/useI18n.js';
 export { useLabel } from './hooks/useLabel.js';
+export { OwnerDocumentProvider, useOwnerDocument } from './OwnerDocument.js';
+export type { OwnerDocument } from './OwnerDocument.js';
 export { Translate, Translate as T } from './Translate.js';
 export type { TranslateProps } from './Translate.js';
 export { useCommand } from './hooks/useCommand.js';

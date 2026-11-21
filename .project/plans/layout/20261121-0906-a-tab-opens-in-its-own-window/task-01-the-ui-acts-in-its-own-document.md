@@ -1,6 +1,6 @@
 ---
 title: The UI acts in its own document
-status: todo
+status: done
 depends: []
 layer: "scena react and ui"
 refs:
@@ -41,3 +41,9 @@ In the main window, nothing changes.
 - `pnpm test` passes, with the popup and menu tests unchanged.
 
 ## Resume
+
+- Done 2026-11-21. The hook and the context are one file, `react/OwnerDocument.tsx`, and the test is `test/react/OwnerDocument.test.tsx`.
+- `useOwnerDocument()` reads the context only, and takes no element. Every use is drawn under `SurfaceWindows`, which sets the context, so an element adds nothing.
+- `Popup` also takes the owner window's `ResizeObserver`, because each window runs its own rendering loop.
+- The test uses a same-origin iframe as the second window, because the repository has no types for `jsdom`.
+- `pnpm test` (397 tests, 3 new), `pnpm typecheck` and `pnpm lint` pass.

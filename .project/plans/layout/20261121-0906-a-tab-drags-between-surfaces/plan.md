@@ -114,6 +114,7 @@ drop (other surface) -> canMoveTo -> surfaces.move -> layout.setSurface(target t
 
 - [x] `pnpm test` passes, with the new tests of task 01, 02 and 03.
 - [x] `pnpm typecheck` and `pnpm lint` pass.
-- [x] In the playground, a tab drags from `main` to the right sidebar and back, to a strip index, a group centre and a group edge.
+- [x] In the playground, a tab drags from `main` to the right sidebar and back.
+- [x] On `main`, it lands at a strip index, a group centre and a group edge.
 - [x] A mount with `policy.movable: false` does not move, and the cursor shows it.
 - [x] A drag inside one surface works as before.

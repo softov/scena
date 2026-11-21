@@ -28,6 +28,7 @@ import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '.
 import { currentTabDrag, endTabDrag, startTabDrag } from './tab-drag.js';
 import { canTakeTab, moveTabHere } from './move-tab.js';
 import { useScena } from '../../react/ScenaProvider.js';
+import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { Divisor } from '../display/Divisor.js';
 import { resolveColorRgb } from '../../sdk/colors.js';
@@ -74,6 +75,7 @@ interface TabPanelContext {
 function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext }) {
   const { t } = useI18n();
   const scena = useScena();
+  const { window: ownerWin } = useOwnerDocument();
   const activeKey = leaf.activeKey ?? leaf.tabs[0];
   // const activeMount = ctx.mounts.find((m) => m.key === activeKey);
 
@@ -112,13 +114,13 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
       setZone(null);
       setDragOverTab(null);
     };
-    window.addEventListener('dragend', clearAll);
-    window.addEventListener('drop', clearAll);
+    ownerWin.addEventListener('dragend', clearAll);
+    ownerWin.addEventListener('drop', clearAll);
     return () => {
-      window.removeEventListener('dragend', clearAll);
-      window.removeEventListener('drop', clearAll);
+      ownerWin.removeEventListener('dragend', clearAll);
+      ownerWin.removeEventListener('drop', clearAll);
     };
-  }, []);
+  }, [ownerWin]);
 
   function setLeafActive(key: string) {
     const next = mapLeaves(ctx.tree, (l) =>

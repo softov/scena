@@ -1,7 +1,7 @@
 ---
 title: A tab opens in its own window
 domain: layout
-status: planned
+status: active
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -101,8 +101,8 @@ reload -> layout loads window surfaces -> SurfaceWindows opens each -> blocked o
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - the UI acts in its own document](task-01-the-ui-acts-in-its-own-document.md) | todo | - |
-| [02 - a window surface keeps its place](task-02-a-window-surface-keeps-its-place.md) | todo | - |
+| [01 - the UI acts in its own document](task-01-the-ui-acts-in-its-own-document.md) | done | - |
+| [02 - a window surface keeps its place](task-02-a-window-surface-keeps-its-place.md) | doing | - |
 | [03 - a window surface is drawn in a window](task-03-a-window-surface-is-drawn.md) | todo | 01, 02 |
 | [04 - a blocked window opens from a notice](task-04-a-blocked-window-opens-from-a-notice.md) | todo | 03 |
 | [05 - a tab dragged out opens a window](task-05-a-tab-dragged-out-opens-a-window.md) | todo | 03 |
@@ -121,8 +121,8 @@ reload -> layout loads window surfaces -> SurfaceWindows opens each -> blocked o
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** finish [plan 1](../20261121-0906-a-tab-drags-between-surfaces/plan.md), then [task-01-the-ui-acts-in-its-own-document.md](task-01-the-ui-acts-in-its-own-document.md). Task 01 and 02 can start before plan 1 ends.
+- **Done so far:** plan 1 built 2026-11-21. Task 01 done 2026-11-21. Task 02 started 2026-11-21.
+- **Next action:** [task-02-a-window-surface-keeps-its-place.md](task-02-a-window-surface-keeps-its-place.md).
 - **Open questions:** none.
 - **Watch out for:** a reload of the main window closes each window too, so that close must not send its tabs to `main`. Which `pagehide` fires first is not checked.
 
