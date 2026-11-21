@@ -1,3 +1,4 @@
+import type { WindowBounds } from './window-surface.js';
 import type { Disposable } from './disposable.js';
 import type { SurfaceName, ResolvedMount } from './mount-surface.js';
 import type { ReactiveStore } from './reactive-store.js';
@@ -111,6 +112,9 @@ export interface SurfaceLayoutState {
     // × close affordance for a pin icon (clicking unpins).
     pinned?: string[];
   };
+  // Set: the surface is drawn in a browser window of its own, at this place
+  // and size (see window-surface.ts). A window surface is named `window:<id>`.
+  window?: WindowBounds;
   // `tab-panel` layout state. Recursive binary tree; see TabPanelNode.
   tabPanel?: {
     tree: TabPanelNode;

@@ -1,6 +1,6 @@
 ---
 title: A window surface keeps its place
-status: todo
+status: done
 depends: []
 layer: "scena sdk and core"
 refs:
@@ -40,3 +40,7 @@ The event map has the window events.
 - `pnpm test` and `pnpm typecheck` pass.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 7. The window events carry `window: Window` on opened and closed.
+- `test/sdk/window-surface.test.ts` also saves a window surface and loads it back in a second scena.
+- `pnpm typecheck` and `pnpm lint` pass, and the 4 new tests pass.
