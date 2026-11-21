@@ -11,7 +11,7 @@ changes: []
 creates: []
 refs:
   - git://3756caa - the commit of scena this plan was checked at
-  - file:///github/scena/.project/briefs/a-tab-opens-in-its-own-window.md - the brief this plan builds, not yet committed
+  - git://490d6e3 - the last commit that holds the brief this plan covers, `briefs/a-tab-opens-in-its-own-window.md`
   - "[code://packages/scena/src/sdk/mount-surface.ts#L30-L40](../../../../packages/scena/src/sdk/mount-surface.ts#L30-L40) - `SurfaceName` takes any string, so `window:<id>` needs no new type"
   - "[code://packages/scena/src/sdk/layout.ts#L91-L158](../../../../packages/scena/src/sdk/layout.ts#L91-L158) - `SurfaceLayoutState`, which gets the place and size of a window"
   - "[code://packages/scena/src/core/controls/layout.ts#L173-L190](../../../../packages/scena/src/core/controls/layout.ts#L173-L190) - the layout state is saved and loaded whole, so a window surface is kept with no new storage"
@@ -77,8 +77,8 @@ reload -> layout loads window surfaces -> SurfaceWindows opens each -> blocked o
 | A reload or a close of the main window keeps the windows to reopen | (defaulted: the main window's `pagehide` marks the close as not a person's close) | 03 |
 | A window loads `about:blank`, as VS Code does | (defaulted: it has the opener's origin and loads no app code) | 03 |
 | The place and size are `screenX`, `screenY`, `outerWidth` and `outerHeight`, read on `resize` and on a one-second check while open | (defaulted: a browser has no event for a window move) | 03 |
-| A window's layout is `tab-panel` | the [brief](file:///github/scena/.project/briefs/a-tab-opens-in-its-own-window.md) | 02 |
-| A drop outside is a `dragend` with `dropEffect` `none` and a point outside the viewport | the [brief](file:///github/scena/.project/briefs/a-tab-opens-in-its-own-window.md) | 05 |
+| A window's layout is `tab-panel` | the brief at `git://490d6e3` | 02 |
+| A drop outside is a `dragend` with `dropEffect` `none` and a point outside the viewport | the brief at `git://490d6e3` | 05 |
 | `DefaultShell` draws `SurfaceWindows`; an app with its own shell adds it | (defaulted: an app that composes `SurfaceArea` itself already draws its own surfaces) | 03 |
 | scena emits `scena:window:opened` and `scena:window:closed` with the `Window`, so an app adds its key listener | (defaulted: the keybindings registry does not listen; the app does, as [`attach-keybindings.ts`](../../../../packages/playground/src/attach-keybindings.ts#L45) shows) | 03 |
 | Dismissing the notice sends the blocked windows' tabs to `main` | (defaulted: the same as a person's close of a window) | 04 |

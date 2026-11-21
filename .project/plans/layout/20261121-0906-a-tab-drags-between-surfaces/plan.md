@@ -10,7 +10,7 @@ changes: []
 creates: []
 refs:
   - git://3756caa - the commit of scena this plan was checked at
-  - file:///github/scena/.project/briefs/drag-a-tab-between-surfaces.md - the brief this plan builds, not yet committed in its updated form
+  - git://490d6e3 - the last commit that holds the brief this plan covers, `briefs/drag-a-tab-between-surfaces.md`
   - "[code://packages/scena/src/ui/layout/TabPanelLayout.tsx#L31](../../../../packages/scena/src/ui/layout/TabPanelLayout.tsx#L31) - `DRAG_MIME`, the tab panel's own drag type"
   - "[code://packages/scena/src/ui/layout/TabPanelLayout.tsx#L157-L216](../../../../packages/scena/src/ui/layout/TabPanelLayout.tsx#L157-L216) - `reconcile`, which prunes dead keys and appends a new mount to the focused leaf"
   - "[code://packages/scena/src/ui/layout/TabPanelLayout.tsx#L245-L248](../../../../packages/scena/src/ui/layout/TabPanelLayout.tsx#L245-L248) - `DragPayload`, a leaf id and a tab key, with no surface"
