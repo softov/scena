@@ -11,6 +11,7 @@ refs:
   - "[code://packages/scena/src/sdk/mount-surface.ts#L184](../../packages/scena/src/sdk/mount-surface.ts#L184) - `surfaces.move`, the contract"
   - "[code://packages/scena/src/core/graph/mount-surface.ts#L323-L338](../../packages/scena/src/core/graph/mount-surface.ts#L323-L338) - `move`, which changes the surface of a mount and keeps its resource"
   - https://code.visualstudio.com/docs/configure/custom-layout - VS Code drags views between the side bars and the panel, read 2026-10-29
+  - file:///github/scena/.project/briefs/a-tab-opens-in-its-own-window.md - the window brief, which builds on this drag and adds a surface per window
 ---
 
 # Drag a tab between surfaces
@@ -48,6 +49,13 @@ scena draws the tabs, so the drag is a scena change.
 - A surface or a mount can refuse a drop, so an app keeps a view where it belongs.
 - An app learns of the move, so it can change props that depend on the surface.
   ahpw sets `beside` on a session page in the right sidebar.
+
+## What builds on this
+
+- The [window brief](a-tab-opens-in-its-own-window.md) opens a tab in its own browser window, as a surface added at run time.
+- So the payload and the move work for any surface name, not only the names the shell draws.
+- The source layout acts on the drag end, so a drop that no surface takes can open a window.
+- A drop from one window's surface into another window's surface is the same move as from `main` to `sidebar:right`.
 
 ## Open points
 
