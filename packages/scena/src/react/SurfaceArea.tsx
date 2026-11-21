@@ -22,6 +22,9 @@ import { useMounts } from './hooks/useMounts.js';
 import { MountWrapper, ViewMount } from './ViewMount.js';
 import { useSurfaceResize, type SurfaceResizeSpec } from './useSurfaceResize.js';
 import { SurfaceLoading } from './SurfaceLoading.js';
+import { canTakeTab, currentTabDrag, moveTabHere } from './surface-drop.js';
+import { readTabDrag, TAB_DRAG_MIME } from '../sdk/tab-drag.js';
+import type { DragEvent as ReactDragEvent } from 'react';
 
 function renderOneMount(mount: ResolvedMount): ReactNode {
   return (
@@ -134,6 +137,38 @@ export function SurfaceArea({
     scena.layout.setSurface(surface, patch);
   };
 
+  // The surface takes a tab dragged from another surface, anywhere on it, at
+  // the end: the layout appends a key it does not know. A layout that places
+  // the tab where it fell (a strip index, a group's edge) handles the drop
+  // first and stops it. A bar, the activity rail and the overlay are not
+  // places for a tab.
+  const takesDrops = role !== 'bar' && role !== 'rail' && role !== 'overlay';
+  function onDragOver(e: ReactDragEvent<HTMLDivElement>): void {
+    if (!takesDrops || !e.dataTransfer.types.includes(TAB_DRAG_MIME)) return;
+    const drag = currentTabDrag();
+    if (!drag || drag.surface === surface) return;
+    if (!canTakeTab(scena, drag, surface)) {
+      e.dataTransfer.dropEffect = 'none';
+      return;
+    }
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+  function onDrop(e: ReactDragEvent<HTMLDivElement>): void {
+    if (!takesDrops) return;
+    const drag = readTabDrag(e.dataTransfer);
+    if (!drag || drag.surface === surface) return;
+    e.preventDefault();
+    // At the end of the order a strip or a stack draws; a tab-panel tree
+    // appends the key to its focused group by itself.
+    moveTabHere(scena, drag, surface, () => {
+      const shown = scena.surfaces.listAt(surface).map((m) => m.key);
+      const known = (surfaceState.split?.order ?? []).filter((k) => shown.includes(k));
+      const order = [...known, ...shown.filter((k) => !known.includes(k)), drag.key];
+      return { split: { ...surfaceState.split, order } };
+    });
+  }
+
   const layoutProps: LayoutProps = {
     surface,
     mounts,
@@ -180,6 +215,8 @@ export function SurfaceArea({
         .join(' ')}
       style={style}
       {...resizeBinding}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
     >
       {layoutDef ? (
         (() => {

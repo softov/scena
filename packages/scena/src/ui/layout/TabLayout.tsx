@@ -12,8 +12,7 @@ import { ContextMenu } from '../menu/ContextMenu.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { TabTitle } from './TabPanelLayout.js';
 import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
-import { currentTabDrag, endTabDrag, startTabDrag } from './tab-drag.js';
-import { canTakeTab, moveTabHere } from './move-tab.js';
+import { canTakeTab, currentTabDrag, endTabDrag, moveTabHere, startTabDrag } from '../../react/surface-drop.js';
 import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
 import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
@@ -225,24 +224,7 @@ export function TabLayout({
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >
       <div className="tab-bar">
-        <div
-          className="tab-bar__strip"
-          ref={tabsRef}
-          // The strip past the last tab, and an empty strip, take a tab from
-          // another surface at the end. A tab's own handlers stop the event
-          // before it gets here.
-          onDragOver={(e) => {
-            const drag = currentTabDrag();
-            if (!drag || drag.surface === surface || !takesDrag(e)) return;
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-          }}
-          onDrop={(e) => {
-            if (!takesDrag(e)) return;
-            e.preventDefault();
-            takeForeign(e, orderedMounts.length);
-          }}
-        >
+        <div className="tab-bar__strip" ref={tabsRef}>
           {orderedMounts.map((m, idx) => {
             // Per-field merge: mount.props wins where defined; otherwise
             // fall through to the component's registered default

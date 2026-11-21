@@ -8,7 +8,7 @@ import { useMounts } from '../../src/react/hooks/useMounts.js';
 import { TabPanelLayout } from '../../src/ui/layout/TabPanelLayout.js';
 import { collectLeaves } from '../../src/sdk/tab-panel.js';
 import { TAB_DRAG_MIME, type TabDragPayload } from '../../src/sdk/tab-drag.js';
-import { endTabDrag, startTabDrag } from '../../src/ui/layout/tab-drag.js';
+import { endTabDrag, startTabDrag } from '../../src/react/surface-drop.js';
 import type { TabPanelLeaf, TabPanelNode } from '../../src/sdk/layout.js';
 import type { SurfaceName } from '../../src/sdk/mount-surface.js';
 

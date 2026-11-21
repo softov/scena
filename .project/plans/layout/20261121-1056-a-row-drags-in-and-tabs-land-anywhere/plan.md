@@ -1,5 +1,5 @@
 ---
-title: A list row drags in, and a tab lands anywhere on a surface
+title: A list row drags in, and a surface takes a drop anywhere
 domain: layout
 status: active
 priority: medium
@@ -11,6 +11,7 @@ changes: []
 creates: []
 refs:
   - git://7774b41 - the commit of scena this plan was checked at, the merge of the window work
+  - "[code://packages/scena/src/react/SurfaceArea.tsx#L101-L200](../../../../packages/scena/src/react/SurfaceArea.tsx#L101-L200) - the element of every surface, which takes the drop"
   - "[code://packages/scena/src/ui/layout/TabLayout.tsx#L310-L337](../../../../packages/scena/src/ui/layout/TabLayout.tsx#L310-L337) - the `tab` layout's page area, which takes no drop"
   - "[code://packages/scena/src/ui/layout/move-tab.ts](../../../../packages/scena/src/ui/layout/move-tab.ts) - `moveTabHere`, the move a row drop of an open key reuses"
   - "[code://packages/scena/src/ui/layout/tab-drag.ts](../../../../packages/scena/src/ui/layout/tab-drag.ts) - the drag in progress, which a row drag records too"
@@ -24,8 +25,9 @@ refs:
 ## Goal
 
 Three refinements before the next scena release.
-A tab dropped on the page area of a `tab` layout lands, as on its strip; the right sidebar showed the bug.
-A row of a list, such as a session in an explorer, drags onto any tab surface and opens there.
+A surface takes a dropped tab anywhere on it, whatever its layout; the right sidebar's page took none.
+The layout only says where in the surface the tab lands, when it can say more than "at the end".
+A row of a list, such as a session in an explorer, drags onto any surface and opens there.
 A reopened tab keeps its title after a reload.
 
 ## Reconnaissance
@@ -42,7 +44,8 @@ The files read and the patterns to reuse are the `refs` in the frontmatter, each
 
 ```
 row dragstart -> startOpenDrag(dataTransfer, { key, resource, props }) -> OPEN_DRAG_MIME + the drag in progress
-drop on a tab layout -> key open? moveTabHere : surfaces.open(here) -> place the key where it fell
+drop on a layout's zone -> place it there, stop the event
+drop elsewhere on the surface (SurfaceArea) -> key open? move : open -> at the end
 ```
 
 ### Gaps
@@ -55,8 +58,11 @@ drop on a tab layout -> key open? moveTabHere : surfaces.open(here) -> place the
 
 | What | Source | Task |
 | --- | --- | --- |
-| The page area of a `tab` layout takes a tab, at the end of its strip | Softov, 2026-11-21: "sidebar tabpanel does not accepts the drop. only the title accept it." | 01 |
-| A list row drag is a scena drag that every tab layout takes, not a drop that ahpw catches | "In scena (Recommended)", Softov, 2026-11-21 | 02 |
+| The page area of the right sidebar takes a tab | Softov, 2026-11-21: "sidebar tabpanel does not accepts the drop. only the title accept it." | 01 |
+| The surface takes the drop, not a tab layout; a layout that can place the tab handles the drop first | "Surface + app drop areas", Softov, 2026-11-21: "its not a tab that takes it right? its a surface or a droppable area" | 01 |
+| A surface whose role is `bar`, `rail` or `overlay` refuses a drop | (defaulted: a tab in the title bar or the activity bar is not a place) | 01 |
+| A drop area an app marks, such as a composer that makes a session a reference, is a second plan | "Surface + app drop areas", Softov, 2026-11-21 | - |
+| A list row drag is a scena drag that every surface takes, not a drop that ahpw catches | "In scena (Recommended)", Softov, 2026-11-21 | 02 |
 | A row of a key that is open elsewhere moves the tab to the drop | "Move it there (Recommended)", Softov, 2026-11-21 | 02 |
 | A row of a key that is not open opens it where it fell | Softov, 2026-11-21: "I want to be able to drag the session from the explorer also." | 02 |
 | A snapshot keeps each mount's props, and a restore passes them back | "Yes, include it (Recommended)", Softov, 2026-11-21 | 03 |
@@ -70,7 +76,8 @@ drop on a tab layout -> key open? moveTabHere : surfaces.open(here) -> place the
 - **State flow** - The target writes its state with the key placed, as a tab drop does.
 - **Layer responsibilities**
   - sdk: `OPEN_DRAG_MIME`, `OpenDragPayload`, `writeOpenDrag`, `readOpenDrag`; `SessionMount.props`.
-  - ui: `startOpenDrag` and `endOpenDrag`; the tab layouts take an open drag; `openHere` beside `moveTabHere`.
+  - react: `SurfaceArea` takes a drop at the end, for every surface that is not a bar, a rail or the overlay.
+  - ui: `startOpenDrag` and `endOpenDrag`; the tab layouts place a drop where it fell; `dropHere` beside `moveTabHere`.
   - core: the snapshot and the restore carry props.
   - playground: session rows drag.
 - **Source-of-truth files** - [`code://packages/scena/src/sdk/tab-drag.ts`](../../../../packages/scena/src/sdk/tab-drag.ts) for both payloads.
@@ -79,8 +86,8 @@ drop on a tab layout -> key open? moveTabHere : surfaces.open(here) -> place the
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - the page area takes a tab](task-01-the-page-area-takes-a-tab.md) | todo | - |
-| [02 - a list row drags onto a surface](task-02-a-list-row-drags-onto-a-surface.md) | todo | 01 |
+| [01 - the surface takes a drop](task-01-the-page-area-takes-a-tab.md) | done | - |
+| [02 - a list row drags onto a surface](task-02-a-list-row-drags-onto-a-surface.md) | doing | 01 |
 | [03 - a reopened tab keeps its title](task-03-a-reopened-tab-keeps-its-title.md) | todo | - |
 | [04 - the commands share the tree helpers](task-04-the-commands-share-the-helpers.md) | todo | - |
 | [05 - the playground drags a session row](task-05-the-playground-drags-a-row.md) | todo | 02, 03 |
@@ -93,15 +100,15 @@ drop on a tab layout -> key open? moveTabHere : surfaces.open(here) -> place the
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-the-page-area-takes-a-tab.md](task-01-the-page-area-takes-a-tab.md).
+- **Done so far:** task 01 done 2026-11-21. Task 02 started 2026-11-21.
+- **Next action:** [task-02-a-list-row-drags-onto-a-surface.md](task-02-a-list-row-drags-onto-a-surface.md).
 - **Open questions:** none.
-- **Watch out for:** a drop on a tab inside the page area must not run twice; the tab stops its own events.
+- **Watch out for:** a drop that a layout places must stop its event, or `SurfaceArea` takes it a second time.
 
 ## Final verification checklist
 
 - [ ] `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.
-- [ ] In the playground, a tab dropped on the right sidebar's page lands there.
+- [ ] In the playground, a tab dropped on the right sidebar's page lands there, and on a `stack` or `single` surface too.
 - [ ] A session row drags onto `main`, a group edge, the right sidebar and a window, and opens there.
 - [ ] A row of an open session moves its tab to the drop; a click still focuses it where it is.
 - [ ] After a reload, reopened tabs show their titles.

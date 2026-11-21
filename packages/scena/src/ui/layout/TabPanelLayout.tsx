@@ -25,8 +25,7 @@ import {
   type TabPanelDropZone,
 } from '../../sdk/tab-panel.js';
 import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
-import { currentTabDrag, endTabDrag, startTabDrag } from './tab-drag.js';
-import { canTakeTab, moveTabHere } from './move-tab.js';
+import { canTakeTab, currentTabDrag, endTabDrag, moveTabHere, startTabDrag } from '../../react/surface-drop.js';
 import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useOwnerDocument } from '../../react/OwnerDocument.js';
@@ -178,6 +177,7 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   ) {
     if (!takesDrag(e)) return;
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     setDragOverTab(idx);
   }
@@ -190,6 +190,7 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   ) {
     if (!takesDrag(e)) return;
     e.preventDefault();
+    e.stopPropagation();
     setDragOverTab(null);
     const foreign = foreignDrop(e);
     if (foreign) {
@@ -223,6 +224,7 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
       setZone(null);
       return;
     }
+    e.stopPropagation();
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setZone(computeZone(e));
@@ -239,6 +241,7 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   function onBodyDrop(e: ReactDragEvent<HTMLDivElement>) {
     if (!takesDrag(e)) return;
     e.preventDefault();
+    e.stopPropagation();
     const z = computeZone(e);
     setZone(null);
     const foreign = foreignDrop(e);

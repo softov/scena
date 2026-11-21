@@ -8,7 +8,7 @@ import { TabPanelLayout } from '../../src/ui/layout/TabPanelLayout.js';
 import { useLayout } from '../../src/react/hooks/useLayout.js';
 import { useMounts } from '../../src/react/hooks/useMounts.js';
 import { TAB_DRAG_MIME, type TabDragPayload } from '../../src/sdk/tab-drag.js';
-import { endTabDrag, startTabDrag } from '../../src/ui/layout/tab-drag.js';
+import { endTabDrag, startTabDrag } from '../../src/react/surface-drop.js';
 import type { SurfaceName } from '../../src/sdk/mount-surface.js';
 import { act } from '@testing-library/react';
 
@@ -178,15 +178,6 @@ describe('TabLayout takes a tab from another surface', () => {
     expect(order(scena)).toEqual(['s1', 'm1', 's2']);
     expect(keysOn(scena, 'sidebar:right')).toContain('m1');
     expect(keysOn(scena, 'main')).not.toContain('m1');
-  });
-
-  it('puts a tab dropped past the last tab at the end', () => {
-    const scena = setup();
-    const strip = screen.getByTestId('sidebar:right').querySelector('.tab-bar__strip') as HTMLElement;
-    act(() => {
-      fireEvent.drop(strip, { dataTransfer: dragFrom({ surface: 'main', key: 'm1' }) });
-    });
-    expect(order(scena)).toEqual(['s1', 's2', 'm1']);
   });
 
   it('gives a tab back to main, on a tab-panel strip', () => {
