@@ -149,13 +149,25 @@ A **mount** is one component in one surface, under a key, with:
 - a `MountTarget` — an inline node, or a binding whose value is a node
 - `MountDisplay` — title, icon, colour, header actions; per mount, so two
   instances of one component can be "Chat A" and "Chat B"
-- `MountPolicy` — editable, persistent, transient, customizable
+- `MountPolicy` — editable, persistent, transient, customizable, closable,
+  movable
 
 A **layout** decides how a surface's several mounts are shown: `Tab`,
 `TabPanel`, `Single`, `Split`, `Stack`, `Spatial`, `Rail`, `Inline`, `Bar`,
 `Floating`. Which layout a surface uses is store state, so it is switchable at
 runtime and persistable per user — `LayoutStorage` is the interface, and
 `createLocalStorageLayoutStorage` the obvious implementation.
+
+A **tab moves between surfaces** by a drag. Every tab layout writes one shared
+payload under `TAB_DRAG_MIME` beside its own drag type: the source surface,
+the mount key and, from a `TabPanel`, the group. A `Tab` or `TabPanel` layout
+on another surface takes the drop: it calls `surfaces.move` first, then writes
+its own state with the key placed where it fell and the source's tree with the
+key gone, so a group the tab leaves empty closes. A `TabPanel` takes it on a
+strip, on a group's centre or on an edge to split; a `Tab` strip at an index or
+at the end. `policy.movable: false` keeps a mount on its surface: the drag shows
+it cannot land, and no move happens. The pure tree moves are in
+`sdk/tab-panel.ts`, so code outside a layout edits a tree the same way.
 
 What a surface shows while it holds **no mount** is the app's, never scena's.
 `surfaces.setEmpty('main', { component: 'StartPage' })` gives a surface an

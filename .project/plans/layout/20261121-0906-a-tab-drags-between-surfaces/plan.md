@@ -1,7 +1,7 @@
 ---
 title: A tab drags between surfaces
 domain: layout
-status: active
+status: built
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -93,7 +93,7 @@ drop (other surface) -> canMoveTo -> surfaces.move -> layout.setSurface(target t
 | [01 - the tab drag names its surface](task-01-the-tab-drag-names-its-surface.md) | done | - |
 | [02 - a tab group takes a tab from another surface](task-02-a-group-takes-a-tab-from-elsewhere.md) | done | 01 |
 | [03 - a tab strip takes a tab from another surface](task-03-a-strip-takes-a-tab-from-elsewhere.md) | done | 01 |
-| [04 - the playground drags a tab between surfaces](task-04-the-playground-drags-between.md) | doing | 02, 03 |
+| [04 - the playground drags a tab between surfaces](task-04-the-playground-drags-between.md) | done | 02, 03 |
 
 ## Risks and tradeoffs
 
@@ -105,15 +105,15 @@ drop (other surface) -> canMoveTo -> surfaces.move -> layout.setSurface(target t
 
 ## Resume state
 
-- **Done so far:** task 01, 02 and 03 done 2026-11-21. Task 04 started 2026-11-21.
-- **Next action:** [task-04-the-playground-drags-between.md](task-04-the-playground-drags-between.md).
+- **Done so far:** every task done 2026-11-21. [implemented.md](implemented.md) says what exists.
+- **Next action:** none. The [window plan](../20261121-0906-a-tab-opens-in-its-own-window/plan.md) builds on this one.
 - **Open questions:** none.
 - **Watch out for:** `reconcile` drops a key that the surface does not mount, so a tree written before `surfaces.move` loses the tab.
 
 ## Final verification checklist
 
-- [ ] `pnpm test` passes, with the new tests of task 01, 02 and 03.
-- [ ] `pnpm typecheck` and `pnpm lint` pass.
-- [ ] In the playground, a tab drags from `main` to the right sidebar and back, to a strip index, a group centre and a group edge.
-- [ ] A mount with `policy.movable: false` does not move, and the cursor shows it.
-- [ ] A drag inside one surface works as before.
+- [x] `pnpm test` passes, with the new tests of task 01, 02 and 03.
+- [x] `pnpm typecheck` and `pnpm lint` pass.
+- [x] In the playground, a tab drags from `main` to the right sidebar and back, to a strip index, a group centre and a group edge.
+- [x] A mount with `policy.movable: false` does not move, and the cursor shows it.
+- [x] A drag inside one surface works as before.

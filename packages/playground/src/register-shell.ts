@@ -16,6 +16,8 @@ import { registerShowcase } from './showcase/index.js';
 import { registerSettings } from './settings/index.js';
 import { registerTheme } from './register-theme.js';
 import { registerLayoutModes } from './layout-modes.js';
+import { registerDragDemo } from './drag-demo.js';
+import { keepTabs } from './tab-storage.js';
 import { attachKeybindings } from './attach-keybindings.js';
 
 // Shared socket — used by both the surface bridge AND the "Simulate surface"
@@ -54,6 +56,7 @@ export function registerShell(scena: Scena): Disposable {
   subs.push(registerExplorer(scena));
   registerShowcase(scena, subs);
   registerSettings(scena, subs);
+  subs.push(registerDragDemo(scena));
 
   subs.push(scena.converters.register(a2uiV010Converter));
   subs.push(
@@ -220,5 +223,7 @@ export function registerShell(scena: Scena): Disposable {
       surfaceSocket;
   }
 
+  // Last, once every component is registered: reopen the tabs of the last visit.
+  subs.push(keepTabs(scena));
   return combineDisposables(...subs);
 }

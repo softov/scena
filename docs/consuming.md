@@ -195,6 +195,11 @@ app with no sidebar still ends up carrying `sidebar:left` in layout state, in
 the store, and in whatever `layoutStorage` persists. `surfaceDefaults` is the
 one that replaces, and it is what says *these are my surfaces*.
 
+**Keeping a copy of a mount's surface.** A person can drag a tab to another
+surface, and the mount moves with its key, resource and props. A page that
+read its surface once, to lay itself out beside something, is then wrong. `surfaces.move` emits `scena:mount:opened` with the new surface; read
+it there, or set `policy.movable: false` on a mount that must stay put.
+
 **Sweeping surfaces with a list of names.** A surface is whatever an app mounts
 to, so any list written down goes stale the moment somebody adds one. Ask
 `surfaces.listSurfaces()`.

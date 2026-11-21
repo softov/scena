@@ -29,6 +29,7 @@ import { LocaleToggle } from '@softov/scena/ui/control';
 import { registerBoot } from './register-boot.js';
 import { registerDevMessages } from './i18n-messages.js';
 import { useUrlPath, navigate } from './use-url-path.js';
+import { tabStorage } from './tab-storage.js';
 
 // Register dev messages at module load so the wall renders translated on first
 // paint (before onRender/registerBoot runs). Idempotent.
@@ -128,7 +129,7 @@ export default function App() {
     );
 
   return (
-    <ScenaComponent options={{ layoutStorage, backendFactories }} onRender={registerBoot}>
+    <ScenaComponent options={{ layoutStorage, sessionStorage: tabStorage, backendFactories }} onRender={registerBoot}>
       <PortaBridge>
         <Suspense fallback={<div>Auth Loading...</div>}>
           <Limen

@@ -1,6 +1,6 @@
 ---
 title: The playground drags a tab between surfaces
-status: todo
+status: done
 depends: [task-02-a-group-takes-a-tab-from-elsewhere.md, task-03-a-strip-takes-a-tab-from-elsewhere.md]
 layer: "playground and docs"
 refs:
@@ -43,3 +43,9 @@ The docs say how a tab moves and how an app keeps one in place.
 - `pnpm typecheck` and `pnpm lint` pass.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 5. The demo tabs are in `packages/playground/src/drag-demo.ts`, and the tab keeping is in `packages/playground/src/tab-storage.ts`.
+- The playground reopens only the mounts of `main` and `sidebar:right`. A restore of the chrome mounts would show mounts that a `when` hides.
+- A restored tab has no title until its page sets one, because a snapshot keeps no props. The two demo tabs keep theirs, because the shell opens them first.
+- `pnpm typecheck` and `pnpm lint` pass, and the playground builds.
+- Softov checked the playground on 2026-11-21, and it worked.
