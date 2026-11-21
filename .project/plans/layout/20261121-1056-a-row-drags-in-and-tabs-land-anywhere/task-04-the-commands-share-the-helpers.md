@@ -1,6 +1,6 @@
 ---
 title: The commands share the tree helpers
-status: todo
+status: done
 depends: []
 layer: "scena runtime"
 refs:
@@ -28,3 +28,7 @@ refs:
 - `pnpm test` passes, with the layout command tests unchanged.
 
 ## Resume
+
+- Done 2026-11-21. `replaceLeaf`, `mapLeaves` and `newLeafId` were the same as the sdk's, and `findLeaf` was `collectLeavesById`.
+- The commands' `collectLeaves` returned its array, so it stays as a wrapper over the sdk's.
+- `pnpm test` (446 tests) passes.

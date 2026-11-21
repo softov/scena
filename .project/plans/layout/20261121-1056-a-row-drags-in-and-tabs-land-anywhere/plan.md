@@ -89,8 +89,8 @@ drop elsewhere on the surface (SurfaceArea) -> key open? move : open -> at the e
 | [01 - the surface takes a drop](task-01-the-page-area-takes-a-tab.md) | done | - |
 | [02 - a list row drags onto a surface](task-02-a-list-row-drags-onto-a-surface.md) | done | 01 |
 | [03 - a reopened tab keeps its title](task-03-a-reopened-tab-keeps-its-title.md) | done | - |
-| [04 - the commands share the tree helpers](task-04-the-commands-share-the-helpers.md) | doing | - |
-| [05 - the playground drags a session row](task-05-the-playground-drags-a-row.md) | todo | 02, 03 |
+| [04 - the commands share the tree helpers](task-04-the-commands-share-the-helpers.md) | done | - |
+| [05 - the playground drags a session row](task-05-the-playground-drags-a-row.md) | doing | 02, 03 |
 
 ## Risks and tradeoffs
 
@@ -100,8 +100,8 @@ drop elsewhere on the surface (SurfaceArea) -> key open? move : open -> at the e
 
 ## Resume state
 
-- **Done so far:** task 01 to 03 done 2026-11-21. Task 04 started 2026-11-21.
-- **Next action:** [task-04-the-commands-share-the-helpers.md](task-04-the-commands-share-the-helpers.md).
+- **Done so far:** task 01 to 04 done 2026-11-21. Task 05 started 2026-11-21.
+- **Next action:** [task-05-the-playground-drags-a-row.md](task-05-the-playground-drags-a-row.md).
 - **Open questions:** none.
 - **Watch out for:** a drop that a layout places must stop its event, or `SurfaceArea` takes it a second time.
 
