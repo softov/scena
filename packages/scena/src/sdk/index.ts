@@ -19,6 +19,8 @@ export * from './host.js';
 export * from './keybinding.js';
 export * from './session.js';
 export * from './layout.js';
+export * from './tab-panel.js';
+export * from './tab-drag.js';
 export * from './shell.js';
 export * from './manifest.js';
 export * from './scena.js';

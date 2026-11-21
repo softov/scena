@@ -9,12 +9,23 @@ import {
 } from 'react';
 import type {
   LayoutProps,
-  TabPanelDirection,
   TabPanelLeaf,
   TabPanelNode,
   TabPanelSplit,
 } from '../../sdk/layout.js';
 import type { ResolvedMount } from '../../sdk/mount-surface.js';
+import {
+  collectLeaves,
+  mapLeaves,
+  placeTab,
+  reconcile,
+  replaceSplit,
+  splitAt,
+  treesEqual,
+  type TabPanelDropZone,
+} from '../../sdk/tab-panel.js';
+import { type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
+import { endTabDrag, startTabDrag } from './tab-drag.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { Divisor } from '../display/Divisor.js';
@@ -32,215 +43,9 @@ const DRAG_MIME = 'application/x-scena-tab-panel';
 const EDGE_THRESHOLD = 0.2;
 const MIN_RATIO = 0.05;
 
-// ----- Tree helpers (pure) -----
-
-function newLeafId(): string {
-  // Random suffix — the previous `g${counter}` scheme collided with persisted
-  // tree leaf ids after a reload (the counter resets, localStorage doesn't),
-  // producing two leaves with the same id. `replaceLeaf` then mutated both,
-  // and `mapLeaves(... ? null : l)` dropped both, collapsing whole splits.
-  return `g_${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function makeLeaf(tabs: string[], activeKey?: string): TabPanelLeaf {
-  return { kind: 'leaf', id: newLeafId(), tabs, activeKey };
-}
-
-function collectTabs(node: TabPanelNode, out: Set<string>): void {
-  if (node.kind === 'leaf') {
-    for (const k of node.tabs) out.add(k);
-    return;
-  }
-  collectTabs(node.first, out);
-  collectTabs(node.second, out);
-}
-
-function collectLeaves(node: TabPanelNode, out: TabPanelLeaf[]): void {
-  if (node.kind === 'leaf') {
-    out.push(node);
-    return;
-  }
-  collectLeaves(node.first, out);
-  collectLeaves(node.second, out);
-}
-
-// Strip dead tabs from each leaf. Empty leaves are KEPT — a leaf only goes
-// away through explicit user action (drag-last-tab-out via `removeTab`, or
-// "Close group" via the leaf menu). That's what makes "Split group right"
-// usable: the freshly-created sibling leaf is empty by design and must
-// survive the next render so the user can drop a tab into it.
-function pruneTree(node: TabPanelNode, alive: Set<string>): TabPanelNode {
-  if (node.kind === 'leaf') {
-    const tabs = node.tabs.filter((k) => alive.has(k));
-    const activeKey = node.activeKey && alive.has(node.activeKey)
-      ? node.activeKey
-      : tabs[0];
-    return { ...node, tabs, activeKey };
-  }
-  return {
-    ...node,
-    first: pruneTree(node.first, alive),
-    second: pruneTree(node.second, alive),
-  };
-}
-
-// Map across leaves; if `fn` returns null, the leaf is dropped (parent
-// collapses to surviving sibling). Returns null if every leaf dropped.
-function mapLeaves(
-  node: TabPanelNode,
-  fn: (leaf: TabPanelLeaf) => TabPanelNode | null,
-): TabPanelNode | null {
-  if (node.kind === 'leaf') return fn(node);
-  const first = mapLeaves(node.first, fn);
-  const second = mapLeaves(node.second, fn);
-  if (first && second) return { ...node, first, second };
-  return first ?? second;
-}
-
-// Replace one leaf identified by id. Used by split-on-drop.
-function replaceLeaf(
-  node: TabPanelNode,
-  leafId: string,
-  replacement: TabPanelNode,
-): TabPanelNode {
-  if (node.kind === 'leaf') return node.id === leafId ? replacement : node;
-  return {
-    ...node,
-    first: replaceLeaf(node.first, leafId, replacement),
-    second: replaceLeaf(node.second, leafId, replacement),
-  };
-}
-
-// Find a parent split that contains `leafId` directly, return path so we
-// can rewrite ratio at the divider. (Not used for v1; ratio updates flow
-// through replaceSplit below.)
-function replaceSplit(
-  node: TabPanelNode,
-  match: (split: TabPanelSplit) => boolean,
-  patch: Partial<TabPanelSplit>,
-): TabPanelNode {
-  if (node.kind === 'leaf') return node;
-  if (match(node)) return { ...node, ...patch };
-  return {
-    ...node,
-    first: replaceSplit(node.first, match, patch),
-    second: replaceSplit(node.second, match, patch),
-  };
-}
-
-// ----- Reconcile against current mounts -----
-
-interface Reconciled {
-  tree: TabPanelNode;
-}
-
-// Reassigns ids for any leaf whose id was already seen in this walk. Heals
-// trees persisted before the `newLeafId` collision fix landed — without this,
-// `replaceLeaf` would mutate every leaf sharing the duplicate id at once.
-function dedupeLeafIds(node: TabPanelNode, seen: Set<string>): TabPanelNode {
-  if (node.kind === 'leaf') {
-    if (seen.has(node.id)) {
-      const fresh = newLeafId();
-      seen.add(fresh);
-      return { ...node, id: fresh };
-    }
-    seen.add(node.id);
-    return node;
-  }
-  return {
-    ...node,
-    first: dedupeLeafIds(node.first, seen),
-    second: dedupeLeafIds(node.second, seen),
-  };
-}
-
-function reconcile(
-  raw: TabPanelNode | undefined,
-  mountKeys: string[],
-  focusedKey: string | undefined,
-): Reconciled {
-  const alive = new Set(mountKeys);
-  let tree: TabPanelNode = raw
-    ? dedupeLeafIds(pruneTree(raw, alive), new Set())
-    : makeLeaf([...mountKeys], focusedKey);
-
-  // Append orphans (mounts not in tree yet). Prefer the leaf holding the
-  // focused key; otherwise the first non-empty leaf; otherwise the first
-  // leaf. Intentional empty groups (split-right / split-down) are NOT
-  // auto-filled — they wait for an explicit drop.
-  const present = new Set<string>();
-  collectTabs(tree, present);
-  const orphans = mountKeys.filter((k) => !present.has(k));
-  if (orphans.length > 0) {
-    const leaves: TabPanelLeaf[] = [];
-    collectLeaves(tree, leaves);
-    const target =
-      (focusedKey && leaves.find((l) => l.tabs.includes(focusedKey))) ||
-      leaves.find((l) => l.tabs.length > 0) ||
-      leaves[0];
-    if (target) {
-      // Pick the active tab for the target leaf. Prefer focusedKey when it's
-      // one of the orphans we just appended; otherwise the last orphan wins
-      // (most recently opened). Without this, the leaf would keep showing
-      // whatever was active before — the user clicks "open" and nothing
-      // visibly changes.
-      const newActive =
-        focusedKey && orphans.includes(focusedKey)
-          ? focusedKey
-          : orphans[orphans.length - 1];
-      tree = replaceLeaf(tree, target.id, {
-        ...target,
-        tabs: [...target.tabs, ...orphans],
-        activeKey: newActive,
-      });
-    }
-  }
-
-  // Re-open case: tab already exists in some leaf but focusedKey just
-  // changed (surfaces.open → focus emits scena:mount:focused →
-  // activeContainerKey updates). Sync the containing leaf's activeKey so the
-  // tab actually becomes active in its leaf.
-  if (focusedKey) {
-    const next = mapLeaves(tree, (l) => {
-      if (l.tabs.includes(focusedKey) && l.activeKey !== focusedKey) {
-        return { ...l, activeKey: focusedKey };
-      }
-      return l;
-    });
-    if (next) tree = next;
-  }
-
-  return { tree };
-}
-
-// Structural (key-order-independent) equality for two trees. Used to decide
-// whether the reconciled tree needs to be written back to state — a JSON
-// compare would risk a false-negative on key order and loop the commit effect.
-function treesEqual(a: TabPanelNode | undefined, b: TabPanelNode | undefined): boolean {
-  if (a === b) return true;
-  if (!a || !b || a.kind !== b.kind) return false;
-  if (a.kind === 'leaf' && b.kind === 'leaf') {
-    return (
-      a.id === b.id &&
-      a.activeKey === b.activeKey &&
-      a.tabs.length === b.tabs.length &&
-      a.tabs.every((t, i) => t === b.tabs[i])
-    );
-  }
-  if (a.kind === 'split' && b.kind === 'split') {
-    return (
-      a.direction === b.direction &&
-      (a.ratio ?? 0.5) === (b.ratio ?? 0.5) &&
-      treesEqual(a.first, b.first) &&
-      treesEqual(a.second, b.second)
-    );
-  }
-  return false;
-}
-
 // ----- Components -----
 
-type DropZone = 'center' | 'top' | 'right' | 'bottom' | 'left';
+type DropZone = TabPanelDropZone;
 
 interface DragPayload {
   sourceLeafId: string;
@@ -326,6 +131,9 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   function onTabDragStart(e: ReactDragEvent<HTMLDivElement>, tabKey: string) {
     const payload: DragPayload = { sourceLeafId: leaf.id, tabKey };
     e.dataTransfer.setData(DRAG_MIME, JSON.stringify(payload));
+    const shared: TabDragPayload = { surface: ctx.surface, key: tabKey, leafId: leaf.id };
+    writeTabDrag(e.dataTransfer, shared);
+    startTabDrag(shared);
     e.dataTransfer.effectAllowed = 'move';
   }
 
@@ -465,6 +273,7 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
               isPinned={ctx.pinned.has(key)}
               dragOverTab={dragOverTab}
               onDragStart={(e) => onTabDragStart(e, key)}
+              onDragEnd={endTabDrag}
               onDragOver={(e) => onTabStripDragOver(e, ti)}
               onDragLeave={onTabStripDragLeave}
               onDrop={(e) => onTabStripDrop(e, ti)}
@@ -623,20 +432,6 @@ function readPayload(e: ReactDragEvent<HTMLDivElement>): DragPayload | null {
   }
 }
 
-// Remove `tabKey` from the leaf that holds it; if that leaf is the
-// target's same leaf, just rewrite tabs; otherwise prune empty leaves.
-function removeTab(tree: TabPanelNode, tabKey: string): TabPanelNode | null {
-  return mapLeaves(tree, (l) => {
-    if (!l.tabs.includes(tabKey)) return l;
-    const tabs = l.tabs.filter((k) => k !== tabKey);
-    if (tabs.length === 0) return null;
-    return {
-      ...l,
-      tabs,
-      activeKey: l.activeKey === tabKey ? tabs[0] : l.activeKey,
-    };
-  });
-}
 
 function insertTab(
   ctx: TabPanelContext,
@@ -644,33 +439,9 @@ function insertTab(
   targetLeafId: string,
   insertIdx: number,
 ): void {
-  // Same-leaf reorder
-  if (payload.sourceLeafId === targetLeafId) {
-    const next = mapLeaves(ctx.tree, (l) => {
-      if (l.id !== targetLeafId) return l;
-      const fromIdx = l.tabs.indexOf(payload.tabKey);
-      if (fromIdx === -1) return l;
-      const tabs = [...l.tabs];
-      tabs.splice(fromIdx, 1);
-      const adjusted = fromIdx < insertIdx ? insertIdx - 1 : insertIdx;
-      tabs.splice(adjusted, 0, payload.tabKey);
-      return { ...l, tabs, activeKey: payload.tabKey };
-    });
-    if (next) ctx.commit(next);
-    ctx.onActivate(payload.tabKey);
-    return;
-  }
-  // Cross-leaf: remove from source, insert into target.
-  const removed = removeTab(ctx.tree, payload.tabKey);
-  if (!removed) return;
-  const inserted = mapLeaves(removed, (l) => {
-    if (l.id !== targetLeafId) return l;
-    const tabs = [...l.tabs];
-    const clamped = Math.max(0, Math.min(insertIdx, tabs.length));
-    tabs.splice(clamped, 0, payload.tabKey);
-    return { ...l, tabs, activeKey: payload.tabKey };
-  });
-  if (inserted) ctx.commit(inserted);
+  const next = placeTab(ctx.tree, payload.tabKey, targetLeafId, insertIdx);
+  if (!next) return;
+  ctx.commit(next);
   ctx.onActivate(payload.tabKey);
 }
 
@@ -680,44 +451,11 @@ function splitLeafOnDrop(
   targetLeafId: string,
   zone: Exclude<DropZone, 'center'>,
 ): void {
-  // Edge case: dragging the only tab of a leaf onto itself — no-op.
-  let sourceTree: TabPanelNode | null = ctx.tree;
-  const sourceLeaf = collectLeavesById(sourceTree, payload.sourceLeafId);
-  if (
-    sourceLeaf &&
-    sourceLeaf.id === targetLeafId &&
-    sourceLeaf.tabs.length === 1
-  ) {
-    return;
-  }
-  sourceTree = removeTab(sourceTree, payload.tabKey);
-  if (!sourceTree) return;
-
-  const target = collectLeavesById(sourceTree, targetLeafId);
-  if (!target) return;
-
-  const newLeaf = makeLeaf([payload.tabKey], payload.tabKey);
-  const direction: TabPanelDirection =
-    zone === 'left' || zone === 'right' ? 'row' : 'column';
-  const newFirst = zone === 'left' || zone === 'top' ? newLeaf : target;
-  const newSecond = zone === 'left' || zone === 'top' ? target : newLeaf;
-  const split: TabPanelSplit = {
-    kind: 'split',
-    direction,
-    ratio: 0.5,
-    first: newFirst,
-    second: newSecond,
-  };
-  const next = replaceLeaf(sourceTree, targetLeafId, split);
+  const next = splitAt(ctx.tree, payload.tabKey, targetLeafId, zone);
+  // Unchanged: the only tab of a leaf dropped on its own edge.
+  if (next === ctx.tree) return;
   ctx.commit(next);
   ctx.onActivate(payload.tabKey);
-}
-
-function collectLeavesById(node: TabPanelNode, id: string): TabPanelLeaf | null {
-  if (node.kind === 'leaf') return node.id === id ? node : null;
-  return (
-    collectLeavesById(node.first, id) || collectLeavesById(node.second, id)
-  );
 }
 
 // Recursive node renderer with shared container ref for divider math.
@@ -860,6 +598,7 @@ export function TabTitle({
   dragOverTab,
   idx,
   onDragStart,
+  onDragEnd,
   onDragOver,
   onDragLeave,
   onDrop,
@@ -876,6 +615,7 @@ export function TabTitle({
   dragOverTab: number | null;
   isPinned: boolean;
   onDragStart: (e: ReactDragEvent<HTMLDivElement>) => void;
+  onDragEnd?: (e: ReactDragEvent<HTMLDivElement>) => void;
   onDragOver: (e: ReactDragEvent<HTMLDivElement>) => void;
   onDragLeave: (e: ReactDragEvent<HTMLDivElement>) => void;
   onDrop: (e: ReactDragEvent<HTMLDivElement>) => void;
@@ -911,6 +651,7 @@ export function TabTitle({
       data-pinned={isPinned || undefined}
       draggable
       onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}

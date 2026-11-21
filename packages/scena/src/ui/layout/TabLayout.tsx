@@ -11,6 +11,8 @@ import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { TabTitle } from './TabPanelLayout.js';
+import { type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
+import { endTabDrag, startTabDrag } from './tab-drag.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Tab strip + active mount. Tabs are draggable for reorder (HTML5 DnD).
@@ -125,6 +127,12 @@ export function TabLayout({
 
   function onTabDragStart(e: ReactDragEvent<HTMLDivElement>, idx: number) {
     e.dataTransfer.setData(DRAG_MIME, String(idx));
+    const key = orderedMounts[idx]?.key;
+    if (key !== undefined) {
+      const shared: TabDragPayload = { surface, key };
+      writeTabDrag(e.dataTransfer, shared);
+      startTabDrag(shared);
+    }
     e.dataTransfer.effectAllowed = 'move';
   }
   function onTabDragOver(e: ReactDragEvent<HTMLDivElement>, idx: number) {
@@ -190,6 +198,7 @@ export function TabLayout({
                 isActive={m === active}
                 dragOverTab={dragOverIdx}
                 onDragStart={(e) => onTabDragStart(e, idx)}
+                onDragEnd={endTabDrag}
                 onDragOver={(e) => onTabDragOver(e, idx)}
                 onDragLeave={onTabDragLeave}
                 onDrop={(e) => onTabDrop(e, idx)}

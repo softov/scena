@@ -1,7 +1,7 @@
 ---
 title: A tab drags between surfaces
 domain: layout
-status: planned
+status: active
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -90,8 +90,8 @@ drop (other surface) -> canMoveTo -> surfaces.move -> layout.setSurface(target t
 
 | Task | Status | Depends on |
 | --- | --- | --- |
-| [01 - the tab drag names its surface](task-01-the-tab-drag-names-its-surface.md) | todo | - |
-| [02 - a tab group takes a tab from another surface](task-02-a-group-takes-a-tab-from-elsewhere.md) | todo | 01 |
+| [01 - the tab drag names its surface](task-01-the-tab-drag-names-its-surface.md) | done | - |
+| [02 - a tab group takes a tab from another surface](task-02-a-group-takes-a-tab-from-elsewhere.md) | doing | 01 |
 | [03 - a tab strip takes a tab from another surface](task-03-a-strip-takes-a-tab-from-elsewhere.md) | todo | 01 |
 | [04 - the playground drags a tab between surfaces](task-04-the-playground-drags-between.md) | todo | 02, 03 |
 
@@ -105,8 +105,8 @@ drop (other surface) -> canMoveTo -> surfaces.move -> layout.setSurface(target t
 
 ## Resume state
 
-- **Done so far:** nothing.
-- **Next action:** [task-01-the-tab-drag-names-its-surface.md](task-01-the-tab-drag-names-its-surface.md).
+- **Done so far:** task 01 done 2026-11-21. Task 02 started 2026-11-21.
+- **Next action:** [task-02-a-group-takes-a-tab-from-elsewhere.md](task-02-a-group-takes-a-tab-from-elsewhere.md).
 - **Open questions:** none.
 - **Watch out for:** `reconcile` drops a key that the surface does not mount, so a tree written before `surfaces.move` loses the tab.
 

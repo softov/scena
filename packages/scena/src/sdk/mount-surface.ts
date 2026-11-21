@@ -55,6 +55,9 @@ export interface MountPolicy {
   // false: a layout draws no close for it. A pane an app declares for a section
   // (an explorer's Open Editors) is part of the section, not a page to close.
   closable?: boolean;
+  // false: the mount stays on its surface. A tab layout on another surface
+  // refuses its drag, and it opens in no other place. Unset is movable.
+  movable?: boolean;
   // true: a stack pane takes the height of its content, up to half the stack,
   // instead of an equal share (an Open Editors list with one row). A divider
   // drag gives it a size of its own like any pane.

@@ -1,6 +1,6 @@
 ---
 title: The tab drag names its surface
-status: todo
+status: done
 depends: []
 layer: "scena sdk and ui/layout"
 refs:
@@ -53,3 +53,8 @@ A mount with `policy.movable: false` stays on its surface.
 - In the playground `tab-panel` mode, a tab still reorders, joins a group and splits a group.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 10. `pnpm test` (383 tests, 26 new), `pnpm typecheck` and `pnpm lint` pass.
+- Softov checked the playground on 2026-11-21 and said to continue.
+- Found: `runtime/layout-commands.ts` keeps its own copies of `findLeaf`, `replaceLeaf`, `mapLeaves` and `newLeafId`. They can import from `sdk/tab-panel.ts` in a later change.
+- Found: `TabPanelContext` already has `surface`, so step 1 of task 02 is done.
