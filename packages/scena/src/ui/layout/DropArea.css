@@ -1,0 +1,17 @@
+/*
+ * A drop area (ui/layout/DropArea.tsx). Dashed while empty; the accent shows
+ * while a drag it takes is over it.
+ */
+.oo-drop-area {
+  border: 1px dashed var(--oo-color-border);
+  border-radius: var(--oo-radius-sm, 4px);
+  padding: 12px;
+  transition: border-color 80ms, background-color 80ms;
+}
+.oo-drop-area[data-drop-over] {
+  border-color: var(--oo-color-accent);
+  background: color-mix(in srgb, var(--oo-color-accent) 10%, transparent);
+}
+.oo-drop-area__label {
+  color: var(--oo-color-muted);
+}

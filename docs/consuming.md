@@ -216,6 +216,12 @@ your opener uses, so a row of an open item moves its tab instead of opening a
 second one. A click and a drag differ on purpose: a click opens at your
 default place and focuses an open item where it is; a drop places it.
 
+**Taking a drop inside a page.** `useDropArea({ accepts, onDrop })` returns
+`{ over, props }`; spread `props` on the element and style it by `over`.
+`onDrop` gets the dropped thing, and the event stops there, so the tab stays
+where it was. In a graph page, `{ component: 'DropArea', accepts: ['UserDetail'],
+command: 'my.addRef', args: { ... } }` runs `my.addRef` with `args` and `drop`.
+
 **Sweeping surfaces with a list of names.** A surface is whatever an app mounts
 to, so any list written down goes stale the moment somebody adds one. Ask
 `surfaces.listSurfaces()`.

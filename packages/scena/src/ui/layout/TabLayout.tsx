@@ -142,7 +142,8 @@ export function TabLayout({
       writeTabDrag(e.dataTransfer, shared);
       startTabDrag(shared);
     }
-    e.dataTransfer.effectAllowed = 'move';
+    // A surface moves the tab; a drop area links it, with a copy effect.
+    e.dataTransfer.effectAllowed = 'copyMove';
   }
   // A tab from this strip carries the index type; a tab from another surface
   // carries the shared one, and may be refused by its policy. A refused drag

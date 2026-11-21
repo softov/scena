@@ -13,10 +13,13 @@ import {
   readTabDrag,
   TAB_DRAG_MIME,
   writeOpenDrag,
+  type DroppedThing,
   type OpenDragPayload,
   type TabDragPayload,
   type TabDragReader,
 } from '../sdk/tab-drag.js';
+import { useCallback, useRef, useState, type DragEvent as ReactDragEvent } from 'react';
+import { useScena as useScenaForDrop } from './ScenaProvider.js';
 import { makeLeaf, removeTab } from '../sdk/tab-panel.js';
 
 // The tab drag in progress.
@@ -167,4 +170,101 @@ export function dropHere(
   if (patch) scena.layout.setSurface(surface, patch);
   scena.surfaces.focus(row.key);
   return true;
+}
+
+// A tab, as a drop area sees it: its mount's resource and title.
+function describeTab(scena: Scena, tab: TabDragPayload): DroppedThing | null {
+  const mount = scena.surfaces.listAt(tab.surface).find((m) => m.key === tab.key);
+  if (!mount) return null;
+  return {
+    from: 'tab',
+    key: tab.key,
+    resource: mount.component,
+    surface: tab.surface,
+    ...(mount.props?.title !== undefined ? { title: mount.props.title } : {}),
+  };
+}
+
+function describeRow(row: OpenDragPayload): DroppedThing {
+  return {
+    from: 'row',
+    key: row.key,
+    resource: row.resource,
+    ...(row.props?.title !== undefined ? { title: row.props.title } : {}),
+  };
+}
+
+// The dropped thing, from the drop's data.
+export function describeDrop(scena: Scena, data: TabDragReader): DroppedThing | null {
+  const tab = readTabDrag(data);
+  if (tab) return describeTab(scena, tab);
+  const row = readOpenDrag(data);
+  return row ? describeRow(row) : null;
+}
+
+// The dragged thing, from the drag in progress: the data is hidden until the
+// drop, and `dragover` is where an area decides.
+export function describeDragInProgress(scena: Scena, types: readonly string[]): DroppedThing | null {
+  if (types.includes(TAB_DRAG_MIME) && current) return describeTab(scena, current);
+  if (types.includes(OPEN_DRAG_MIME) && currentOpen) return describeRow(currentOpen);
+  return null;
+}
+
+export interface DropAreaOptions {
+  // Whether the area takes this thing. Unset: it takes any tab or row.
+  accepts?: (thing: DroppedThing) => boolean;
+  onDrop: (thing: DroppedThing) => void;
+}
+
+export interface DropArea {
+  // True while a drag the area takes is over it.
+  over: boolean;
+  // Spread on the area's element.
+  props: {
+    onDragOver: (e: ReactDragEvent<HTMLElement>) => void;
+    onDragLeave: (e: ReactDragEvent<HTMLElement>) => void;
+    onDrop: (e: ReactDragEvent<HTMLElement>) => void;
+  };
+}
+
+// Marks an element inside a page as a drop area. A tab or a row dropped on it
+// goes to `onDrop`, and the event stops there, so the tab layout and the
+// surface do not take it: the tab stays where it was. A thing the area does
+// not accept passes through to the surface.
+export function useDropArea(options: DropAreaOptions): DropArea {
+  const scena = useScenaForDrop();
+  const [over, setOver] = useState(false);
+  const opts = useRef(options);
+  opts.current = options;
+
+  const takes = useCallback(
+    (thing: DroppedThing | null): thing is DroppedThing =>
+      thing !== null && (opts.current.accepts === undefined || opts.current.accepts(thing)),
+    [],
+  );
+
+  const onDragOver = useCallback((e: ReactDragEvent<HTMLElement>) => {
+    if (!takes(describeDragInProgress(scena, e.dataTransfer.types))) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+    setOver(true);
+  }, [scena, takes]);
+
+  const onDragLeave = useCallback((e: ReactDragEvent<HTMLElement>) => {
+    const next = e.relatedTarget as Node | null;
+    if (!next || !(e.currentTarget as Node).contains(next)) setOver(false);
+  }, []);
+
+  const onDrop = useCallback((e: ReactDragEvent<HTMLElement>) => {
+    const thing = describeDrop(scena, e.dataTransfer);
+    if (!takes(thing)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setOver(false);
+    endTabDrag();
+    opts.current.onDrop(thing);
+  }, [scena, takes]);
+
+  return { over, props: { onDragOver, onDragLeave, onDrop } };
 }
