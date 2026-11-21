@@ -182,6 +182,8 @@ export type {
   ThemeModeToggleProps,
 } from './control/index.js';
 export { Row, Column } from './layout/index.js';
+export { DropArea } from './layout/DropArea.js';
+export type { DropAreaProps } from './layout/DropArea.js';
 export { Grid } from './layout/index.js';
 export type { GridProps } from './layout/index.js';
 export { Video, Audio } from './media/index.js';

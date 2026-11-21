@@ -1,6 +1,6 @@
 ---
 title: A graph page has a drop area
-status: todo
+status: done
 depends: [task-01-a-component-marks-a-drop-area.md]
 layer: "scena ui/layout"
 refs:
@@ -37,3 +37,6 @@ It runs `command` with `args` and the dropped thing as `drop`, when the thing's 
 - `pnpm test` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 5. The styles are in `ui/layout/DropArea.css`, which `styles/layout.css` imports, as `Column.css` is.
+- `test/ui/DropArea.test.tsx` mounts a `DropArea` node on `main`; `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.

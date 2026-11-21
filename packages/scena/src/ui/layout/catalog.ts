@@ -6,6 +6,7 @@ import type { ComponentDefinition } from '../../sdk/component-registry.js';
 // in ./register.ts.
 export const CATALOG_LAYOUT_MAP: ComponentDefinition[] = [
   { component: 'Row', category: 'inline', renderer: { kind: 'react', load: () => import('./Row.js').then((m) => ({ default: m.Row })) } },
+  { component: 'DropArea', category: 'inline', renderer: { kind: 'react', load: () => import('./DropArea.js').then((m) => ({ default: m.DropArea })) } },
   { component: 'Column', category: 'inline', renderer: { kind: 'react', load: () => import('./Column.js').then((m) => ({ default: m.Column })) } },
   { component: 'Grid', category: 'inline', renderer: { kind: 'react', load: () => import('./Grid.js').then((m) => ({ default: m.Grid })) } },
   { component: 'Splitter', category: 'page', renderer: { kind: 'react', load: () => import('./Splitter.js').then((m) => ({ default: m.Splitter as unknown })) } },
