@@ -209,6 +209,13 @@ take it off on `scena:window:closed`. To reopen the windows' tabs after a
 reload, restore the mounts of each surface `isWindowSurface` names, beside
 `main`.
 
+**Making a row draggable onto the surfaces.** A list row, such as a session
+in an explorer, calls `startOpenDrag(e.dataTransfer, { key, resource, props })`
+from its `dragstart`; `Listable` takes it as `onRowDragStart`. Use the same key
+your opener uses, so a row of an open item moves its tab instead of opening a
+second one. A click and a drag differ on purpose: a click opens at your
+default place and focuses an open item where it is; a drop places it.
+
 **Sweeping surfaces with a list of names.** A surface is whatever an app mounts
 to, so any list written down goes stale the moment somebody adds one. Ask
 `surfaces.listSurfaces()`.

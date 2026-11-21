@@ -160,12 +160,20 @@ runtime and persistable per user — `LayoutStorage` is the interface, and
 
 A **tab moves between surfaces** by a drag. Every tab layout writes one shared
 payload under `TAB_DRAG_MIME` beside its own drag type: the source surface,
-the mount key and, from a `TabPanel`, the group. A `Tab` or `TabPanel` layout
-on another surface takes the drop: it calls `surfaces.move` first, then writes
-its own state with the key placed where it fell and the source's tree with the
-key gone, so a group the tab leaves empty closes. A `TabPanel` takes it on a
-strip, on a group's centre or on an edge to split; a `Tab` strip at an index or
-at the end. `policy.movable: false` keeps a mount on its surface: the drag shows
+the mount key and, from a `TabPanel`, the group. The **surface** takes the
+drop, not the layout: `SurfaceArea` takes it anywhere on a surface, whatever
+its layout, and the tab lands at the end. A layout that can say more places it
+where it fell and stops the event: a `TabPanel` on a strip, on a group's
+centre or on an edge to split; a `Tab` strip at an index. Either way the drop
+calls `surfaces.move` first, then writes the target's state with the key placed
+and the source's tree with the key gone, so a group the tab leaves empty
+closes. A bar, the activity rail and the overlay take no drop.
+
+A **list row drags in** the same way. A row calls `startOpenDrag` with what
+`surfaces.open` needs (a key, a component node, a title), under
+`OPEN_DRAG_MIME`. A surface that takes it opens the key there; a key already
+open on another surface moves its tab there instead. `dropHere` and
+`judgeDrag` in `react/surface-drop.ts` are the one path both drags take. `policy.movable: false` keeps a mount on its surface: the drag shows
 it cannot land, and no move happens. The pure tree moves are in
 `sdk/tab-panel.ts`, so code outside a layout edits a tree the same way.
 

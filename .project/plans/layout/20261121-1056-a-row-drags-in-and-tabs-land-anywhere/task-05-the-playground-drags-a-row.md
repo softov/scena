@@ -1,6 +1,6 @@
 ---
 title: The playground drags a session row
-status: todo
+status: done
 depends: [task-02-a-list-row-drags-onto-a-surface.md, task-03-a-reopened-tab-keeps-its-title.md]
 layer: "playground and docs"
 refs:
@@ -36,3 +36,9 @@ The docs say how an app makes a row drag.
 - `pnpm typecheck` and `pnpm lint` pass.
 
 ## Resume
+
+- Done 2026-11-21: steps 1, 3 and 4. The row uses `Listable`'s `onRowDragStart`.
+- Step 2 is not done: `Listable` has no row drag end. A cancelled row drag leaves its record, which only a drag with the open type reads, and the next drag replaces it.
+- `pnpm typecheck` and `pnpm lint` pass, and the playground builds.
+- Softov's check found the right sidebar drawing the title actions of a tab on `main`, and `main` in tab groups drawing none. Now only the focused tab's strip or group draws them, and the playground's focus mirrors follow focus on every surface.
+- Softov checked the playground on 2026-11-21.

@@ -1,7 +1,7 @@
 ---
 title: A list row drags in, and a surface takes a drop anywhere
 domain: layout
-status: active
+status: built
 priority: medium
 created: 2026-11-21
 revalidated: 2026-11-21
@@ -91,7 +91,7 @@ drop elsewhere on the surface (SurfaceArea) -> key open? move : open -> at the e
 | [02 - a list row drags onto a surface](task-02-a-list-row-drags-onto-a-surface.md) | done | 01 |
 | [03 - a reopened tab keeps its title](task-03-a-reopened-tab-keeps-its-title.md) | done | - |
 | [04 - the commands share the tree helpers](task-04-the-commands-share-the-helpers.md) | done | - |
-| [05 - the playground drags a session row](task-05-the-playground-drags-a-row.md) | doing | 02, 03 |
+| [05 - the playground drags a session row](task-05-the-playground-drags-a-row.md) | done | 02, 03 |
 
 ## Risks and tradeoffs
 
@@ -101,15 +101,15 @@ drop elsewhere on the surface (SurfaceArea) -> key open? move : open -> at the e
 
 ## Resume state
 
-- **Done so far:** task 01 to 04 done 2026-11-21. Task 05 built 2026-11-21; its check by hand is left.
-- **Next action:** [task-05-the-playground-drags-a-row.md](task-05-the-playground-drags-a-row.md).
+- **Done so far:** every task done 2026-11-21. [implemented.md](implemented.md) says what exists.
+- **Next action:** none. App drop areas are the next plan.
 - **Open questions:** none.
 - **Watch out for:** a drop that a layout places must stop its event, or `SurfaceArea` takes it a second time.
 
 ## Final verification checklist
 
-- [ ] `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.
-- [ ] In the playground, a tab dropped on the right sidebar's page lands there, and on a `stack` or `single` surface too.
-- [ ] A session row drags onto `main`, a group edge, the right sidebar and a window, and opens there.
-- [ ] A row of an open session moves its tab to the drop; a click still focuses it where it is.
-- [ ] After a reload, reopened tabs show their titles.
+- [x] `pnpm test`, `pnpm typecheck` and `pnpm lint` pass.
+- [x] In the playground, a tab dropped on the right sidebar's page lands there, and on a `stack` or `single` surface too.
+- [x] A session row drags onto `main`, a group edge, the right sidebar and a window, and opens there.
+- [x] A row of an open session moves its tab to the drop; a click still focuses it where it is.
+- [x] After a reload, reopened tabs show their titles.

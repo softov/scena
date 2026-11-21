@@ -1,4 +1,4 @@
-import { useScena, useStore } from '@softov/scena/react';
+import { startOpenDrag, useScena, useStore } from '@softov/scena/react';
 import { Listable, StatusDot, type ListableColumn } from '@softov/scena/ui';
 import { readSessionOpens, SESSION_OPENS_PATH, setSessionOpens, type Session, type SessionPlace } from './data.js';
 import { sessionKey } from './commands.js';
@@ -63,6 +63,15 @@ export default function SessionExplorer() {
           getKey={(s) => s.id}
           selectedKey={activeKind === 'session' ? activeId : null}
           onSelect={(s) => scena.commands.execute('sessions.open', { sessionId: s.id })}
+          // A row drags onto any surface: the session opens where it falls,
+          // or its tab moves there when it is open elsewhere.
+          onRowDragStart={(e, s) =>
+            startOpenDrag(e.dataTransfer, {
+              key: sessionKey(s.id),
+              resource: { component: 'SessionView', sessionId: s.id },
+              props: { title: s.title },
+            })
+          }
           contextMenuSlot="resource:context"
           contextFor={(s) => ({ '$/resource/kind': 'session', '$/resource/id': s.id, '$/resource/key': sessionKey(s.id) })}
           emptyState="Loading…"
