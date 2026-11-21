@@ -22,8 +22,7 @@ import { useMounts } from './hooks/useMounts.js';
 import { MountWrapper, ViewMount } from './ViewMount.js';
 import { useSurfaceResize, type SurfaceResizeSpec } from './useSurfaceResize.js';
 import { SurfaceLoading } from './SurfaceLoading.js';
-import { canTakeTab, currentTabDrag, moveTabHere } from './surface-drop.js';
-import { readTabDrag, TAB_DRAG_MIME } from '../sdk/tab-drag.js';
+import { dropHere, judgeDrag } from './surface-drop.js';
 import type { DragEvent as ReactDragEvent } from 'react';
 
 function renderOneMount(mount: ResolvedMount): ReactNode {
@@ -144,10 +143,10 @@ export function SurfaceArea({
   // places for a tab.
   const takesDrops = role !== 'bar' && role !== 'rail' && role !== 'overlay';
   function onDragOver(e: ReactDragEvent<HTMLDivElement>): void {
-    if (!takesDrops || !e.dataTransfer.types.includes(TAB_DRAG_MIME)) return;
-    const drag = currentTabDrag();
-    if (!drag || drag.surface === surface) return;
-    if (!canTakeTab(scena, drag, surface)) {
+    if (!takesDrops) return;
+    const judged = judgeDrag(scena, e.dataTransfer.types, surface);
+    if (judged === 'pass') return;
+    if (judged === 'refuse') {
       e.dataTransfer.dropEffect = 'none';
       return;
     }
@@ -156,17 +155,15 @@ export function SurfaceArea({
   }
   function onDrop(e: ReactDragEvent<HTMLDivElement>): void {
     if (!takesDrops) return;
-    const drag = readTabDrag(e.dataTransfer);
-    if (!drag || drag.surface === surface) return;
-    e.preventDefault();
     // At the end of the order a strip or a stack draws; a tab-panel tree
     // appends the key to its focused group by itself.
-    moveTabHere(scena, drag, surface, () => {
-      const shown = scena.surfaces.listAt(surface).map((m) => m.key);
+    const landed = dropHere(scena, e.dataTransfer, surface, (key) => {
+      const shown = scena.surfaces.listAt(surface).map((m) => m.key).filter((k) => k !== key);
       const known = (surfaceState.split?.order ?? []).filter((k) => shown.includes(k));
-      const order = [...known, ...shown.filter((k) => !known.includes(k)), drag.key];
+      const order = [...known, ...shown.filter((k) => !known.includes(k)), key];
       return { split: { ...surfaceState.split, order } };
     });
+    if (landed) e.preventDefault();
   }
 
   const layoutProps: LayoutProps = {

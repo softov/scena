@@ -8,7 +8,7 @@ import { useMounts } from '../../src/react/hooks/useMounts.js';
 import { TabPanelLayout } from '../../src/ui/layout/TabPanelLayout.js';
 import { collectLeaves } from '../../src/sdk/tab-panel.js';
 import { TAB_DRAG_MIME, type TabDragPayload } from '../../src/sdk/tab-drag.js';
-import { endTabDrag, startTabDrag } from '../../src/react/surface-drop.js';
+import { endTabDrag, startOpenDrag, startTabDrag } from '../../src/react/surface-drop.js';
 import type { TabPanelLeaf, TabPanelNode } from '../../src/sdk/layout.js';
 import type { SurfaceName } from '../../src/sdk/mount-surface.js';
 
@@ -215,5 +215,55 @@ describe('TabPanelLayout takes a tab from another surface', () => {
     });
     expect(keysOn(scena, 'window:1')).toEqual(['a']);
     expect(scena.layout.get().surfaces['window:1']?.window).toEqual({ left: 860, top: 280, width: 800, height: 600 });
+  });
+
+  describe('a list row', () => {
+    function rowDrag(key: string) {
+      const data = new Map<string, string>();
+      const dt = {
+        types: [] as string[],
+        setData: (t: string, v: string) => { data.set(t, v); dt.types = [...data.keys()]; },
+        getData: (t: string) => data.get(t) ?? '',
+        dropEffect: 'move',
+        effectAllowed: 'all',
+      };
+      startOpenDrag(dt, { key, resource: { component: 'Page' }, props: { title: key } });
+      return dt;
+    }
+    const rect = (el: HTMLElement) => {
+      el.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100, x: 0, y: 0, toJSON: () => ({}) });
+    };
+
+    it('opens at the strip index', () => {
+      const scena = setup();
+      act(() => {
+        fireEvent.drop(tab('main', 'b'), { dataTransfer: rowDrag('r1') });
+      });
+      expect(keysOn(scena, 'main')).toContain('r1');
+      expect(leavesOf(tree(scena, 'main'))[0]).toMatchObject({ tabs: ['a', 'r1', 'b'], activeKey: 'r1' });
+    });
+
+    it('opens in a new group on an edge', () => {
+      const scena = setup();
+      const el = body('main');
+      rect(el);
+      act(() => {
+        dropAt(el, 50, 95, rowDrag('r1'));
+      });
+      expect(tree(scena, 'main')).toMatchObject({ kind: 'split', direction: 'column' });
+      expect(leavesOf(tree(scena, 'main')).map((l) => l.tabs)).toEqual([['a', 'b'], ['r1']]);
+    });
+
+    it('moves the tab of a key open on another surface into the group', () => {
+      const scena = setup();
+      const el = body('main');
+      rect(el);
+      act(() => {
+        dropAt(el, 50, 50, rowDrag('x'));
+      });
+      expect(keysOn(scena, 'main')).toContain('x');
+      expect(keysOn(scena, 'sidebar:right')).not.toContain('x');
+      expect(leavesOf(tree(scena, 'main'))[0]?.tabs).toEqual(['a', 'b', 'x']);
+    });
   });
 });

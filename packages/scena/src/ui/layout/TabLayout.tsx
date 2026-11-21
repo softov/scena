@@ -11,8 +11,8 @@ import { useScena } from '../../react/ScenaProvider.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { NAMED_GLYPH } from '../display/Icon.js';
 import { TabTitle } from './TabPanelLayout.js';
-import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
-import { canTakeTab, currentTabDrag, endTabDrag, moveTabHere, startTabDrag } from '../../react/surface-drop.js';
+import { type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
+import { dropHere, endTabDrag, judgeDrag, startTabDrag } from '../../react/surface-drop.js';
 import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
 import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
@@ -142,27 +142,23 @@ export function TabLayout({
   // carries the shared one, and may be refused by its policy. A refused drag
   // gets `dropEffect: none` and no preventDefault, so no drop fires.
   function takesDrag(e: ReactDragEvent<HTMLDivElement>): boolean {
-    const types = e.dataTransfer.types;
-    const drag = currentTabDrag();
-    if (drag && drag.surface !== surface && types.includes(TAB_DRAG_MIME)) {
-      if (canTakeTab(scena, drag, surface)) return true;
+    const judged = judgeDrag(scena, e.dataTransfer.types, surface);
+    if (judged === 'take') return true;
+    if (judged === 'refuse') {
       e.dataTransfer.dropEffect = 'none';
       return false;
     }
-    return types.includes(DRAG_MIME);
+    return e.dataTransfer.types.includes(DRAG_MIME);
   }
 
-  // Moves a tab from another surface to `toIdx` of this strip. False for a
-  // drop from this strip, which the index reorder handles.
+  // Lands a tab from another surface, or a list row, at `toIdx` of this
+  // strip. False for a drop from this strip, which the index reorder handles.
   function takeForeign(e: ReactDragEvent<HTMLDivElement>, toIdx: number): boolean {
-    const shared = readTabDrag(e.dataTransfer);
-    if (!shared || shared.surface === surface) return false;
-    moveTabHere(scena, shared, surface, () => {
-      const order = orderedMounts.map((m) => m.key);
-      order.splice(Math.max(0, Math.min(toIdx, order.length)), 0, shared.key);
+    return dropHere(scena, e.dataTransfer, surface, (key) => {
+      const order = orderedMounts.map((m) => m.key).filter((k) => k !== key);
+      order.splice(Math.max(0, Math.min(toIdx, order.length)), 0, key);
       return { split: { ...state.split, order } };
     });
-    return true;
   }
 
   // A tab dropped outside the browser window, where no surface took it, opens

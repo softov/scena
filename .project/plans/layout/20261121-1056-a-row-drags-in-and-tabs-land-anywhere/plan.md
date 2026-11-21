@@ -87,8 +87,8 @@ drop elsewhere on the surface (SurfaceArea) -> key open? move : open -> at the e
 | Task | Status | Depends on |
 | --- | --- | --- |
 | [01 - the surface takes a drop](task-01-the-page-area-takes-a-tab.md) | done | - |
-| [02 - a list row drags onto a surface](task-02-a-list-row-drags-onto-a-surface.md) | doing | 01 |
-| [03 - a reopened tab keeps its title](task-03-a-reopened-tab-keeps-its-title.md) | todo | - |
+| [02 - a list row drags onto a surface](task-02-a-list-row-drags-onto-a-surface.md) | done | 01 |
+| [03 - a reopened tab keeps its title](task-03-a-reopened-tab-keeps-its-title.md) | doing | - |
 | [04 - the commands share the tree helpers](task-04-the-commands-share-the-helpers.md) | todo | - |
 | [05 - the playground drags a session row](task-05-the-playground-drags-a-row.md) | todo | 02, 03 |
 
@@ -100,8 +100,8 @@ drop elsewhere on the surface (SurfaceArea) -> key open? move : open -> at the e
 
 ## Resume state
 
-- **Done so far:** task 01 done 2026-11-21. Task 02 started 2026-11-21.
-- **Next action:** [task-02-a-list-row-drags-onto-a-surface.md](task-02-a-list-row-drags-onto-a-surface.md).
+- **Done so far:** task 01 and 02 done 2026-11-21. Task 03 started 2026-11-21.
+- **Next action:** [task-03-a-reopened-tab-keeps-its-title.md](task-03-a-reopened-tab-keeps-its-title.md).
 - **Open questions:** none.
 - **Watch out for:** a drop that a layout places must stop its event, or `SurfaceArea` takes it a second time.
 

@@ -4,9 +4,9 @@ import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react
 import { createScena } from '../../src/core/scena.js';
 import { ScenaProvider } from '../../src/react/ScenaProvider.js';
 import { SurfaceArea } from '../../src/react/SurfaceArea.js';
-import { endTabDrag, startTabDrag } from '../../src/react/surface-drop.js';
+import { endTabDrag, startOpenDrag, startTabDrag } from '../../src/react/surface-drop.js';
 import { registerBuiltinLayouts } from '../../src/ui/layout/register.js';
-import { TAB_DRAG_MIME, type TabDragPayload } from '../../src/sdk/tab-drag.js';
+import { TAB_DRAG_MIME, type OpenDragPayload, type TabDragPayload } from '../../src/sdk/tab-drag.js';
 import type { SurfaceName } from '../../src/sdk/mount-surface.js';
 
 beforeEach(() => {
@@ -89,5 +89,59 @@ describe('a surface takes a tab dropped anywhere on it', () => {
       fireEvent.drop(el('sidebar:right'), { dataTransfer: dragFrom({ surface: 'main', key: 'fixed' }) });
     });
     expect(keysOn(scena, 'main')).toContain('fixed');
+  });
+
+  describe('a list row', () => {
+    function rowDrag(payload: OpenDragPayload) {
+      const data = new Map<string, string>();
+      const dt = {
+        types: [] as string[],
+        setData: (t: string, v: string) => { data.set(t, v); dt.types = [...data.keys()]; },
+        getData: (t: string) => data.get(t) ?? '',
+        dropEffect: 'move',
+        effectAllowed: 'all',
+      };
+      startOpenDrag(dt, payload);
+      return dt;
+    }
+    const row = (key: string): OpenDragPayload => ({ key, resource: { component: 'Page' }, props: { title: `Row ${key}` } });
+
+    it.each(['tab', 'stack', 'single'])('opens a key that is not open, on a %s surface, at the end', async (layout) => {
+      const { scena, el } = await setup(layout);
+      const dt = rowDrag(row('r1'));
+      fireEvent.dragOver(el('sidebar:right'), { dataTransfer: dt });
+      act(() => {
+        fireEvent.drop(el('sidebar:right'), { dataTransfer: dt });
+      });
+      expect(keysOn(scena, 'sidebar:right')).toContain('r1');
+      expect(scena.surfaces.listAt('sidebar:right').find((m) => m.key === 'r1')?.props?.title).toBe('Row r1');
+      if (layout !== 'single') expect(scena.layout.get().surfaces['sidebar:right']?.split?.order).toEqual(['s1', 'r1']);
+    });
+
+    it('moves the tab of a key open on another surface to the drop', async () => {
+      const { scena, el } = await setup('tab');
+      act(() => {
+        fireEvent.drop(el('sidebar:right'), { dataTransfer: rowDrag(row('m1')) });
+      });
+      expect(keysOn(scena, 'sidebar:right')).toContain('m1');
+      expect(keysOn(scena, 'main')).not.toContain('m1');
+    });
+
+    it('refuses the row of an open key that cannot move', async () => {
+      const { scena, el } = await setup('tab');
+      const dt = rowDrag(row('fixed'));
+      fireEvent.dragOver(el('sidebar:right'), { dataTransfer: dt });
+      expect(dt.dropEffect).toBe('none');
+      expect(keysOn(scena, 'main')).toContain('fixed');
+    });
+
+    it('takes no row on a bar', async () => {
+      const { scena, el } = await setup('tab');
+      act(() => {
+        fireEvent.drop(el('titlebar'), { dataTransfer: rowDrag(row('r1')) });
+      });
+      expect(keysOn(scena, 'titlebar')).toEqual([]);
+      expect(scena.surfaces.listSurfaces().some((s) => keysOn(scena, s).includes('r1'))).toBe(false);
+    });
   });
 });

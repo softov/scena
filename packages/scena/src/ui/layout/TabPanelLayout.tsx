@@ -24,8 +24,8 @@ import {
   treesEqual,
   type TabPanelDropZone,
 } from '../../sdk/tab-panel.js';
-import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
-import { canTakeTab, currentTabDrag, endTabDrag, moveTabHere, startTabDrag } from '../../react/surface-drop.js';
+import { type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
+import { dropHere, endTabDrag, judgeDrag, startTabDrag } from '../../react/surface-drop.js';
 import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useOwnerDocument } from '../../react/OwnerDocument.js';
@@ -154,21 +154,13 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   // A refused drag gets `dropEffect: none` and no preventDefault, so the
   // browser shows it cannot land and no drop fires.
   function takesDrag(e: ReactDragEvent<HTMLDivElement>): boolean {
-    const types = e.dataTransfer.types;
-    const drag = currentTabDrag();
-    if (drag && drag.surface !== ctx.surface && types.includes(TAB_DRAG_MIME)) {
-      if (canTakeTab(scena, drag, ctx.surface)) return true;
+    const judged = judgeDrag(scena, e.dataTransfer.types, ctx.surface);
+    if (judged === 'take') return true;
+    if (judged === 'refuse') {
       e.dataTransfer.dropEffect = 'none';
       return false;
     }
-    return types.includes(DRAG_MIME);
-  }
-
-  // The shared payload of a drop from another surface, or null for a drop
-  // from this one.
-  function foreignDrop(e: ReactDragEvent<HTMLDivElement>): TabDragPayload | null {
-    const shared = readTabDrag(e.dataTransfer);
-    return shared && shared.surface !== ctx.surface ? shared : null;
+    return e.dataTransfer.types.includes(DRAG_MIME);
   }
 
   function onTabStripDragOver(
@@ -192,14 +184,12 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
     e.preventDefault();
     e.stopPropagation();
     setDragOverTab(null);
-    const foreign = foreignDrop(e);
-    if (foreign) {
-      moveTabHere(scena, foreign, ctx.surface, () => {
-        const tree = placeTab(ctx.tree, foreign.key, leaf.id, toIdx);
-        return tree ? { tabPanel: { tree } } : null;
-      });
-      return;
-    }
+    // A tab from another surface, or a list row: placed at this index.
+    const landed = dropHere(scena, e.dataTransfer, ctx.surface, (key) => {
+      const tree = placeTab(ctx.tree, key, leaf.id, toIdx);
+      return tree ? { tabPanel: { tree } } : null;
+    });
+    if (landed) return;
     const payload = readPayload(e);
     if (!payload) return;
     insertTab(ctx, payload, leaf.id, toIdx);
@@ -244,16 +234,14 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
     e.stopPropagation();
     const z = computeZone(e);
     setZone(null);
-    const foreign = foreignDrop(e);
-    if (foreign && z) {
-      moveTabHere(scena, foreign, ctx.surface, () => {
-        const tree = z === 'center'
-          ? placeTab(ctx.tree, foreign.key, leaf.id, leaf.tabs.length)
-          : splitAt(ctx.tree, foreign.key, leaf.id, z);
-        return tree ? { tabPanel: { tree } } : null;
-      });
-      return;
-    }
+    // A tab from another surface, or a list row: joins or splits the group.
+    const landed = z !== null && dropHere(scena, e.dataTransfer, ctx.surface, (key) => {
+      const tree = z === 'center'
+        ? placeTab(ctx.tree, key, leaf.id, leaf.tabs.length)
+        : splitAt(ctx.tree, key, leaf.id, z);
+      return tree ? { tabPanel: { tree } } : null;
+    });
+    if (landed) return;
     const payload = readPayload(e);
     if (!payload || !z) return;
     if (z === 'center') {
