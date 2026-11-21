@@ -1,6 +1,6 @@
 ---
 title: A tab strip takes a tab from another surface
-status: todo
+status: done
 depends: [task-01-the-tab-drag-names-its-surface.md]
 layer: "scena ui/layout"
 refs:
@@ -35,3 +35,8 @@ In ahpw, this is the layout of `sidebar:right`.
 - `pnpm test` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 5.
+- The strip itself also takes a drop, at the end, so an empty strip and the space past the last tab take a tab. A tab stops its own drag events first.
+- A drop reads the shared payload before the index. Before this, a drag between two `tab` layouts read the other strip's index as a reorder.
+- `pnpm test` (394 tests, 5 new), `pnpm typecheck` and `pnpm lint` pass.
