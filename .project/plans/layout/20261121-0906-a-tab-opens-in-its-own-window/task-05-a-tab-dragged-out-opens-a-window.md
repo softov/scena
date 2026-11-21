@@ -1,6 +1,6 @@
 ---
 title: A tab dragged out opens a window
-status: todo
+status: done
 depends: [task-03-a-window-surface-is-drawn.md]
 layer: "scena ui/layout and runtime"
 refs:
@@ -42,3 +42,9 @@ A mount with `movable: false` does neither.
 - `pnpm test` passes.
 
 ## Resume
+
+- Done 2026-11-21: steps 1 to 8. `droppedAt`, `besideWindow` and `endedOutside` are in `runtime/open-tab-window.ts` beside `openTabWindow`.
+- The tab layouts set `$/tab/movable` in the tab menu, and the command's `when` reads it. Other layouts leave it unset, so they do not offer the command.
+- The command places the window beside the main window, even when its menu opened in a second window.
+- The browser opens the window from `SurfaceWindows` after the layout change. A drag that lasts longer than the browser lets a click count may be blocked; the notice of task 04 then opens it.
+- `pnpm test` (419 tests, 8 new), `pnpm typecheck` and `pnpm lint` pass.

@@ -27,6 +27,7 @@ import {
 import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
 import { currentTabDrag, endTabDrag, startTabDrag } from './tab-drag.js';
 import { canTakeTab, moveTabHere } from './move-tab.js';
+import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
 import { useScena } from '../../react/ScenaProvider.js';
 import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
@@ -138,6 +139,14 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
     writeTabDrag(e.dataTransfer, shared);
     startTabDrag(shared);
     e.dataTransfer.effectAllowed = 'move';
+  }
+
+  // A tab dropped outside the browser window, where no surface took it, opens
+  // in a window of its own at the drop point.
+  function onTabDragEnd(e: ReactDragEvent<HTMLDivElement>, tabKey: string) {
+    endTabDrag();
+    if (!endedOutside(ownerWin, e)) return;
+    openTabWindow(scena, tabKey, droppedAt(ownerWin, e.screenX, e.screenY));
   }
 
   // ----- Tab-strip drop (reorder within strip OR move into this leaf) -----
@@ -319,7 +328,7 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
               isPinned={ctx.pinned.has(key)}
               dragOverTab={dragOverTab}
               onDragStart={(e) => onTabDragStart(e, key)}
-              onDragEnd={endTabDrag}
+              onDragEnd={(e) => onTabDragEnd(e, key)}
               onDragOver={(e) => onTabStripDragOver(e, ti)}
               onDragLeave={onTabStripDragLeave}
               onDrop={(e) => onTabStripDrop(e, ti)}
@@ -428,6 +437,7 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
             '$/tab/leafId': leaf.id,
             '$/tab/isActive': tabMenu.tabKey === activeKey,
             '$/tab/isPinned': ctx.pinned.has(tabMenu.tabKey),
+            '$/tab/movable': ctx.mounts.find((m) => m.key === tabMenu.tabKey)?.policy.movable !== false,
             '$/tab/canSplit': true,
             '$/tab/canMove': ctx.leafCount > 1,
           }}

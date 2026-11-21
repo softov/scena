@@ -204,4 +204,16 @@ describe('TabPanelLayout takes a tab from another surface', () => {
     expect(keysOn(scena, 'main')).toEqual(['a', 'b']);
     expect(leavesOf(tree(scena, 'main'))[0]?.tabs).toEqual(['a', 'b']);
   });
+
+  it('opens a tab dropped outside the browser window in a window surface', () => {
+    const scena = setup();
+    const el = tab('main', 'a');
+    const ev = createEvent.dragEnd(el, { dataTransfer: { dropEffect: 'none', types: [], getData: () => '', setData: () => {} } });
+    for (const [k, v] of Object.entries({ clientX: -20, clientY: 40, screenX: 900, screenY: 300 })) Object.defineProperty(ev, k, { value: v });
+    act(() => {
+      fireEvent(el, ev);
+    });
+    expect(keysOn(scena, 'window:1')).toEqual(['a']);
+    expect(scena.layout.get().surfaces['window:1']?.window).toEqual({ left: 860, top: 280, width: 800, height: 600 });
+  });
 });

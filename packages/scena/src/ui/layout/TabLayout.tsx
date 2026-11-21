@@ -14,6 +14,8 @@ import { TabTitle } from './TabPanelLayout.js';
 import { readTabDrag, TAB_DRAG_MIME, type TabDragPayload, writeTabDrag } from '../../sdk/tab-drag.js';
 import { currentTabDrag, endTabDrag, startTabDrag } from './tab-drag.js';
 import { canTakeTab, moveTabHere } from './move-tab.js';
+import { droppedAt, endedOutside, openTabWindow } from '../../runtime/open-tab-window.js';
+import { useOwnerDocument } from '../../react/OwnerDocument.js';
 import { useI18n } from '../../react/hooks/useI18n.js';
 
 // Tab strip + active mount. Tabs are draggable for reorder (HTML5 DnD).
@@ -41,6 +43,7 @@ export function TabLayout({
 }: LayoutProps) {
   const { t } = useI18n();
   const scena = useScena();
+  const { window: ownerWin } = useOwnerDocument();
   const persistedOrder = state.split?.order ?? [];
   const orderSet = new Set(persistedOrder);
   const orderedKnown = persistedOrder
@@ -163,6 +166,14 @@ export function TabLayout({
     return true;
   }
 
+  // A tab dropped outside the browser window, where no surface took it, opens
+  // in a window of its own at the drop point.
+  function onTabDragEnd(e: ReactDragEvent<HTMLDivElement>, tabKey: string) {
+    endTabDrag();
+    if (!endedOutside(ownerWin, e)) return;
+    openTabWindow(scena, tabKey, droppedAt(ownerWin, e.screenX, e.screenY));
+  }
+
   function onTabDragOver(e: ReactDragEvent<HTMLDivElement>, idx: number) {
     if (!takesDrag(e)) return;
     e.preventDefault();
@@ -247,7 +258,7 @@ export function TabLayout({
                 isActive={m === active}
                 dragOverTab={dragOverIdx}
                 onDragStart={(e) => onTabDragStart(e, idx)}
-                onDragEnd={endTabDrag}
+                onDragEnd={(e) => onTabDragEnd(e, m.key)}
                 onDragOver={(e) => onTabDragOver(e, idx)}
                 onDragLeave={onTabDragLeave}
                 onDrop={(e) => onTabDrop(e, idx)}
@@ -337,6 +348,7 @@ export function TabLayout({
             '$/tab/index': tabMenu.tabIdx,
             '$/tab/isActive': tabMenu.tabKey === active?.key,
             '$/tab/isPinned': pinned.has(tabMenu.tabKey),
+            '$/tab/movable': mounts.find((m) => m.key === tabMenu.tabKey)?.policy.movable !== false,
             '$/group/tabCount': orderedMounts.length,
           }}
         />
