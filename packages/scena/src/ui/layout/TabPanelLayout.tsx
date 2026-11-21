@@ -133,17 +133,19 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
   //      element entirely, no `dragleave` may fire on this body at all —
   //      so its `zone` state would persist across drags.
   // The window listeners below guarantee zone clears on every drag end/drop
-  // regardless of where it happened.
+  // regardless of where it happened. They listen in the capture phase: a drop
+  // area inside the page stops the drop it takes, and a bubbling listener
+  // would never hear it.
   useEffect(() => {
     const clearAll = (): void => {
       setZone(null);
       setDragOverTab(null);
     };
-    ownerWin.addEventListener('dragend', clearAll);
-    ownerWin.addEventListener('drop', clearAll);
+    ownerWin.addEventListener('dragend', clearAll, true);
+    ownerWin.addEventListener('drop', clearAll, true);
     return () => {
-      ownerWin.removeEventListener('dragend', clearAll);
-      ownerWin.removeEventListener('drop', clearAll);
+      ownerWin.removeEventListener('dragend', clearAll, true);
+      ownerWin.removeEventListener('drop', clearAll, true);
     };
   }, [ownerWin]);
 
