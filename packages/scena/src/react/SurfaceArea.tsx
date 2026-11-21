@@ -23,6 +23,9 @@ import { MountWrapper, ViewMount } from './ViewMount.js';
 import { useSurfaceResize, type SurfaceResizeSpec } from './useSurfaceResize.js';
 import { SurfaceLoading } from './SurfaceLoading.js';
 import { dropHere, judgeDrag } from './surface-drop.js';
+import { useFocusedWindow } from './window-focus.js';
+import { OwnerDocumentProvider } from './OwnerDocument.js';
+import { createPortal } from 'react-dom';
 import type { DragEvent as ReactDragEvent } from 'react';
 
 function renderOneMount(mount: ResolvedMount): ReactNode {
@@ -141,6 +144,7 @@ export function SurfaceArea({
   // the tab where it fell (a strip index, a group's edge) handles the drop
   // first and stops it. A bar, the activity rail and the overlay are not
   // places for a tab.
+  const focusedWindow = useFocusedWindow();
   const takesDrops = role !== 'bar' && role !== 'rail' && role !== 'overlay';
   function onDragOver(e: ReactDragEvent<HTMLDivElement>): void {
     if (!takesDrops) return;
@@ -197,7 +201,7 @@ export function SurfaceArea({
     },
   };
 
-  return (
+  const element = (
     <div
       data-surface={surface}
       data-presentation={presentation}
@@ -231,4 +235,13 @@ export function SurfaceArea({
       )}
     </div>
   );
+  // The overlay follows focus: while a window of a tab has it, a palette or a
+  // dialog opens there, where the person pressed the key, not in the page.
+  if (role === 'overlay' && focusedWindow) {
+    return createPortal(
+      <OwnerDocumentProvider document={focusedWindow.document}>{element}</OwnerDocumentProvider>,
+      focusedWindow.document.body,
+    );
+  }
+  return element;
 }

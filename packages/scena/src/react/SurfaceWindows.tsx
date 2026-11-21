@@ -6,6 +6,9 @@ import { useMounts } from './hooks/useMounts.js';
 import { OwnerDocumentProvider } from './OwnerDocument.js';
 import { SurfaceArea } from './SurfaceArea.js';
 import { mirrorStyles } from './window-styles.js';
+import { noteFocus, noteWindow } from './window-focus.js';
+
+export { listSurfaceWindows } from './window-focus.js';
 import { BlockedWindows } from './BlockedWindows.js';
 import type { Scena } from '../sdk/scena.js';
 import type { SurfaceName } from '../sdk/mount-surface.js';
@@ -35,23 +38,6 @@ import { isWindowSurface, removeSurface, type WindowBounds } from '../sdk/window
 
 const CHECK_MS = 1000;
 
-// The windows open now, by scena: an app that starts listening after a window
-// opened (keys, after a reload) reads them here, then follows the events.
-const openByScena = new WeakMap<Scena, Map<SurfaceName, Window>>();
-
-export function listSurfaceWindows(scena: Scena): { surface: SurfaceName; window: Window }[] {
-  return [...(openByScena.get(scena) ?? new Map<SurfaceName, Window>()).entries()].map(([surface, window]) => ({ surface, window }));
-}
-
-function noteWindow(scena: Scena, surface: SurfaceName, win: Window | null): void {
-  let map = openByScena.get(scena);
-  if (!map) {
-    map = new Map();
-    openByScena.set(scena, map);
-  }
-  if (win) map.set(surface, win);
-  else map.delete(surface);
-}
 const MIN_SIZE = 200;
 
 interface Opened {
@@ -164,6 +150,9 @@ export function SurfaceWindows({ renderBlocked = defaultBlocked }: SurfaceWindow
       closeWindowSurface(scena, surface);
     };
     win.addEventListener('resize', keepBounds);
+    // The overlay (a palette, a quick open) draws in the window with focus.
+    const onFocus = () => noteFocus(scena, surface);
+    win.addEventListener('focus', onFocus);
     win.addEventListener('pagehide', onGone);
 
     opened.current.set(surface, {
@@ -173,10 +162,13 @@ export function SurfaceWindows({ renderBlocked = defaultBlocked }: SurfaceWindow
         clearInterval(timer);
         styles.dispose();
         win.removeEventListener('resize', keepBounds);
+        win.removeEventListener('focus', onFocus);
         win.removeEventListener('pagehide', onGone);
       },
     });
     noteWindow(scena, surface, win);
+    // A window opens with the focus.
+    noteFocus(scena, surface);
     scena.events.emit('scena:window:opened', { surface, window: win });
     rerender();
     return true;
@@ -224,12 +216,16 @@ export function SurfaceWindows({ renderBlocked = defaultBlocked }: SurfaceWindow
       leaving.current = false;
     };
     window.addEventListener('pagehide', onLeave);
+    // The main page taking the focus back takes the overlay back.
+    const onMainFocus = () => noteFocus(scena, null);
+    window.addEventListener('focus', onMainFocus);
     window.addEventListener('pageshow', onBack);
     return () => {
       window.removeEventListener('pagehide', onLeave);
       window.removeEventListener('pageshow', onBack);
+      window.removeEventListener('focus', onMainFocus);
     };
-  }, [close]);
+  }, [close, scena]);
 
   // Unmounting closes the windows without touching the layout. A tick later,
   // so React's development remount does not close and reopen them: the
