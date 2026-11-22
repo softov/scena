@@ -8,16 +8,13 @@
 // over it, so its cursor shows and nothing under it is selected. The pointer is
 // captured by the grip, so the drag's events still go there.
 //
-// `oo-resizing` stays on `<html>` for rules that name what they change, as the
-// table rows of Listable.css do; such a rule restyles only what it names.
+// Nothing is written on `<html>`. A rule that changes something during a drag
+// asks for the shield, `body:has(> .oo-resize-shield) ...`, as the table rows of
+// Listable.css do, and restyles only what it names.
 export function shieldDrag(doc: Document, cursor: string): () => void {
   const shield = doc.createElement('div');
   shield.className = 'oo-resize-shield';
   shield.style.cssText = `position:fixed;inset:0;z-index:2147483647;cursor:${cursor};user-select:none;`;
   doc.body.appendChild(shield);
-  doc.documentElement.classList.add('oo-resizing');
-  return () => {
-    shield.remove();
-    doc.documentElement.classList.remove('oo-resizing');
-  };
+  return () => shield.remove();
 }

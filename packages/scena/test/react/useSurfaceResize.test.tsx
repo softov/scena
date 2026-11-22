@@ -203,15 +203,14 @@ describe('useSurfaceResize: the gesture settles', () => {
     act(() => {
       element.dispatchEvent(pointer('pointerdown', 236, 400));
     });
-    expect(document.documentElement.classList.contains('oo-resizing')).toBe(true);
-    // A shield over the page holds the cursor; nothing is written on <html>'s style, which every element inherits.
+    // A shield over the page holds the cursor. Nothing is written on <html>, whose class or style restyles every element.
     expect(document.querySelector('.oo-resize-shield')?.getAttribute('style')).toContain('cursor: ew-resize');
+    expect(document.documentElement.className).toBe('');
     expect(document.documentElement.style.cursor).toBe('');
 
     act(() => {
       element.dispatchEvent(pointer('pointerup', 236, 400));
     });
-    expect(document.documentElement.classList.contains('oo-resizing')).toBe(false);
     expect(document.querySelector('.oo-resize-shield')).toBeNull();
     expect(document.documentElement.style.cursor).toBe('');
     expect(element.getAttribute('data-resize-state')).toBe('idle');
@@ -227,7 +226,7 @@ describe('useSurfaceResize: the gesture settles', () => {
       element.dispatchEvent(pointer('pointercancel', 296, 400));
     });
 
-    expect(document.documentElement.classList.contains('oo-resizing')).toBe(false);
+    expect(document.querySelector('.oo-resize-shield')).toBeNull();
     expect(scena.store.get('$/layout/surfaces/sidebar:left/size' as never)).toBe(300);
   });
 });
