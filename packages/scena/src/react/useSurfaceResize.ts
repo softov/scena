@@ -96,16 +96,19 @@ export function useSurfaceResize(
     elementRef.current?.setAttribute('data-resize-state', state);
   }, []);
 
-  const commit = useCallback(
-    (transient: boolean) => {
-      scheduledRef.current = false;
-      if (pendingRef.current !== null) {
-        scena.layout.setSurface(surface, { size: pendingRef.current }, { transient });
-        pendingRef.current = null;
-      }
-    },
-    [scena, surface],
-  );
+  // The drag moves the surface's own element and nothing else, as doop's
+  // first shell did: one style write a frame, on the element whose width (or
+  // height) the shell sets. The layout, the store, the CSS variables on
+  // `<html>` and the shell's render all wait for the end, where one settled
+  // write gives them the size, and the shell draws the width the element
+  // already has. A layout write per frame re-rendered the shell and restyled
+  // the whole page through the variables, about 180 ms a frame on a large one.
+  const apply = useCallback(() => {
+    scheduledRef.current = false;
+    const element = elementRef.current;
+    if (element === null || pendingRef.current === null) return;
+    element.style[vertical ? 'width' : 'height'] = `${pendingRef.current}px`;
+  }, [vertical]);
 
   const onPointerMove = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -149,7 +152,7 @@ export function useSurfaceResize(
         pendingRef.current = clamp(startSize + sign * (pos - startPos), min, max);
         if (!scheduledRef.current) {
           scheduledRef.current = true;
-          rafRef.current = requestAnimationFrame(() => commit(true));
+          rafRef.current = requestAnimationFrame(apply);
         }
       };
 
@@ -162,16 +165,11 @@ export function useSurfaceResize(
           rafRef.current = null;
         }
         scheduledRef.current = false;
-        // The settled write. Everything during the drag was transient, so
-        // without this the size never reaches the store or storage.
-        //
-        // The fallback is the *live* size, not the size the drag started from:
-        // by here the last transient frame has usually already been applied and
-        // cleared `pending`, so starting over from `startSize` would end the
-        // gesture by committing the width the user just spent it changing.
-        pendingRef.current ??=
-          scena.layout.get().surfaces[surface]?.size ?? startSize;
-        commit(false);
+        // The settled write, the only one of the drag: the last size the
+        // pointer asked for, or the size it started from when it never moved.
+        const size = pendingRef.current ?? scena.layout.get().surfaces[surface]?.size ?? startSize;
+        pendingRef.current = null;
+        scena.layout.setSurface(surface, { size });
         draggingRef.current = false;
         mark('idle');
         document.documentElement.classList.remove('oo-resizing');
@@ -188,7 +186,7 @@ export function useSurfaceResize(
       element.addEventListener('pointerup', end);
       element.addEventListener('pointercancel', end);
     },
-    [active, edge, grip, vertical, min, max, mark, commit, scena, surface],
+    [active, edge, grip, vertical, min, max, mark, apply, scena, surface],
   );
 
   if (!active) return { ref };
