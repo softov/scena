@@ -132,15 +132,19 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
   function mirrorToCss(only?: SurfaceName): void {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
+    // Only a value that differs is written. Every element inherits these, and
+    // the browser restyles and lays out the whole page for a write to them,
+    // even one of the same value: each tab click, a layout write, did that, about
+    // 140 ms on ahpw's large pages in a trace of 2026-11-21.
+    const write = (name: string, value: string): void => {
+      if (root.style.getPropertyValue(name) !== value) root.style.setProperty(name, value);
+    };
     for (const [surface, surfaceState] of changedSurfaces(only)) {
       const slug = surface.replace(':', '-');
       if (surfaceState.size !== undefined) {
-        root.style.setProperty(`--oo-${slug}-size`, `${surfaceState.size}px`);
+        write(`--oo-${slug}-size`, `${surfaceState.size}px`);
       }
-      root.style.setProperty(
-        `--oo-${slug}-visible`,
-        surfaceState.visible ? '1' : '0',
-      );
+      write(`--oo-${slug}-visible`, surfaceState.visible ? '1' : '0');
     }
   }
 
