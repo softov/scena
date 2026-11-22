@@ -132,15 +132,19 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
   function mirrorToCss(only?: SurfaceName): void {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
+    // Only a value that differs is written. Every element inherits these, and
+    // the browser restyles and lays out the whole page for a write to them,
+    // even one of the same value: each tab click, a layout write, did that, about
+    // 140 ms on ahpw's large pages in a trace of 2026-11-21.
+    const write = (name: string, value: string): void => {
+      if (root.style.getPropertyValue(name) !== value) root.style.setProperty(name, value);
+    };
     for (const [surface, surfaceState] of changedSurfaces(only)) {
       const slug = surface.replace(':', '-');
       if (surfaceState.size !== undefined) {
-        root.style.setProperty(`--oo-${slug}-size`, `${surfaceState.size}px`);
+        write(`--oo-${slug}-size`, `${surfaceState.size}px`);
       }
-      root.style.setProperty(
-        `--oo-${slug}-visible`,
-        surfaceState.visible ? '1' : '0',
-      );
+      write(`--oo-${slug}-visible`, surfaceState.visible ? '1' : '0');
     }
   }
 
@@ -167,13 +171,14 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
         console.error('[scena.layout] subscriber threw:', err);
       }
     }
-    // The CSS variables move with the gesture: they are one write per changed
-    // property on one element, and a shell that sizes from them rather than
-    // from React state gets the frame for free.
-    mirrorToCss(opts?.surface);
     // A frame of a drag is not a value anybody should be reading or storing.
-    // The next settled call mirrors and persists whatever it ended on.
+    // The next settled call mirrors and persists whatever it ended on. That
+    // holds for the CSS variables too: they sit on `<html>`, every element
+    // inherits them, and a write there restyles the whole page, about 180 ms
+    // a frame on a large one. The shells size from layout state, which
+    // follows the drag; the variables catch up when it ends.
     if (opts?.transient === true) return;
+    mirrorToCss(opts?.surface);
     mirrorToStore(opts?.surface);
     scheduleSave();
   }

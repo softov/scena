@@ -229,10 +229,9 @@
 
 /* Not during a splitter drag. `containerWidth` changes every frame there, so
  * each frame restarts the transition and the grid trails the pointer by the
- * full duration - the exact lag the transition exists to hide. `oo-resizing`
- * is on <html> for the length of a drag (ShellSplitter.tsx:67, and
- * useSurfaceResize.ts:143). */
-html.oo-resizing .oo-listable[data-mode='table'] .oo-listable__rows {
+ * full duration - the exact lag the transition exists to hide. The shield is
+ * on <body> for the length of a drag (react/resize-shield.ts). */
+body:has(> .oo-resize-shield) .oo-listable[data-mode='table'] .oo-listable__rows {
   transition: none;
 }
 

@@ -115,7 +115,11 @@ describe('useSurfaceResize: which way it grows', () => {
       element.dispatchEvent(pointer('pointerdown', 236, 400));
       element.dispatchEvent(pointer('pointermove', 296, 400));
     });
+    expect(element.style.width).toBe('300px');
 
+    act(() => {
+      element.dispatchEvent(pointer('pointerup', 296, 400));
+    });
     expect(scena.layout.get().surfaces['sidebar:left']?.size).toBe(300);
   });
 
@@ -127,7 +131,11 @@ describe('useSurfaceResize: which way it grows', () => {
       element.dispatchEvent(pointer('pointerdown', 1004, 400));
       element.dispatchEvent(pointer('pointermove', 954, 400));
     });
+    expect(element.style.width).toBe('330px');
 
+    act(() => {
+      element.dispatchEvent(pointer('pointerup', 954, 400));
+    });
     expect(scena.layout.get().surfaces['sidebar:left']?.size).toBe(330);
   });
 
@@ -139,10 +147,15 @@ describe('useSurfaceResize: which way it grows', () => {
       element.dispatchEvent(pointer('pointerdown', 236, 400));
       element.dispatchEvent(pointer('pointermove', 5000, 400));
     });
-    expect(scena.layout.get().surfaces['sidebar:left']?.size).toBe(400);
+    expect(element.style.width).toBe('400px');
 
     act(() => {
       element.dispatchEvent(pointer('pointermove', -5000, 400));
+    });
+    expect(element.style.width).toBe('120px');
+
+    act(() => {
+      element.dispatchEvent(pointer('pointerup', -5000, 400));
     });
     expect(scena.layout.get().surfaces['sidebar:left']?.size).toBe(120);
   });
@@ -162,7 +175,7 @@ describe('useSurfaceResize: which way it grows', () => {
 });
 
 describe('useSurfaceResize: the gesture settles', () => {
-  it('mirrors to the store only once the pointer is released', async () => {
+  it('moves only the element during the drag, and the layout and store once it is released', async () => {
     const { scena, element } = mount({ edge: 'right', min: 100, max: 600 });
     stubRect(element, { left: 0, right: 240, top: 0, bottom: 800, width: 240, height: 800 });
     const path = '$/layout/surfaces/sidebar:left/size';
@@ -171,13 +184,15 @@ describe('useSurfaceResize: the gesture settles', () => {
       element.dispatchEvent(pointer('pointerdown', 236, 400));
       element.dispatchEvent(pointer('pointermove', 296, 400));
     });
-    // Moved on screen, deliberately not announced to anything reading the store.
-    expect(scena.layout.get().surfaces['sidebar:left']?.size).toBe(300);
+    // Moved on screen by its own style alone: the layout, the store and the shell's render wait.
+    expect(element.style.width).toBe('300px');
+    expect(scena.layout.get().surfaces['sidebar:left']?.size).not.toBe(300);
     expect(scena.store.get(path as never)).not.toBe(300);
 
     act(() => {
       element.dispatchEvent(pointer('pointerup', 296, 400));
     });
+    expect(scena.layout.get().surfaces['sidebar:left']?.size).toBe(300);
     expect(scena.store.get(path as never)).toBe(300);
   });
 
@@ -188,12 +203,15 @@ describe('useSurfaceResize: the gesture settles', () => {
     act(() => {
       element.dispatchEvent(pointer('pointerdown', 236, 400));
     });
-    expect(document.documentElement.classList.contains('oo-resizing')).toBe(true);
+    // A shield over the page holds the cursor. Nothing is written on <html>, whose class or style restyles every element.
+    expect(document.querySelector('.oo-resize-shield')?.getAttribute('style')).toContain('cursor: ew-resize');
+    expect(document.documentElement.className).toBe('');
+    expect(document.documentElement.style.cursor).toBe('');
 
     act(() => {
       element.dispatchEvent(pointer('pointerup', 236, 400));
     });
-    expect(document.documentElement.classList.contains('oo-resizing')).toBe(false);
+    expect(document.querySelector('.oo-resize-shield')).toBeNull();
     expect(document.documentElement.style.cursor).toBe('');
     expect(element.getAttribute('data-resize-state')).toBe('idle');
   });
@@ -208,7 +226,7 @@ describe('useSurfaceResize: the gesture settles', () => {
       element.dispatchEvent(pointer('pointercancel', 296, 400));
     });
 
-    expect(document.documentElement.classList.contains('oo-resizing')).toBe(false);
+    expect(document.querySelector('.oo-resize-shield')).toBeNull();
     expect(scena.store.get('$/layout/surfaces/sidebar:left/size' as never)).toBe(300);
   });
 });

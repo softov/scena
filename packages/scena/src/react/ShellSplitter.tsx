@@ -1,6 +1,7 @@
 import { type CSSProperties, type PointerEvent, useRef } from 'react';
 import type { SurfaceName } from '../sdk/mount-surface.js';
 import { useScena } from './ScenaProvider.js';
+import { shieldDrag } from './resize-shield.js';
 
 export interface ShellSplitterProps {
   // The surface whose size this splitter controls.
@@ -41,6 +42,7 @@ export function ShellSplitter({
   const startPosRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const pendingSizeRef = useRef<number | null>(null);
+  const unshieldRef = useRef<(() => void) | null>(null);
 
   // Transient while the pointer is down: the frame still re-renders the shell,
   // but the layout is not mirrored into the reactive store (which wakes every
@@ -63,10 +65,9 @@ export function ShellSplitter({
     (e.currentTarget as HTMLElement).style.background = 'var(--oo-color-accent)';
     // `user-select: none` on the handle alone does not stop the drag from
     // selecting text across the surfaces either side of it, because the pointer
-    // is captured but the selection is the document's.
-    document.documentElement.classList.add('oo-resizing');
-    document.documentElement.style.cursor =
-      orientation === 'vertical' ? 'ew-resize' : 'ns-resize';
+    // is captured but the selection is the document's: a shield covers them.
+    unshieldRef.current?.();
+    unshieldRef.current = shieldDrag(e.currentTarget.ownerDocument, orientation === 'vertical' ? 'ew-resize' : 'ns-resize');
   }
 
   function onPointerCancel(e: PointerEvent<HTMLDivElement>) {
@@ -100,8 +101,8 @@ export function ShellSplitter({
     (e.currentTarget as Element).releasePointerCapture(e.pointerId);
     draggingRef.current = false;
     (e.currentTarget as HTMLElement).style.background = 'none';
-    document.documentElement.classList.remove('oo-resizing');
-    document.documentElement.style.cursor = '';
+    unshieldRef.current?.();
+    unshieldRef.current = null;
   }
 
   const baseStyle: CSSProperties =

@@ -38,6 +38,7 @@ import { useI18n } from '../../react/hooks/useI18n.js';
 import { useStore } from '../../react/hooks/useStore.js';
 import { FOCUSED_MOUNT_PATH } from '../../sdk/mount-surface.js';
 import type { BindingPath } from '../../sdk/component-graph.js';
+import { mountStyle } from './mount-style.js';
 
 // Multi-group tabs. Recursive binary tree: a leaf is one Tab strip; a split
 // holds two children with a draggable divider. Drag a tab onto another
@@ -428,7 +429,8 @@ function GroupPanel({ leaf, ctx }: { leaf: TabPanelLeaf; ctx: TabPanelContext })
                 key={key}
                 className="oo-layout__mount"
                 data-active={key === activeKey || undefined}
-                style={{ position: 'absolute', inset: 0, overflow: 'auto', display: key === activeKey ? 'block' : 'none' }}
+                inert={key !== activeKey}
+                style={mountStyle(key === activeKey, { position: 'absolute', inset: 0, overflow: 'auto' })}
               >
                 {ctx.renderMount(m) as ReactNode}
               </div>
