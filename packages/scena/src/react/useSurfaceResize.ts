@@ -2,6 +2,7 @@ import { type PointerEvent as ReactPointerEvent, useCallback, useRef } from 'rea
 import type { SurfaceName } from '../sdk/mount-surface.js';
 import type { SurfacePresentation } from '../sdk/layout.js';
 import { useScena } from './ScenaProvider.js';
+import { shieldDrag } from './resize-shield.js';
 
 /**
  * Resizing a surface by its own edge, with no handle in the layout.
@@ -143,9 +144,8 @@ export function useSurfaceResize(
 
       draggingRef.current = true;
       mark('active');
-      document.documentElement.classList.add('oo-resizing');
-      document.documentElement.style.cursor = vertical ? 'ew-resize' : 'ns-resize';
       element.setPointerCapture(event.pointerId);
+      const unshield = shieldDrag(element.ownerDocument, vertical ? 'ew-resize' : 'ns-resize');
 
       const move = (moveEvent: globalThis.PointerEvent): void => {
         const pos = vertical ? moveEvent.clientX : moveEvent.clientY;
@@ -172,8 +172,7 @@ export function useSurfaceResize(
         scena.layout.setSurface(surface, { size });
         draggingRef.current = false;
         mark('idle');
-        document.documentElement.classList.remove('oo-resizing');
-        document.documentElement.style.cursor = '';
+        unshield();
         if (element.hasPointerCapture(endEvent.pointerId)) {
           element.releasePointerCapture(endEvent.pointerId);
         }

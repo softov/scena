@@ -328,22 +328,11 @@ textarea:focus {
 }
 
 /*
- * While a splitter is being dragged.
- *
- * `user-select: none` on the handle alone does not help: the pointer is
- * captured by the handle, but the selection being extended belongs to the
- * document, so dragging across a sidebar highlights every label it passes over.
- *
- * The cursor is forced for the same reason. The handle is 4px wide and the
- * pointer spends most of a drag outside it, where the cursor would otherwise
- * revert to whatever it is over. The splitter sets the value inline, since only
- * it knows which axis is being dragged.
+ * While a splitter is being dragged, a shield covers the page (see
+ * react/resize-shield.ts): it keeps the drag from selecting the text it crosses
+ * and holds the resize cursor. Rules for every element under `html.oo-resizing`
+ * did the same, but restyled the whole page at each end of a drag.
  */
-html.oo-resizing,
-html.oo-resizing * {
-  user-select: none !important;
-}
-
-html.oo-resizing * {
-  cursor: inherit !important;
+.oo-resize-shield {
+  user-select: none;
 }
