@@ -148,6 +148,26 @@ describe('TabLayout active tab', () => {
   });
 });
 
+describe('TabLayout keeps a tab not shown', () => {
+  it('laid out but not drawn, inert and over the shown one, instead of display: none', () => {
+    const scena = createScena();
+    const mount = (key: string) => ({ key, surface: 'main', component: { component: 'Page' }, props: { title: key }, policy: {}, openedAt: 0 });
+    render(
+      <ScenaProvider scena={scena}>
+        <TabLayout surface="main" mounts={[mount('a'), mount('b')] as never} state={{ visible: true, activeContainerKey: 'a' }}
+          setState={() => {}} renderMount={() => null} onActivate={() => {}} onClose={() => {}} onReorder={() => {}} />
+      </ScenaProvider>,
+    );
+    const [shown, hidden] = Array.from(document.querySelectorAll<HTMLElement>('.oo-layout__mount'));
+    expect(shown?.style.display).toBe('block');
+    expect(shown?.hasAttribute('inert')).toBe(false);
+    expect(hidden?.style.display).toBe('block');
+    expect(hidden?.style.getPropertyValue('content-visibility')).toBe('hidden');
+    expect(hidden?.style.position).toBe('absolute');
+    expect(hidden?.hasAttribute('inert')).toBe(true);
+  });
+});
+
 describe('TabLayout takes a tab from another surface', () => {
   afterEach(endTabDrag);
   type TestScena = ReturnType<typeof createScena>;

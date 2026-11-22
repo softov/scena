@@ -19,6 +19,7 @@ import { useI18n } from '../../react/hooks/useI18n.js';
 import { useStore } from '../../react/hooks/useStore.js';
 import { FOCUSED_MOUNT_PATH } from '../../sdk/mount-surface.js';
 import type { BindingPath } from '../../sdk/component-graph.js';
+import { mountStyle } from './mount-style.js';
 
 // Tab strip + active mount. Tabs are draggable for reorder (HTML5 DnD).
 // Right-click on a tab opens slot `tab:context`. The [...] trailing button
@@ -358,7 +359,8 @@ export function TabLayout({
               key={m.key}
               className="oo-layout__mount"
               data-active={m === active || undefined}
-              style={{ height: '100%', overflow: 'auto', display: m === active ? 'block' : 'none' }}
+              inert={m !== active}
+              style={mountStyle(m === active, { height: '100%', overflow: 'auto' })}
             >
               {renderMount(m) as ReactNode}
             </div>

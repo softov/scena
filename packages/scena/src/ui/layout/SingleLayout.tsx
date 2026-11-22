@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useScena } from '../../react/ScenaProvider.js';
 import { SectionHeader } from './SectionHeader.js';
 import { useMountTitle } from './MountTitle.js';
+import { mountStyle } from './mount-style.js';
 
 // One mount fills the surface; no tab strip. Active mount picked via
 // `state.activeContainerKey`, falling back to the most recently opened. When the
@@ -40,7 +41,8 @@ export function SingleLayout({ mounts, state, renderMount, renderEmpty }: Layout
               key={m.key}
               className="oo-layout__mount"
               data-active={m === active || undefined}
-              style={{ position: 'absolute', inset: 0, overflow: 'auto', display: m === active ? 'block' : 'none' }}
+              inert={m !== active}
+              style={mountStyle(m === active, { position: 'absolute', inset: 0, overflow: 'auto' })}
             >
               {renderMount(m) as ReactNode}
             </div>
