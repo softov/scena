@@ -167,13 +167,14 @@ export function createLayoutAPI(deps: LayoutDeps): LayoutAPI & {
         console.error('[scena.layout] subscriber threw:', err);
       }
     }
-    // The CSS variables move with the gesture: they are one write per changed
-    // property on one element, and a shell that sizes from them rather than
-    // from React state gets the frame for free.
-    mirrorToCss(opts?.surface);
     // A frame of a drag is not a value anybody should be reading or storing.
-    // The next settled call mirrors and persists whatever it ended on.
+    // The next settled call mirrors and persists whatever it ended on. That
+    // holds for the CSS variables too: they sit on `<html>`, every element
+    // inherits them, and a write there restyles the whole page, about 180 ms
+    // a frame on a large one. The shells size from layout state, which
+    // follows the drag; the variables catch up when it ends.
     if (opts?.transient === true) return;
+    mirrorToCss(opts?.surface);
     mirrorToStore(opts?.surface);
     scheduleSave();
   }
