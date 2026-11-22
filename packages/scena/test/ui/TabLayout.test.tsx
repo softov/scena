@@ -98,23 +98,53 @@ describe('TabLayout active tab', () => {
     </ScenaProvider>
   );
 
-  it('scrolls the tab that becomes active into the strip\'s view', () => {
+  // jsdom has no IntersectionObserver: this one hands each test the tab it watches and lets the test say what the browser saw.
+  const watched: { target: Element; root: Element; report: (ratio: number, box: Partial<DOMRect>, view: Partial<DOMRect>) => void }[] = [];
+  beforeEach(() => {
+    watched.length = 0;
+    vi.stubGlobal('IntersectionObserver', class {
+      constructor(private readonly cb: IntersectionObserverCallback, private readonly options: IntersectionObserverInit) {}
+      observe(target: Element) {
+        watched.push({
+          target,
+          root: this.options.root as Element,
+          report: (ratio, box, view) => this.cb([{ target, intersectionRatio: ratio, boundingClientRect: box, rootBounds: view } as IntersectionObserverEntry], this as never),
+        });
+      }
+      disconnect() {}
+    });
+  });
+  afterEach(() => vi.unstubAllGlobals());
+  const strip = { left: 0, right: 100, top: 0, bottom: 30 };
+
+  it('watches the tab that becomes active, in its strip', () => {
     const scena = createScena();
     const { rerender } = render(layout(scena, 'a'));
-    expect(scrolled).toHaveBeenCalledTimes(1);
-    expect((scrolled.mock.calls[0]?.[0] as HTMLElement).title).toBe('a');
+    expect(watched.map((one) => (one.target as HTMLElement).title)).toEqual(['a']);
+    expect(watched[0]?.root.className).toBe('tab-bar__strip');
 
     rerender(layout(scena, 'c'));
-    expect(scrolled).toHaveBeenCalledTimes(2);
-    expect((scrolled.mock.calls[1]?.[0] as HTMLElement).title).toBe('c');
-    expect(scrolled.mock.calls[1]?.[1]).toEqual({ block: 'nearest', inline: 'nearest' });
+    expect(watched.map((one) => (one.target as HTMLElement).title)).toEqual(['a', 'c']);
+    rerender(layout(scena, 'c'));
+    expect(watched).toHaveLength(2);
   });
 
-  it('leaves the strip alone when the active tab stays the same', () => {
+  it('scrolls the strip by the part of the tab cut off, and not at all for a tab in view', () => {
     const scena = createScena();
-    const { rerender } = render(layout(scena, 'b'));
-    rerender(layout(scena, 'b'));
-    expect(scrolled).toHaveBeenCalledTimes(1);
+    render(layout(scena, 'a'));
+    const one = watched[0]!;
+    const scrollBy = vi.fn();
+    (one.root as HTMLElement).scrollBy = scrollBy as never;
+
+    one.report(1, { left: 10, right: 60, top: 0, bottom: 30 }, strip);
+    expect(scrollBy).not.toHaveBeenCalled();
+
+    one.report(0.5, { left: 80, right: 130, top: 0, bottom: 30 }, strip);
+    expect(scrollBy).toHaveBeenLastCalledWith({ left: 30, top: 0 });
+
+    one.report(0.5, { left: -20, right: 30, top: 0, bottom: 30 }, strip);
+    expect(scrollBy).toHaveBeenLastCalledWith({ left: -20, top: 0 });
+    expect(scrolled).not.toHaveBeenCalled();
   });
 });
 
