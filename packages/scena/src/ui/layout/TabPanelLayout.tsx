@@ -733,11 +733,30 @@ export function TabTitle({
   const icon = m?.props?.icon ?? compProps?.icon;
   const color = m?.props?.color ?? compProps?.color;
   // A tab that becomes active scrolls into the strip's view; one in view already leaves the strip where it is.
-  // jsdom has no scrollIntoView, so a consumer's tests that draw tabs do not fail on it.
+  // An IntersectionObserver tells, after the browser's own layout, whether the
+  // tab is cut off and by how much, with both boxes measured: nothing here reads
+  // the layout, so the click that activated the tab forces none. The strip
+  // alone scrolls, by the part cut off. Without the observer, as in jsdom, the
+  // strip stays where it is.
   const tabRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    if (!isActive) return;
     const tab = tabRef.current;
-    if (isActive && typeof tab?.scrollIntoView === 'function') tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    const strip = tab?.parentElement;
+    const View = tab?.ownerDocument.defaultView;
+    if (!tab || !strip || !View || typeof View.IntersectionObserver !== 'function') return;
+    const watch = new View.IntersectionObserver((entries) => {
+      watch.disconnect();
+      const entry = entries[entries.length - 1];
+      const view = entry?.rootBounds;
+      if (!entry || !view || entry.intersectionRatio >= 1) return;
+      const box = entry.boundingClientRect;
+      const left = box.left < view.left ? box.left - view.left : box.right > view.right ? Math.min(box.right - view.right, box.left - view.left) : 0;
+      const top = box.top < view.top ? box.top - view.top : box.bottom > view.bottom ? Math.min(box.bottom - view.bottom, box.top - view.top) : 0;
+      if ((left !== 0 || top !== 0) && typeof strip.scrollBy === 'function') strip.scrollBy({ left, top });
+    }, { root: strip, threshold: 1 });
+    watch.observe(tab);
+    return () => watch.disconnect();
   }, [isActive]);
   return (
     <div
